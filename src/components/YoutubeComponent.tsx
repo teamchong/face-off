@@ -1,4 +1,9 @@
-import { CircularProgress, Fab } from '@material-ui/core';
+import {
+  CircularProgress,
+  IconButton,
+  InputAdornment,
+  TextField
+} from '@material-ui/core';
 import { createStyles, withStyles } from '@material-ui/core/styles';
 import { Theme } from '@material-ui/core/styles/createMuiTheme';
 import { CameraFront, CameraRear, PhotoCamera } from '@material-ui/icons';
@@ -41,17 +46,27 @@ const styles = ({ spacing }: Theme) =>
       position: 'absolute',
       left: '120px',
       zIndex: 1
+    },
+    textField: {
+      width: WIDTH + 'px',
+      marginLeft: spacing.unit,
+      marginRight: spacing.unit
     }
   });
 
 const videoRef = React.createRef<HTMLVideoElement>();
 
 const readAsDataURL = async () => {
+  let { videoWidth, videoHeight } = videoRef.current;
+  if (videoWidth > WIDTH) {
+    videoHeight = ~~((WIDTH * videoHeight) / videoWidth);
+    videoWidth = WIDTH;
+  }
   const canvas = document.createElement('canvas');
-  canvas.width = WIDTH;
-  canvas.height = HEIGHT;
+  canvas.width = videoWidth;
+  canvas.height = videoHeight;
   const ctx = canvas.getContext('2d');
-  ctx.drawImage(videoRef.current, 0, 0, WIDTH, HEIGHT);
+  ctx.drawImage(videoRef.current, 0, 0, videoWidth, videoHeight);
   return ctx.canvas.toDataURL();
 };
 
@@ -78,15 +93,28 @@ const YoutubeComponent = ({
   addImages
 }) => (
   <div className={classes.container}>
-    <Fab
-      color="primary"
-      aria-label="Take screenshot"
-      className={classes.screenshot}
-      onClick={() => screenshotHandler(addImages)}
-    >
-      <PhotoCamera />
-    </Fab>
-    <input type="text" value={youtubeUrl} onChange={changeYoutubeUrl} />
+    <div>
+      <TextField
+        label="Youtube Url"
+        className={classes.textField}
+        value={youtubeUrl}
+        onChange={({ target }) => changeYoutubeUrl(target.value)}
+        margin="normal"
+        variant="outlined"
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton
+                aria-label="Take screenshot"
+                onClick={() => screenshotHandler(addImages)}
+              >
+                <PhotoCamera />
+              </IconButton>
+            </InputAdornment>
+          )
+        }}
+      />
+    </div>
     {!mp4Url ? (
       <CircularProgress className={classes.progress} />
     ) : (
@@ -103,8 +131,12 @@ const YoutubeComponent = ({
           borderStyle: 'solid',
           borderColor: '#ccc'
         }}
+        crossOrigin="anonymous"
       >
-        <source src={mp4Url} type="video/mp4" />
+        <source
+          src={`https://cors-anywhere.herokuapp.com/${mp4Url}`}
+          type="video/mp4"
+        />
       </video>
     )}
   </div>
