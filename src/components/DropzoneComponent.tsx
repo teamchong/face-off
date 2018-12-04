@@ -8,6 +8,8 @@ import { Dispatch } from 'redux';
 import { addImages, showMessage } from '../actions/cameraPanelActions';
 import { AppState } from '../reducers';
 
+const MAX_WIDTH = 640;
+
 const styles = () =>
   createStyles({
     typography: {
@@ -21,9 +23,34 @@ const styles = () =>
     }
   });
 
-const onDrop = (
-  acceptedFiles: any[],
-  rejectedFiles: any[],
+const readAsDataURL = async (file: File) => {
+  const dataUrl = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = error => reject(error);
+    reader.readAsDataURL(file);
+  });
+  const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const imgEl = new Image();
+    imgEl.onload = () => resolve(imgEl);
+    imgEl.onerror = error => reject(error);
+    imgEl.src = dataUrl;
+  });
+  if (img.width > MAX_WIDTH) {
+    const newHeight = ~~((MAX_WIDTH * img.height) / img.width);
+    const canvas = document.createElement('canvas');
+    canvas.width = MAX_WIDTH;
+    canvas.height = newHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, MAX_WIDTH, newHeight);
+    return ctx.canvas.toDataURL();
+  }
+  return dataUrl;
+};
+
+const onDrop = async (
+  acceptedFiles: File[],
+  rejectedFiles: File[],
   addImagesFunc: typeof addImages,
   showMessageFunc: typeof showMessage
 ) => {
@@ -38,10 +65,12 @@ __proto__: File
 */
   if (!!(acceptedFiles || []).length) {
     addImagesFunc(
-      acceptedFiles.map(image => ({
-        ...image,
-        preview: URL.createObjectURL(image)
-      }))
+      await Promise.all(
+        acceptedFiles.map(async image => ({
+          name: image.name,
+          preview: await readAsDataURL(image)
+        }))
+      )
     );
   }
   const rejectedMessage = (rejectedFiles || [])
@@ -188,11 +217,12 @@ const DropzoneComponent = ({ classes, images, addImages, showMessage }) => (
   </React.Fragment>
 );
 
-const camPanelSelector = ({ message }) => ({
+const cameraPanelSelector = ({ message }) => ({
   message
 });
 
-const mapStateToProps = ({ camPanel }: AppState) => camPanelSelector(camPanel);
+const mapStateToProps = ({ cameraPanel }: AppState) =>
+  cameraPanelSelector(cameraPanel);
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   addImages: images => dispatch(addImages(images)),

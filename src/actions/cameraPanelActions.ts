@@ -5,14 +5,27 @@ import {
   SHOW_MESSAGE,
   HIDE_MESSAGE,
   ADD_IMAGES,
-  REMOVE_IMAGES
+  REMOVE_IMAGES,
+  SWITCH_FACINGMODE,
+  FACINGMODE_REAR,
+  FACINGMODE_FRONT
 } from '../constants';
 
 export const switchTab = (tab: string) => action(SWITCHTAB_CAMPANEL, tab);
 export const showMessage = (message: string) => action(SHOW_MESSAGE, message);
 export const hideMessage = () => action(HIDE_MESSAGE);
 
-export const addImages = (images: Dropzone.ImageFile[]) =>
-  action(ADD_IMAGES, images);
+export const addImages = (
+  images: Readonly<{
+    name: string;
+    width: number;
+    height: number;
+    preview: string;
+  }>[]
+) => action(ADD_IMAGES, images);
 export const removeImages = (imageIndexes: number[]) =>
   action(REMOVE_IMAGES, imageIndexes);
+
+export const switchFacingMode = (
+  facingMode: FACINGMODE_REAR | FACINGMODE_FRONT
+) => action(SWITCH_FACINGMODE, facingMode);

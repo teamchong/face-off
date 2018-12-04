@@ -22,6 +22,7 @@ import {
   DeleteSweep,
   Done,
   Videocam
+  VideoLibrary
 } from '@material-ui/icons';
 import {
   createStyles,
@@ -34,6 +35,7 @@ import { Props, ReactElement, ReactNode, ReactType } from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { ReactLifeCycleFunctions } from 'recompose';
+import YoutubeComponent from './YoutubeComponent';
 import DropzoneComponent from './DropzoneComponent';
 import WebcamComponent from './WebcamComponent';
 import {
@@ -47,7 +49,7 @@ import { AppState } from '../reducers';
 
 type Actions = { switchTab; showMessage; hideMessage; removeImages };
 type ActiveTypeProps = { ActiveTab: ReactType };
-type CamPanelConnectedProps = Props<ReactNode> &
+type CameraPanelConnectedProps = Props<ReactNode> &
   ActiveTypeProps &
   StyledComponentProps &
   Actions &
@@ -59,6 +61,9 @@ const styles = ({ palette, spacing }: Theme) =>
     root: {
       flexGrow: 1,
       backgroundColor: palette.background.paper
+    },
+    title: {
+      position: 'absolute'
     },
     br: {
       width: '100%'
@@ -77,7 +82,6 @@ const styles = ({ palette, spacing }: Theme) =>
       marginLeft: spacing.unit
     },
     card: {
-      maxWidth: 640,
       margin: '5px',
       display: 'inline-block'
     },
@@ -94,7 +98,7 @@ const TabContainer = ({ children }: Props<ReactNode>): ReactElement<any> => (
   </Typography>
 );
 
-const CamPanel = ({
+const CameraPanel = ({
   ActiveTab,
   classes,
   message,
@@ -104,15 +108,21 @@ const CamPanel = ({
   showMessage,
   removeImages,
   images
-}: CamPanelConnectedProps): ReactElement<any> => (
+}: CameraPanelConnectedProps): ReactElement<any> => (
   <React.Fragment>
     {!!images.length && (
       <div>
-        {images.map(({ name, preview }, i) => (
+        {images.map(({ name, width, height, preview }, i) => (
           <Card className={classes.card}>
             <CardActionArea>
-              <img src={preview} title={name} className={classes.card} />
-              <CardContent>{name}</CardContent>
+              <CardContent className={classes.title}>{name}</CardContent>
+              <img
+                src={preview}
+                title={name}
+                width={width}
+                height={height}
+                className={classes.card}
+              />
             </CardActionArea>
             <CardActions className={classes.cardActions}>
               <Button
@@ -138,9 +148,10 @@ const CamPanel = ({
     )}
     <div className={classes!.root}>
       <AppBar position="static">
-        <Tabs value={tab} onChange={(_, value) => switchTab(value)}>
-          <Tab value="one" icon={<AddPhotoAlternate />} />
-          <Tab value="two" icon={<Videocam />} />
+        <Tabs value={tab} onChange={(_, value) => switchTab(value)} fullWidth>
+          <Tab value="one" icon={<VideoLibrary />} />
+          <Tab value="two" icon={<AddPhotoAlternate />} />
+          <Tab value="three" icon={<Videocam />} />
         </Tabs>
       </AppBar>
       <TabContainer>
@@ -175,19 +186,22 @@ const CamPanel = ({
 const withActiveTab = (Container: ReactType) => (
   props: ContainerProps
 ): ReactElement<ContainerProps & ActiveTypeProps> =>
-  props.tab === 'two' ? (
+  props.tab === 'three' ? (
     <Container {...props} ActiveTab={WebcamComponent} />
-  ) : (
+  ) : props.tab === 'two' ? (
     <Container {...props} ActiveTab={DropzoneComponent} />
+  ) : (
+    <Container {...props} ActiveTab={YoutubeComponent} />
   );
 
-const camPanelSelector = ({ tab, message, images }) => ({
+const cameraPanelSelector = ({ tab, message, images }) => ({
   tab,
   message,
   images
 });
 
-const mapStateToProps = ({ camPanel }: AppState) => camPanelSelector(camPanel);
+const mapStateToProps = ({ cameraPanel }: AppState) =>
+  cameraPanelSelector(cameraPanel);
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   switchTab: tab => dispatch(switchTab(tab)),
@@ -199,4 +213,4 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(withStyles(styles)(withActiveTab(CamPanel)));
+)(withStyles(styles)(withActiveTab(CameraPanel)));

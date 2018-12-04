@@ -1,11 +1,11 @@
 import configureStore from './configureStore';
-import CamPanel from './components/CameraPanel';
+import CameraPanel from './components/CameraPanel';
 import { Card, CardContent, Grid } from '@material-ui/core';
 import * as React from 'react';
 import { render } from 'react-dom';
 import { Provider } from 'react-redux';
 
-import './App.css';
+import './index.css';
 
 const store = configureStore();
 
@@ -13,7 +13,7 @@ const App = () => (
   <Grid container={true}>
     <Card raised={true}>
       <CardContent>
-        <CamPanel />
+        <CameraPanel />
       </CardContent>
     </Card>
   </Grid>

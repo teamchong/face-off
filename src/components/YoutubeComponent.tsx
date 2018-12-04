@@ -4,7 +4,6 @@ import { Theme } from '@material-ui/core/styles/createMuiTheme';
 import { CameraFront, CameraRear, PhotoCamera } from '@material-ui/icons';
 import * as React from 'react';
 import { connect } from 'react-redux';
-import * as Webcam from 'react-webcam';
 import { Dispatch } from 'redux';
 import { FACINGMODE_REAR, FACINGMODE_FRONT } from '../constants';
 import {
@@ -57,23 +56,23 @@ const styles = ({ spacing }: Theme) =>
     }
   });
 
-const cameraRef = React.createRef<Webcam>();
+const videoRef = React.createRef<HTMLVideoElement>();
 
 const screenshotHandler = (addImagesFunc: typeof addImages) => {
-  addImagesFunc([
-    {
-      name: `WebCam-${new Date()
-        .toLocaleString('en-GB')
-        .replace('/', '-')
-        .replace(/[,]/g, '')}.jpg`,
-      width: WIDTH,
-      height: HEIGHT,
-      preview: cameraRef.current.getScreenshot()
-    }
-  ]);
+  //   addImagesFunc([
+  //     {
+  //       name: `Video-${new Date()
+  //         .toLocaleString('en-GB')
+  //         .replace('/', '-')
+  //         .replace(/[,]/g, '')}.jpg`,
+  //       width: WIDTH,
+  //       height: HEIGHT,
+  //       preview: videoRef.current
+  //     }
+  //   ]);
 };
 
-const WebcamComponent = ({
+const YoutubeComponent = ({
   classes,
   facingMode,
   showMessage,
@@ -89,35 +88,25 @@ const WebcamComponent = ({
     >
       <PhotoCamera />
     </Fab>
-    <Fab
-      color="primary"
-      aria-label="Use rear camera"
-      className={classes.rearFacing}
-      onClick={() => switchFacingMode(FACINGMODE_REAR)}
-    >
-      <CameraRear />
-    </Fab>
-    <Fab
-      color="primary"
-      aria-label="Use front camera"
-      className={classes.frontFacing}
-      onClick={() => switchFacingMode(FACINGMODE_FRONT)}
-    >
-      <CameraFront />
-    </Fab>
-    <Webcam
-      ref={cameraRef}
+    <video
+      ref={videoRef}
       width={WIDTH}
       height={HEIGHT}
-      videoConstraints={{ facingMode }}
-      audio={false}
-      screenshotFormat="image/jpeg"
+      controls
+      autoplay
+      loop
+      muted
       style={{
         borderWidth: 5,
         borderStyle: 'solid',
         borderColor: '#ccc'
       }}
-    />
+    >
+      <source
+        src="https:\/\/r4---sn-vgqskned.googlevideo.com\/videoplayback?clen=421372828&expire=1543956755&ipbits=0&pl=16&mime=video%2Fmp4&sparams=clen%2Cdur%2Cei%2Cgir%2Cid%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Clmt%2Cmime%2Cmm%2Cmn%2Cms%2Cmv%2Cpl%2Cratebypass%2Crequiressl%2Csource%2Cexpire&itag=18&ms=au%2Crdu&initcwndbps=2785000&mv=m&mt=1543935035&mn=sn-vgqskned%2Csn-vgqs7nl7&mm=31%2C29&ei=s5QGXObiI8XR8wSwrJWQDQ&id=o-AOxzKpLthxADq5E9xIehcz39akVv4-Yg9TdKTlK5W6Js&c=WEB&signature=18F79D17185ADF231BCD0C6C2C5C17680748FE94.94682E3D28D70C4E5DBD457600C73FF181481517&gir=yes&requiressl=yes&ip=54.87.68.138&fvip=2&key=yt6&lmt=1540224087351148&dur=6875.312&source=youtube&ratebypass=yes&txp=5531432"
+        type="video/mp4"
+      />
+    </video>
   </div>
 );
 
@@ -135,4 +124,4 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(withStyles(styles)(WebcamComponent));
+)(withStyles(styles)(YoutubeComponent));
