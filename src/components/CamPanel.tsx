@@ -1,32 +1,35 @@
 import { AppBar, Tabs, Tab, Typography } from '@material-ui/core';
-import { createStyles, StyledComponentProps, withStyles } from '@material-ui/core/styles';
+import {
+  createStyles,
+  StyledComponentProps,
+  withStyles
+} from '@material-ui/core/styles';
 import { Theme } from '@material-ui/core/styles/createMuiTheme';
 import * as React from 'react';
 import { Props, ReactElement, ReactNode, ReactType } from 'react';
 import * as Dropzone from 'react-dropzone';
 import { connect } from 'react-redux';
-import { MiddlewareAPI } from 'redux';
+import { Dispatch } from 'redux';
 import * as Webcam from 'react-webcam';
+import { ReactLifeCycleFunctions } from 'recompose';
 import { switchTab } from '../actions/camPanelActions';
 import { CamPanelModel } from '../models';
-import { ReactLifeCycleFunctions } from 'recompose';
+import { AppState } from '../reducers';
 
-type CamPanelProps = { tab: string; };
+type CamPanelProps = { tab: string };
 type ActiveTypeProps = { ActiveTab: ReactType };
-type CamPanelWithMiddlewareProps =
-  Props<ReactNode> &
+type CamPanelConnectedProps = Props<ReactNode> &
   ActiveTypeProps &
-  StyledComponentProps &
-  MiddlewareAPI &
-  CamPanelProps;
+  StyledComponentProps & { switchTab: typeof switchTab } & CamPanelProps;
 type ContainerProps = CamPanelProps & Props<ReactNode>;
 
-const styles = ({ palette }: Theme) => createStyles({
-  root: {
-    flexGrow: 1,
-    backgroundColor: palette.background.paper
-  }
-});
+const styles = ({ palette }: Theme) =>
+  createStyles({
+    root: {
+      flexGrow: 1,
+      backgroundColor: palette.background.paper
+    }
+  });
 
 const TabContainer = ({ children }: Props<ReactNode>): ReactElement<any> => (
   <Typography component="div" style={{ padding: 8 * 2 }}>
@@ -34,13 +37,15 @@ const TabContainer = ({ children }: Props<ReactNode>): ReactElement<any> => (
   </Typography>
 );
 
-const CamPanel = ({ ActiveTab, classes, dispatch, tab }: CamPanelWithMiddlewareProps): ReactElement<any> => (
+const CamPanel = ({
+  ActiveTab,
+  classes,
+  switchTab,
+  tab
+}: CamPanelConnectedProps): ReactElement<any> => (
   <div className={classes!.root}>
     <AppBar position="static">
-      <Tabs
-        value={tab}
-        onChange={(_, value) => dispatch(switchTab(value))}
-      >
+      <Tabs value={tab} onChange={(_, value) => switchTab(value)}>
         <Tab value="one" label="Image" />
         <Tab value="two" label="Live Camera" />
       </Tabs>
@@ -52,19 +57,23 @@ const CamPanel = ({ ActiveTab, classes, dispatch, tab }: CamPanelWithMiddlewareP
 );
 
 const withActiveTab = (Container: ReactType) => (
-  (props: ContainerProps): ReactElement<ContainerProps & ActiveTypeProps> => (
-    props.tab === 'two' ? (
-      <Container {...props} ActiveTab={Webcam} />
-    ) : (
-      <Container {...props} ActiveTab={Dropzone} />
-    )
-  )
-);
+  props: ContainerProps
+): ReactElement<ContainerProps & ActiveTypeProps> =>
+  props.tab === 'two' ? (
+    <Container {...props} ActiveTab={Webcam} />
+  ) : (
+    <Container {...props} ActiveTab={Dropzone} />
+  );
 
-const stateToProps = ({ tab }: CamPanelModel) => ({ tab });
+const camPanelSelector = ({ tab }) => ({ tab });
 
-export default connect(stateToProps)(
-  withActiveTab(
-    withStyles(styles)(CamPanel)
-  )
-);
+const mapStateToProps = ({ camPanel }: AppState) => camPanelSelector(camPanel);
+
+const mapDispatchToProps = (dispatch: Dispatch) => ({
+  switchTab: tab => dispatch(switchTab(tab))
+});
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(withActiveTab(withStyles(styles)(CamPanel)));
