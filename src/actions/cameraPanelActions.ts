@@ -7,8 +7,7 @@ import {
   ADD_IMAGES,
   REMOVE_IMAGES,
   SWITCH_FACINGMODE,
-  FACINGMODE_REAR,
-  FACINGMODE_FRONT
+  CHANGE_YOUTUBEURL
 } from '../constants';
 
 export const switchTab = (tab: string) => action(SWITCHTAB_CAMPANEL, tab);
@@ -26,6 +25,8 @@ export const addImages = (
 export const removeImages = (imageIndexes: number[]) =>
   action(REMOVE_IMAGES, imageIndexes);
 
-export const switchFacingMode = (
-  facingMode: FACINGMODE_REAR | FACINGMODE_FRONT
-) => action(SWITCH_FACINGMODE, facingMode);
+export const switchFacingMode = (facingMode: string) =>
+  action(SWITCH_FACINGMODE, facingMode);
+
+export const changeYoutubeUrl = (youtubeUrl: string) =>
+  action(CHANGE_YOUTUBEURL, youtubeUrl);

@@ -1,6 +1,6 @@
 import { combineReducers } from 'redux';
 import { ActionType } from 'typesafe-actions';
-import { CamPanelModel } from './models';
+import { CameraPanelModel } from './models';
 import * as actions from './actions';
 import {
   SWITCHTAB_CAMPANEL,
@@ -9,12 +9,15 @@ import {
   ADD_IMAGES,
   REMOVE_IMAGES,
   SWITCH_FACINGMODE,
-  FACINGMODE_REAR
+  CHANGE_YOUTUBEURL,
+  FACINGMODE_REAR,
+  DEFAULT_YOUTUBE_URL,
+  DEFAULT_MP4_URL
 } from './constants';
 
 export type AppActions = ActionType<typeof actions>;
 export type AppState = {
-  readonly cameraPanel: CamPanelModel;
+  readonly cameraPanel: CameraPanelModel;
 };
 
 export default combineReducers<AppState, AppActions>({
@@ -23,7 +26,9 @@ export default combineReducers<AppState, AppActions>({
       tab: 'one',
       message: null,
       images: [],
-      facingMode: FACINGMODE_REAR
+      facingMode: FACINGMODE_REAR,
+      youtubeUrl: DEFAULT_YOUTUBE_URL,
+      mp4Url: DEFAULT_MP4_URL
     },
     action
   ) => {
@@ -48,7 +53,9 @@ export default combineReducers<AppState, AppActions>({
       case SWITCH_FACINGMODE:
         const { payload: facingMode } = action;
         return { ...state, facingMode };
-        break;
+      case CHANGE_YOUTUBEURL:
+        const { payload: youtubeUrl } = action;
+        return { ...state, youtubeUrl };
       default:
         return state;
     }
