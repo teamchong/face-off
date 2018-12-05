@@ -3,7 +3,7 @@ import { ActionType } from 'typesafe-actions';
 import { CameraPanelModel } from './models';
 import * as actions from './actions';
 import {
-  SWITCHTAB_CAMPANEL,
+  SWITCHTAB_CAMERAPANEL,
   SHOW_MESSAGE,
   HIDE_MESSAGE,
   ADD_IMAGES,
@@ -21,19 +21,19 @@ export type AppState = {
 };
 
 export default combineReducers<AppState, AppActions>({
-  cameraPanel: (
+  cameraPanel(
     state = {
       tab: 'one',
-      message: null,
+      message: '',
       images: [],
       facingMode: FACINGMODE_REAR,
       youtubeUrl: DEFAULT_YOUTUBE_URL,
       mp4Url: DEFAULT_MP4_URL
     },
     action
-  ) => {
+  ) {
     switch (action.type) {
-      case SWITCHTAB_CAMPANEL:
+      case SWITCHTAB_CAMERAPANEL:
         const { payload: tab } = action;
         return { ...state, tab };
       case SHOW_MESSAGE:

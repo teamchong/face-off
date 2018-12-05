@@ -1,8 +1,9 @@
 import { Fab } from '@material-ui/core';
-import { createStyles, withStyles } from '@material-ui/core/styles';
+import { createStyles, StyledComponentProps, withStyles } from '@material-ui/core/styles';
 import { Theme } from '@material-ui/core/styles/createMuiTheme';
 import { CameraFront, CameraRear, PhotoCamera } from '@material-ui/icons';
 import * as React from 'react';
+import { createRef } from 'react';
 import { connect } from 'react-redux';
 import * as Webcam from 'react-webcam';
 import { Dispatch } from 'redux';
@@ -12,7 +13,15 @@ import {
   switchFacingMode,
   addImages
 } from '../actions/cameraPanelActions';
+import { CameraPanelModel, ImageModel } from '../models';
 import { AppState } from '../reducers';
+
+// declare namespace Webcam {
+//   interface WebcamProps {
+//     videoConstraints: any;
+//   }
+// }
+
 /*
 prop	type	default	notes
 className	string	''	CSS class of video element
@@ -32,35 +41,46 @@ videoConstraints	object		MediaStreamConstraints(s) for the video
 const WIDTH = 640;
 const HEIGHT = 480;
 
-const styles = ({ spacing }: Theme) =>
-  createStyles({
-    container: {
-      position: 'relative'
-    },
-    screenshot: {
-      margin: spacing.unit,
-      position: 'absolute',
-      left: '0px',
-      zIndex: 1
-    },
-    rearFacing: {
-      margin: spacing.unit,
-      position: 'absolute',
-      left: '60px',
-      zIndex: 1
-    },
-    frontFacing: {
-      margin: spacing.unit,
-      position: 'absolute',
-      left: '120px',
-      zIndex: 1
-    }
-  });
+const styles = ({ spacing }: Theme) => createStyles({
+  container: {
+    position: 'relative'
+  },
+  screenshot: {
+    margin: spacing.unit,
+    position: 'absolute',
+    left: '0px',
+    zIndex: 1
+  },
+  rearFacing: {
+    margin: spacing.unit,
+    position: 'absolute',
+    left: '60px',
+    zIndex: 1
+  },
+  frontFacing: {
+    margin: spacing.unit,
+    position: 'absolute',
+    left: '120px',
+    zIndex: 1
+  }
+});
 
-const cameraRef = React.createRef<Webcam>();
+const cameraRef = createRef<Webcam>();
 
-const screenshotHandler = (addImagesFunc: typeof addImages) => {
-  addImagesFunc([
+type Actions = {
+  showMessage: typeof showMessage;
+  switchFacingMode: typeof switchFacingMode;
+  addImages: typeof addImages;
+};
+type WebcamComponentProps = StyledComponentProps & Actions & Partial<CameraPanelModel>;
+const WebcamComponent = ({
+  classes,
+  facingMode,
+  showMessage,
+  switchFacingMode,
+  addImages
+}: WebcamComponentProps) => {
+  const screenshotHandler = () => addImages([
     {
       name: `WebCam-${new Date()
         .toLocaleString('en-GB')
@@ -68,68 +88,62 @@ const screenshotHandler = (addImagesFunc: typeof addImages) => {
         .replace(/[,]/g, '')}.jpg`,
       width: WIDTH,
       height: HEIGHT,
-      preview: cameraRef.current.getScreenshot()
+      preview: !cameraRef.current ? '' : cameraRef.current.getScreenshot() || ''
     }
   ]);
-};
+  const switchRear = () => switchFacingMode(FACINGMODE_REAR);
+  const switchFront = () => switchFacingMode(FACINGMODE_FRONT);
+  return (
+    <div className={classes!.container}>
+      <Fab
+        color="primary"
+        aria-label="Take screenshot"
+        className={classes!.screenshot}
+        onClick={screenshotHandler}
+      >
+        <PhotoCamera />
+      </Fab>
+      <Fab
+        color="primary"
+        aria-label="Use rear camera"
+        className={classes!.rearFacing}
+        onClick={switchRear}
+      >
+        <CameraRear />
+      </Fab>
+      <Fab
+        color="primary"
+        aria-label="Use front camera"
+        className={classes!.frontFacing}
+        onClick={switchFront}
+      >
+        <CameraFront />
+      </Fab>
+      <Webcam
+        ref={cameraRef}
+        width={WIDTH}
+        height={HEIGHT}
+        videoConstraints={{ facingMode }}
+        audio={false}
+        screenshotFormat="image/jpeg"
+        style={{
+          borderWidth: 5,
+          borderStyle: 'solid',
+          borderColor: '#ccc'
+        }}
+      />
+    </div>
+  );
+}
 
-const WebcamComponent = ({
-  classes,
-  facingMode,
-  showMessage,
-  switchFacingMode,
-  addImages
-}) => (
-  <div className={classes.container}>
-    <Fab
-      color="primary"
-      aria-label="Take screenshot"
-      className={classes.screenshot}
-      onClick={() => screenshotHandler(addImages)}
-    >
-      <PhotoCamera />
-    </Fab>
-    <Fab
-      color="primary"
-      aria-label="Use rear camera"
-      className={classes.rearFacing}
-      onClick={() => switchFacingMode(FACINGMODE_REAR)}
-    >
-      <CameraRear />
-    </Fab>
-    <Fab
-      color="primary"
-      aria-label="Use front camera"
-      className={classes.frontFacing}
-      onClick={() => switchFacingMode(FACINGMODE_FRONT)}
-    >
-      <CameraFront />
-    </Fab>
-    <Webcam
-      ref={cameraRef}
-      width={WIDTH}
-      height={HEIGHT}
-      videoConstraints={{ facingMode }}
-      audio={false}
-      screenshotFormat="image/jpeg"
-      style={{
-        borderWidth: 5,
-        borderStyle: 'solid',
-        borderColor: '#ccc'
-      }}
-    />
-  </div>
-);
+const cameraPanelSelector = ({ facingMode }: CameraPanelModel) => ({ facingMode });
 
-const cameraPanelSelector = ({ facingMode }) => ({ facingMode });
-
-const mapStateToProps = ({ cameraPanel }: AppState) =>
-  cameraPanelSelector(cameraPanel);
+const mapStateToProps = ({ cameraPanel }: AppState) => cameraPanelSelector(cameraPanel);
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  showMessage: message => dispatch(showMessage(message)),
-  addImages: images => dispatch(addImages(images)),
-  switchFacingMode: facingMode => dispatch(switchFacingMode(facingMode))
+  showMessage: (message: string) => dispatch(showMessage(message)),
+  addImages: (images: Readonly<ImageModel>[]) => dispatch(addImages(images)),
+  switchFacingMode: (facingMode: string) => dispatch(switchFacingMode(facingMode))
 });
 
 export default connect(

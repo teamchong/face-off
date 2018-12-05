@@ -1,9 +1,14 @@
-import * as Dropzone from 'react-dropzone';
+export interface ImageModel {
+  name: string;
+  width: number;
+  height: number;
+  preview: string;
+}
 
 export interface CameraPanelModel {
   readonly tab: string;
   readonly message: string;
-  readonly images: Readonly<{ name: string; preview: string }>[];
+  readonly images: Readonly<ImageModel>[];
   readonly facingMode: string;
   readonly youtubeUrl: string;
   readonly mp4Url: string;

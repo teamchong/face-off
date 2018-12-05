@@ -1,27 +1,28 @@
 import { Button, Typography } from '@material-ui/core';
-import { createStyles, withStyles } from '@material-ui/core/styles';
+import { createStyles, StyledComponentProps, withStyles } from '@material-ui/core/styles';
 import { Collections } from '@material-ui/icons';
 import * as React from 'react';
+import { Fragment, ReactElement } from 'react';
 import * as Dropzone from 'react-dropzone';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { addImages, showMessage } from '../actions/cameraPanelActions';
+import { CameraPanelModel, ImageModel } from '../models';
 import { AppState } from '../reducers';
 
 const MAX_WIDTH = 640;
 
-const styles = () =>
-  createStyles({
-    typography: {
-      color: 'rgba(255,255,255,0.9)'
-    },
-    br: {
-      width: '100%'
-    },
-    iconSmall: {
-      fontSize: 20
-    }
-  });
+const styles = () => createStyles({
+  typography: {
+    color: 'rgba(255,255,255,0.9)'
+  },
+  br: {
+    width: '100%'
+  },
+  iconSmall: {
+    fontSize: 20
+  }
+});
 
 const readAsDataURL = async (file: File) => {
   const dataUrl = await new Promise<string>((resolve, reject) => {
@@ -42,45 +43,24 @@ const readAsDataURL = async (file: File) => {
     canvas.width = MAX_WIDTH;
     canvas.height = newHeight;
     const ctx = canvas.getContext('2d');
-    ctx.drawImage(img, 0, 0, MAX_WIDTH, newHeight);
-    return ctx.canvas.toDataURL();
+    if (ctx !== null) {
+      ctx.drawImage(img, 0, 0, MAX_WIDTH, newHeight);
+      return {
+        name: img.name,
+        width: canvas.width,
+        height: canvas.height,
+        preview: ctx.canvas.toDataURL()
+      };
+    }
   }
-  return dataUrl;
+  return {
+    name: img.name,
+    width: img.width,
+    height: img.height,
+    preview: dataUrl
+  };
 };
 
-const onDrop = async (
-  acceptedFiles: File[],
-  rejectedFiles: File[],
-  addImagesFunc: typeof addImages,
-  showMessageFunc: typeof showMessage
-) => {
-  /*
-lastModified: 1541910129972
-lastModifiedDate: Sun Nov 11 2018 12:22:09 GMT+0800 (香港標準時間) {}
-name: "Stuart.jpg"
-size: 173149
-type: "image/jpeg"
-webkitRelativePath: ""
-__proto__: File
-*/
-  if (!!(acceptedFiles || []).length) {
-    addImagesFunc(
-      await Promise.all(
-        acceptedFiles.map(async image => ({
-          name: image.name,
-          preview: await readAsDataURL(image)
-        }))
-      )
-    );
-  }
-  const rejectedMessage = (rejectedFiles || [])
-    .map(file => file.name)
-    .join('\n');
-  if (!!rejectedMessage) {
-    showMessageFunc(`The following files are not images
-${rejectedMessage}`);
-  }
-};
 /*
 Prop name	Type	Default	Description
 accept	union		
@@ -184,49 +164,81 @@ Method name	Parameters	Description
 open()		
 Open system file upload dialog.
 */
-const DropzoneComponent = ({ classes, images, addImages, showMessage }) => (
-  <React.Fragment>
-    <Dropzone
-      accept="image/jpeg, image/png"
-      onDrop={(acceptedFiles, rejectedFiles) =>
-        onDrop(acceptedFiles, rejectedFiles, addImages, showMessage)
-      }
-      className="color-bg"
-      style={{
-        borderWidth: 5,
-        borderStyle: 'dashed',
-        borderColor: 'rgba(0,0,0,0.2)',
-        borderRadius: 5,
-        width: 640,
-        height: 480,
-        alignContent: 'center',
-        justifyContent: 'center',
-        flexFlow: 'row wrap',
-        display: 'flex'
-      }}
-    >
-      <Typography variant="h4" gutterBottom className={classes.typography}>
-        Drop your file here...
-      </Typography>
-      <div className={classes.br} />
-      <Button variant="contained" color="secondary" className={classes.button}>
-        Browse...
-        <Collections />
-      </Button>
-    </Dropzone>
-  </React.Fragment>
-);
+type Actions = {
+  addImages: typeof addImages;
+  showMessage: typeof showMessage;
+};
+type DropzoneComponentProps = StyledComponentProps & Actions & Partial<CameraPanelModel>;
+const DropzoneComponent = ({ classes, images, addImages, showMessage }: DropzoneComponentProps) => {
+  const dropHandler = async (
+    acceptedFiles: File[],
+    rejectedFiles: File[]
+  ) => {
+    /*
+    lastModified: 1541910129972
+    lastModifiedDate: Sun Nov 11 2018 12:22:09 GMT+0800 (香港標準時間) {}
+    name: "Stuart.jpg"
+    size: 173149
+    type: "image/jpeg"
+    webkitRelativePath: ""
+    __proto__: File
+    */
+    if (!!(acceptedFiles || []).length) {
+      addImages(
+        await Promise.all(
+          acceptedFiles.map(image => readAsDataURL(image))
+        )
+      );
+    }
+    const rejectedMessage = (rejectedFiles || [])
+      .map(file => file.name)
+      .join('\n');
+    if (!!rejectedMessage) {
+      showMessage(`The following files are not images
+${rejectedMessage}`);
+    }
+  };
+  return (
+    <Fragment>
+      <Dropzone
+        accept="image/jpeg, image/png"
+        onDrop={dropHandler}
+        className="color-bg"
+        style={{
+          borderWidth: 5,
+          borderStyle: 'dashed',
+          borderColor: 'rgba(0,0,0,0.2)',
+          borderRadius: 5,
+          width: 640,
+          height: 480,
+          alignContent: 'center',
+          justifyContent: 'center',
+          flexFlow: 'row wrap',
+          display: 'flex'
+        }}
+      >
+        <Typography variant="h4" gutterBottom={true} className={classes!.typography}>
+          Drop your file here...
+        </Typography>
+        <div className={classes!.br} />
+        <Button variant="contained" color="secondary" className={classes!.button}>
+          Browse...
+          <Collections />
+        </Button>
+      </Dropzone>
+    </Fragment>
+  );
+}
 
-const cameraPanelSelector = ({ message }) => ({
+const cameraPanelSelector = ({ message }: CameraPanelModel) => ({
   message
 });
 
-const mapStateToProps = ({ cameraPanel }: AppState) =>
-  cameraPanelSelector(cameraPanel);
+const mapStateToProps = ({ cameraPanel }: AppState) => cameraPanelSelector(cameraPanel);
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  addImages: images => dispatch(addImages(images)),
-  showMessage: message => dispatch(showMessage(message))
+  addImages: (images: Readonly<ImageModel>[]) => dispatch(addImages(images)),
+  showMessage: (message: string) => dispatch(showMessage(message))
 });
 
 export default connect(
