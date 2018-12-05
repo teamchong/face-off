@@ -10,6 +10,9 @@ export const REMOVE_IMAGES = 'REMOVE_IMAGES';
 export const SWITCH_FACINGMODE = 'SWITCH_FACINGMODE';
 export const CHANGE_YOUTUBEURL = 'CHANGE_YOUTUBEURL';
 
+export const FETCH_MP4URL = 'FETCH_MP4URL';
+export const FETCHED_MP4URL = 'FETCHED_MP4URL';
+
 /* constants */
 export const FACINGMODE_REAR = 'environment';
 export const FACINGMODE_FRONT = 'user';

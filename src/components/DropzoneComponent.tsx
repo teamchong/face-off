@@ -1,5 +1,9 @@
 import { Button, Typography } from '@material-ui/core';
-import { createStyles, StyledComponentProps, withStyles } from '@material-ui/core/styles';
+import {
+  createStyles,
+  StyledComponentProps,
+  withStyles
+} from '@material-ui/core/styles';
 import { Collections } from '@material-ui/icons';
 import * as React from 'react';
 import { Fragment, ReactElement } from 'react';
@@ -8,21 +12,22 @@ import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { addImages, showMessage } from '../actions/cameraPanelActions';
 import { CameraPanelModel, ImageModel } from '../models';
-import { AppState } from '../reducers';
+import { RootState } from '../reducers';
 
 const MAX_WIDTH = 640;
 
-const styles = () => createStyles({
-  typography: {
-    color: 'rgba(255,255,255,0.9)'
-  },
-  br: {
-    width: '100%'
-  },
-  iconSmall: {
-    fontSize: 20
-  }
-});
+const styles = () =>
+  createStyles({
+    typography: {
+      color: 'rgba(255,255,255,0.9)'
+    },
+    br: {
+      width: '100%'
+    },
+    iconSmall: {
+      fontSize: 20
+    }
+  });
 
 const readAsDataURL = async (file: File) => {
   const dataUrl = await new Promise<string>((resolve, reject) => {
@@ -168,12 +173,16 @@ type Actions = {
   addImages: typeof addImages;
   showMessage: typeof showMessage;
 };
-type DropzoneComponentProps = StyledComponentProps & Actions & Partial<CameraPanelModel>;
-const DropzoneComponent = ({ classes, images, addImages, showMessage }: DropzoneComponentProps) => {
-  const dropHandler = async (
-    acceptedFiles: File[],
-    rejectedFiles: File[]
-  ) => {
+type DropzoneComponentProps = StyledComponentProps &
+  Actions &
+  Partial<CameraPanelModel>;
+const DropzoneComponent = ({
+  classes,
+  images,
+  addImages,
+  showMessage
+}: DropzoneComponentProps) => {
+  const dropHandler = async (acceptedFiles: File[], rejectedFiles: File[]) => {
     /*
     lastModified: 1541910129972
     lastModifiedDate: Sun Nov 11 2018 12:22:09 GMT+0800 (香港標準時間) {}
@@ -185,9 +194,7 @@ const DropzoneComponent = ({ classes, images, addImages, showMessage }: Dropzone
     */
     if (!!(acceptedFiles || []).length) {
       addImages(
-        await Promise.all(
-          acceptedFiles.map(image => readAsDataURL(image))
-        )
+        await Promise.all(acceptedFiles.map(image => readAsDataURL(image)))
       );
     }
     const rejectedMessage = (rejectedFiles || [])
@@ -217,24 +224,33 @@ ${rejectedMessage}`);
           display: 'flex'
         }}
       >
-        <Typography variant="h4" gutterBottom={true} className={classes!.typography}>
+        <Typography
+          variant="h4"
+          gutterBottom={true}
+          className={classes!.typography}
+        >
           Drop your file here...
         </Typography>
         <div className={classes!.br} />
-        <Button variant="contained" color="secondary" className={classes!.button}>
+        <Button
+          variant="contained"
+          color="secondary"
+          className={classes!.button}
+        >
           Browse...
           <Collections />
         </Button>
       </Dropzone>
     </Fragment>
   );
-}
+};
 
 const cameraPanelSelector = ({ message }: CameraPanelModel) => ({
   message
 });
 
-const mapStateToProps = ({ cameraPanel }: AppState) => cameraPanelSelector(cameraPanel);
+const mapStateToProps = ({ cameraPanel }: RootState) =>
+  cameraPanelSelector(cameraPanel);
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   addImages: (images: Readonly<ImageModel>[]) => dispatch(addImages(images)),

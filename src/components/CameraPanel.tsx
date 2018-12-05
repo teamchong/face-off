@@ -45,7 +45,7 @@ import {
   removeImages
 } from '../actions/cameraPanelActions';
 import { CameraPanelModel } from '../models';
-import { AppState } from '../reducers';
+import { RootState } from '../reducers';
 
 type Actions = {
   switchTab: typeof switchTab;
@@ -61,40 +61,50 @@ type CameraPanelConnectedProps = Props<ReactNode> &
   CameraPanelModel;
 type ContainerProps = CameraPanelModel & Props<ReactNode>;
 
-const styles = ({ palette, spacing }: Theme) => createStyles({
-  root: {
-    flexGrow: 1,
-    backgroundColor: palette.background.paper
-  },
-  title: {
-    position: 'absolute'
-  },
-  br: {
-    width: '100%'
-  },
-  removeAll: {
-    width: '100%',
-    marginBottom: '5px'
-  },
-  button: {
-    margin: spacing.unit
-  },
-  leftIcon: {
-    marginRight: spacing.unit
-  },
-  rightIcon: {
-    marginLeft: spacing.unit
-  },
-  card: {
-    margin: '5px',
-    display: 'inline-block'
-  },
-  cardActions: {
-    backgroundColor: 'rgba(0,0,0,0.1)'
-  }
-});
+const styles = ({ palette, spacing }: Theme) =>
+  createStyles({
+    root: {
+      flexGrow: 1,
+      backgroundColor: palette.background.paper
+    },
+    imagesContainer: {
+      display: 'flex',
+      flexFlow: 'row wrap',
+      justifyContent: 'flex-start',
+      alignItems: 'flex-start',
+      alignContent: 'flex-start'
+    },
+    title: {
+      position: 'absolute'
+    },
+    br: {
+      width: '100%'
+    },
+    removeAll: {
+      width: '100%',
+      marginBottom: '5px'
+    },
+    button: {
+      margin: spacing.unit
+    },
+    leftIcon: {
+      marginRight: spacing.unit
+    },
+    rightIcon: {
+      marginLeft: spacing.unit
+    },
+    card: {
+      margin: '5px',
+      display: 'inline-block'
+    },
+    cardActions: {
+      backgroundColor: 'rgba(0,0,0,0.1)'
+    }
+  });
 
-const Transition = (props: Props<ReactNode>) => <Slide direction="up" {...props} />;
+const Transition = (props: Props<ReactNode>) => (
+  <Slide direction="up" {...props} />
+);
 
 const TabContainer = ({ children }: Props<ReactNode>): ReactElement<any> => (
   <Typography component="div" style={{ padding: 8 * 2 }}>
@@ -117,43 +127,6 @@ const CameraPanel = ({
   const switchTabHandler = (_: any, value: string) => switchTab(value);
   return (
     <Fragment>
-      {!!images.length && (
-        <div>
-          {images.map(({ name, width, height, preview }, i) => {
-            const removeImageHandler = () => removeImages([i]);
-            <Card className={classes!.card}>
-              <CardActionArea>
-                <CardContent className={classes!.title}>{name}</CardContent>
-                <img
-                  src={preview}
-                  title={name}
-                  width={width}
-                  height={height}
-                  className={classes!.card}
-                />
-              </CardActionArea>
-              <CardActions className={classes!.cardActions}>
-                <Button
-                  size="small"
-                  color="primary"
-                  onClick={removeImageHandler}
-                >
-                  <Delete /> Remove
-                </Button>
-              </CardActions>
-            </Card>
-          })}
-          <div className={classes!.br} />
-          <Button
-            variant="contained"
-            color="primary"
-            className={classes!.removeAll}
-            onClick={removeAllHandler}
-          >
-            <DeleteSweep /> Remove all
-          </Button>
-        </div>
-      )}
       <div className={classes!.root}>
         <AppBar position="static">
           <Tabs value={tab} onChange={switchTabHandler} fullWidth={true}>
@@ -188,21 +161,65 @@ const CameraPanel = ({
           </DialogActions>
         </Dialog>
       </div>
+      {!!images.length && (
+        <div>
+          <Button
+            variant="contained"
+            color="primary"
+            className={classes!.removeAll}
+            onClick={removeAllHandler}
+          >
+            <DeleteSweep /> Remove all
+          </Button>
+          <div className={classes!.br} />
+          <div className={classes!.imagesContainer}>
+            {images.map(({ name, width, height, preview }, i) => {
+              const removeImageHandler = () => removeImages([i]);
+              return (
+                <Card
+                  className={classes!.card}
+                  key={i}
+                  style={{ order: images.length - i }}
+                >
+                  <CardActionArea>
+                    <CardContent className={classes!.title}>{name}</CardContent>
+                    <img
+                      src={preview}
+                      title={name}
+                      width={width}
+                      height={height}
+                      className={classes!.card}
+                    />
+                  </CardActionArea>
+                  <CardActions className={classes!.cardActions}>
+                    <Button
+                      size="small"
+                      color="primary"
+                      onClick={removeImageHandler}
+                    >
+                      <Delete /> Remove
+                    </Button>
+                  </CardActions>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </Fragment>
   );
-}
+};
 
 const withActiveTab = (Container: ReactType) => (
   props: ContainerProps
-): ReactElement<ContainerProps & ActiveTypeProps> => (
+): ReactElement<ContainerProps & ActiveTypeProps> =>
   props.tab === 'three' ? (
     <Container {...props} ActiveTab={WebcamComponent} />
   ) : props.tab === 'two' ? (
     <Container {...props} ActiveTab={DropzoneComponent} />
   ) : (
     <Container {...props} ActiveTab={YoutubeComponent} />
-  )
-);
+  );
 
 const cameraPanelSelector = ({ tab, message, images }: CameraPanelModel) => ({
   tab,
@@ -210,13 +227,22 @@ const cameraPanelSelector = ({ tab, message, images }: CameraPanelModel) => ({
   images
 });
 
-const mapStateToProps = ({ cameraPanel }: AppState) => cameraPanelSelector(cameraPanel);
+const mapStateToProps = ({ cameraPanel }: RootState) =>
+  cameraPanelSelector(cameraPanel);
 
-const mapDispatchToProps = (dispatch: Dispatch) =>({
-  switchTab(tab: string) { dispatch(switchTab(tab)); },
-  showMessage(message: string) { dispatch(showMessage(message)); },
-  hideMessage() { dispatch(hideMessage()); },
-  removeImages(imageIndexes: number[]) { dispatch(removeImages(imageIndexes)); }
+const mapDispatchToProps = (dispatch: Dispatch) => ({
+  switchTab(tab: string) {
+    dispatch(switchTab(tab));
+  },
+  showMessage(message: string) {
+    dispatch(showMessage(message));
+  },
+  hideMessage() {
+    dispatch(hideMessage());
+  },
+  removeImages(imageIndexes: number[]) {
+    dispatch(removeImages(imageIndexes));
+  }
 });
 
 export default connect(
