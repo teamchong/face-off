@@ -1,32 +1,12 @@
-import { rootEpic, rootReducer, RootState } from "./reducers";
-import { applyMiddleware, createStore } from "redux";
-import { combineEpics, createEpicMiddleware } from "redux-observable";
-import { fetchMp4Url } from "./actions";
-import { FACINGMODE_REAR, DEFAULT_YOUTUBE_URL } from "./constants";
-import { loadTinyFaceDetectorModel } from "face-api.js";
-
-const initState: RootState = {
-  cameraPanel: {
-    tab: "one",
-    message: "",
-    images: [],
-    facingMode: FACINGMODE_REAR,
-    youtubeUrl: DEFAULT_YOUTUBE_URL,
-    mp4Url: ""
-  }
-};
+import { rootEpic, rootReducer, RootState } from './reducers';
+import { applyMiddleware, createStore } from 'redux';
+import { combineEpics, createEpicMiddleware } from 'redux-observable';
+import { appStart } from './actions';
 
 export default () => {
   const epicMiddleware = createEpicMiddleware();
-  const store = createStore(
-    rootReducer,
-    initState,
-    applyMiddleware(epicMiddleware)
-  );
+  const store = createStore(rootReducer, applyMiddleware(epicMiddleware));
   epicMiddleware.run(rootEpic);
-  store.dispatch(fetchMp4Url(DEFAULT_YOUTUBE_URL));
-  (async () => {
-    await loadTinyFaceDetectorModel("/");
-  })();
+  store.dispatch(appStart());
   return store;
 };

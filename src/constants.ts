@@ -13,6 +13,9 @@ export const CHANGE_YOUTUBEURL = 'CHANGE_YOUTUBEURL';
 export const FETCH_MP4URL = 'FETCH_MP4URL';
 export const FETCHED_MP4URL = 'FETCHED_MP4URL';
 
+export const APP_START = 'APP_START';
+export const LOADED_MODELS = 'LOADED_MODELS';
+
 /* constants */
 export const FACINGMODE_REAR = 'environment';
 export const FACINGMODE_FRONT = 'user';

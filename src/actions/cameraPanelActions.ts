@@ -1,5 +1,5 @@
-import * as Dropzone from "react-dropzone";
-import { action } from "typesafe-actions";
+import * as Dropzone from 'react-dropzone';
+import { action } from 'typesafe-actions';
 import {
   SWITCHTAB_CAMERAPANEL,
   SHOW_MESSAGE,
@@ -9,9 +9,11 @@ import {
   SWITCH_FACINGMODE,
   CHANGE_YOUTUBEURL,
   FETCH_MP4URL,
-  FETCHED_MP4URL
-} from "../constants";
-import { ImageModel } from "../models";
+  FETCHED_MP4URL,
+  APP_START,
+  LOADED_MODELS,
+} from '../constants';
+import { ImageModel } from '../models';
 
 export const switchTab = (tab: string) => action(SWITCHTAB_CAMERAPANEL, tab);
 export const showMessage = (message: string) => action(SHOW_MESSAGE, message);
@@ -35,3 +37,7 @@ export const fetchedMp4Url = (payload: {
   youtubeUrlLoaded: string;
   mp4Url: string;
 }) => action(FETCHED_MP4URL, payload);
+
+export const appStart = () => action(APP_START);
+
+export const loadedModels = () => action(LOADED_MODELS);

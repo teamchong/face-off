@@ -1,3 +1,5 @@
+import { RefObject } from "react";
+
 export interface ImageModel {
   name: string;
   width: number;
@@ -13,4 +15,6 @@ export interface CameraPanelModel {
   readonly youtubeUrl: string;
   readonly youtubeUrlLoaded: string;
   readonly mp4Url: string;
+  readonly videoRef: RefObject<HTMLVideoElement>;
+  readonly modelsLoaded: boolean;
 }

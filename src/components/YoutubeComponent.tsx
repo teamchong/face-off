@@ -99,6 +99,7 @@ type YoutubeComponentProps = StyledComponentProps &
   Partial<CameraPanelModel>;
 const YoutubeComponent = ({
   classes,
+  videoRef,
   youtubeUrl,
   youtubeUrlLoaded,
   mp4Url,
@@ -183,10 +184,12 @@ const YoutubeComponent = ({
 };
 
 const cameraPanelSelector = ({
+  videoRef,
   youtubeUrl,
   youtubeUrlLoaded,
   mp4Url
 }: CameraPanelModel) => ({
+  videoRef,
   youtubeUrl,
   youtubeUrlLoaded,
   mp4Url
