@@ -1,10 +1,10 @@
-import { combineReducers } from 'redux';
-import { combineEpics } from 'redux-observable';
-import { combineLatest, from } from 'rxjs';
-import { tap, ignoreElements, filter, map, switchMap } from 'rxjs/operators';
-import { ActionType, isOfType } from 'typesafe-actions';
-import { CameraPanelModel } from './models';
-import * as actions from './actions';
+import { combineReducers } from "redux";
+import { combineEpics } from "redux-observable";
+import { combineLatest, from } from "rxjs";
+import { tap, ignoreElements, filter, map, switchMap } from "rxjs/operators";
+import { ActionType, isOfType } from "typesafe-actions";
+import { CameraPanelModel } from "./models";
+import * as actions from "./actions";
 import {
   SWITCHTAB_CAMERAPANEL,
   SHOW_MESSAGE,
@@ -16,7 +16,7 @@ import {
   FETCH_MP4URL,
   FETCHED_MP4URL,
   YOUTUBE_API
-} from './constants';
+} from "./constants";
 
 export type RootActions = ActionType<typeof actions>;
 export type RootState = {
@@ -33,7 +33,7 @@ export const rootEpic = combineEpics((action$, state$) =>
         filter(result => !!result.length),
         map(result =>
           actions.fetchedMp4Url({
-            youtubeUrl,
+            youtubeUrlLoaded: youtubeUrl,
             mp4Url: result[result.length - 1].url
           })
         )
@@ -77,11 +77,11 @@ export const rootReducer = combineReducers<RootState, RootActions>({
       }
       case FETCH_MP4URL: {
         const { payload: youtubeUrl } = action;
-        return { ...state, youtubeUrl, mp4Url: '' };
+        return { ...state, youtubeUrl, mp4Url: "" };
       }
       case FETCHED_MP4URL: {
-        const { youtubeUrl, mp4Url } = action.payload;
-        return { ...state, youtubeUrl, mp4Url };
+        const { youtubeUrlLoaded, mp4Url } = action.payload;
+        return { ...state, youtubeUrlLoaded, mp4Url };
       }
       default:
         return state;
