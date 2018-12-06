@@ -14,7 +14,7 @@ import {
   Slide,
   Tabs,
   Tab,
-  Typography
+  Typography,
 } from '@material-ui/core';
 import {
   AddPhotoAlternate,
@@ -22,12 +22,12 @@ import {
   DeleteSweep,
   Done,
   Videocam,
-  VideoLibrary
+  VideoLibrary,
 } from '@material-ui/icons';
 import {
   createStyles,
   StyledComponentProps,
-  withStyles
+  withStyles,
 } from '@material-ui/core/styles';
 import { Theme } from '@material-ui/core/styles/createMuiTheme';
 import * as React from 'react';
@@ -42,7 +42,7 @@ import {
   switchTab,
   showMessage,
   hideMessage,
-  removeImages
+  removeImages,
 } from '../actions/cameraPanelActions';
 import { CameraPanelModel } from '../models';
 import { RootState } from '../reducers';
@@ -65,41 +65,41 @@ const styles = ({ palette, spacing }: Theme) =>
   createStyles({
     root: {
       flexGrow: 1,
-      backgroundColor: palette.background.paper
+      backgroundColor: palette.background.paper,
     },
     imagesContainer: {
       display: 'flex',
       flexFlow: 'row wrap',
       justifyContent: 'flex-start',
       alignItems: 'flex-start',
-      alignContent: 'flex-start'
+      alignContent: 'flex-start',
     },
     title: {
-      position: 'absolute'
+      position: 'absolute',
     },
     br: {
-      width: '100%'
+      width: '100%',
     },
     removeAll: {
       width: '100%',
-      marginBottom: '5px'
+      marginBottom: '5px',
     },
     button: {
-      margin: spacing.unit
+      margin: spacing.unit,
     },
     leftIcon: {
-      marginRight: spacing.unit
+      marginRight: spacing.unit,
     },
     rightIcon: {
-      marginLeft: spacing.unit
+      marginLeft: spacing.unit,
     },
     card: {
       margin: '5px',
-      display: 'inline-block'
+      display: 'inline-block',
     },
     cardActions: {
-      backgroundColor: 'rgba(0,0,0,0.1)'
-    }
+      backgroundColor: 'rgba(0,0,0,0.1)',
+    },
   });
 
 const Transition = (props: Props<ReactNode>) => (
@@ -121,7 +121,7 @@ const CameraPanel = ({
   hideMessage,
   showMessage,
   removeImages,
-  images
+  images,
 }: CameraPanelConnectedProps): ReactElement<any> => {
   const removeAllHandler = () => removeImages(images.map((image, i) => i));
   const switchTabHandler = (_: any, value: string) => switchTab(value);
@@ -173,7 +173,7 @@ const CameraPanel = ({
           </Button>
           <div className={classes!.br} />
           <div className={classes!.imagesContainer}>
-            {images.map(({ name, width, height, preview }, i) => {
+            {images.map(({ title, width, height, src }, i) => {
               const removeImageHandler = () => removeImages([i]);
               return (
                 <Card
@@ -184,8 +184,8 @@ const CameraPanel = ({
                   <CardActionArea>
                     <CardContent className={classes!.title}>{name}</CardContent>
                     <img
-                      src={preview}
-                      title={name}
+                      src={src}
+                      title={title}
                       width={width}
                       height={height}
                       className={classes!.card}
@@ -224,7 +224,7 @@ const withActiveTab = (Container: ReactType) => (
 const cameraPanelSelector = ({ tab, message, images }: CameraPanelModel) => ({
   tab,
   message,
-  images
+  images,
 });
 
 const mapStateToProps = ({ cameraPanel }: RootState) =>
@@ -242,7 +242,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   },
   removeImages(imageIndexes: number[]) {
     dispatch(removeImages(imageIndexes));
-  }
+  },
 });
 
 export default connect(

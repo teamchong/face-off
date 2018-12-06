@@ -1,20 +1,27 @@
 import { createRef } from 'react';
 import { combineReducers } from 'redux';
-import { combineEpics } from 'redux-observable';
-import { combineLatest, empty, from, interval, Observable } from 'rxjs';
+import { combineEpics, StateObservable } from 'redux-observable';
+import { combineLatest, empty, from, interval, of, Observable } from 'rxjs';
 import {
-  tap,
-  ignoreElements,
+  catchError,
+  concatMap,
+  delay,
   filter,
   map,
   mergeMap,
   switchMap,
+  tap,
 } from 'rxjs/operators';
 import { ActionType, isOfType } from 'typesafe-actions';
 import * as faceapi from 'face-api.js';
 import { CameraPanelModel } from './models';
 import * as actions from './actions';
-import { fetchMp4Url, fetchedMp4Url, loadedModels } from './actions';
+import {
+  fetchMp4Url,
+  fetchedMp4Url,
+  loadedModels,
+  detectFaces,
+} from './actions';
 import * as faceapi from 'face-api.js';
 import {
   SWITCHTAB_CAMERAPANEL,
@@ -27,7 +34,9 @@ import {
   FETCH_MP4URL,
   FETCHED_MP4URL,
   APP_START,
+  APP_STOP,
   LOADED_MODELS,
+  DETECT_FACES,
   FACINGMODE_REAR,
   YOUTUBE_API,
   DEFAULT_YOUTUBE_URL,
@@ -39,40 +48,58 @@ export type RootState = {
 };
 
 export const rootEpic = combineEpics(
-  (action$: Observable) =>
+  (action$: Observable<RootActions>) =>
+    action$.pipe(
+      filter(isOfType(APP_START)),
+      map(() => fetchMp4Url(DEFAULT_YOUTUBE_URL))
+    ),
+  (action$: Observable<RootActions>) =>
     action$.pipe(
       filter(isOfType(APP_START)),
       switchMap(() =>
         from(
-          faceapi.loadTinyFaceDetectorModel(
+          faceapi.loadSsdMobilenetv1Model(
             'https://justadudewhohacks.github.io/face-api.js/models/'
           )
         )
       ),
       map(() => loadedModels())
     ),
-  (action$: Observable) =>
+  (action$: Observable<RootActions>) =>
     action$.pipe(
-      filter(isOfType(APP_START)),
-      map(() => fetchMp4Url(DEFAULT_YOUTUBE_URL))
+      filter(isOfType(LOADED_MODELS)),
+      map(() => detectFaces())
     ),
-  (action$: Observable, state$: Observable) =>
-    combineLatest(action$, state$).pipe(
-      filter(([action]) => isOfType(LOADED_MODELS)(action)),
-      switchMap(([_, { cameraPanel }]) =>
-        interval(1000).pipe(
-          tap(props => {
-            console.log(cameraPanel);
-          }),
-          switchMap(() => empty())
-        )
-      ),
-      switchMap(() => empty())
+  (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
+    action$.pipe(
+      filter(isOfType(DETECT_FACES)),
+      filter(() => {
+        const { cameraPanel } = state$.value;
+        return cameraPanel.appStarted;
+      }),
+      switchMap(() => {
+        const { cameraPanel } = state$.value;
+        const { tab, videoRef } = cameraPanel;
+        if (tab === 'one' && videoRef.current) {
+          return from(
+            faceapi.detectAllFaces(
+              videoRef.current,
+              new faceapi.SsdMobilenetv1Options()
+            )
+          ).pipe(
+            map(result => {
+              
+            })
+          );
+        }
+        return of([]);
+      }),
+      concatMap(() => of(detectFaces()).pipe(delay(1000)))
     ),
-  (action$: Observable, state$: Observable) =>
-    combineLatest(action$, state$).pipe(
-      filter(([action]) => isOfType(FETCH_MP4URL)(action)),
-      switchMap(([{ payload: youtubeUrl }]) =>
+  (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
+    action$.pipe(
+      filter(isOfType(FETCH_MP4URL)),
+      switchMap(({ payload: youtubeUrl }) =>
         from(fetch(`${YOUTUBE_API}${youtubeUrl}`)).pipe(
           switchMap(result => result.json()),
           map(result => result.filter(r => /^video\/mp4;/.test(r.type))),
@@ -91,6 +118,7 @@ export const rootEpic = combineEpics(
 export const rootReducer = combineReducers<RootState, RootActions>({
   cameraPanel(
     state = {
+      appStarted: false,
       tab: 'one',
       message: '',
       images: [],
@@ -135,7 +163,11 @@ export const rootReducer = combineReducers<RootState, RootActions>({
         return { ...state, youtubeUrl };
       }
       case FETCH_MP4URL: {
-        const { payload: youtubeUrl } = action;
+        const { payload: youtubeUrlBeforeTrim } = action;
+        const youtubeUrl = (youtubeUrlBeforeTrim || '').replace(
+          /^\s+|\s+$/g,
+          ''
+        );
         return { ...state, youtubeUrl, mp4Url: '' };
       }
       case FETCHED_MP4URL: {
@@ -145,7 +177,13 @@ export const rootReducer = combineReducers<RootState, RootActions>({
       case LOADED_MODELS: {
         return { ...state, modelsLoaded: true };
       }
-      case APP_START:
+      case APP_START: {
+        return { ...state, appStarted: true };
+      }
+      case APP_STOP: {
+        return { ...state, appStarted: false };
+      }
+      case DETECT_FACES:
       default:
         return state;
     }

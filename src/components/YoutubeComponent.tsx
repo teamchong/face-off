@@ -2,37 +2,37 @@ import {
   CircularProgress,
   IconButton,
   InputAdornment,
-  TextField
-} from "@material-ui/core";
+  TextField,
+} from '@material-ui/core';
 import {
   createStyles,
   StyledComponentProps,
-  withStyles
-} from "@material-ui/core/styles";
-import { Theme } from "@material-ui/core/styles/createMuiTheme";
+  withStyles,
+} from '@material-ui/core/styles';
+import { Theme } from '@material-ui/core/styles/createMuiTheme';
 import {
   CameraFront,
   CameraRear,
   PhotoCamera,
-  PlayCircleFilled
-} from "@material-ui/icons";
-import * as React from "react";
-import { createRef, ChangeEvent } from "react";
-import { connect } from "react-redux";
-import { Dispatch } from "redux";
+  PlayCircleFilled,
+} from '@material-ui/icons';
+import * as React from 'react';
+import { createRef, ChangeEvent } from 'react';
+import { connect } from 'react-redux';
+import { Dispatch } from 'redux';
 import {
   CORS_PROXY_URL,
   FACINGMODE_REAR,
-  FACINGMODE_FRONT
-} from "../constants";
+  FACINGMODE_FRONT,
+} from '../constants';
 import {
   showMessage,
   changeYoutubeUrl,
   addImages,
-  fetchMp4Url
-} from "../actions/cameraPanelActions";
-import { CameraPanelModel, ImageModel } from "../models";
-import { RootState } from "../reducers";
+  fetchMp4Url,
+} from '../actions/cameraPanelActions';
+import { CameraPanelModel } from '../models';
+import { RootState } from '../reducers';
 
 const WIDTH = 640;
 const HEIGHT = 480;
@@ -40,53 +40,37 @@ const HEIGHT = 480;
 const styles = ({ spacing }: Theme) =>
   createStyles({
     container: {
-      position: "relative"
+      position: 'relative',
     },
     progress: {
-      margin: spacing.unit * 2
+      margin: spacing.unit * 2,
     },
     screenshot: {
       margin: spacing.unit,
-      position: "absolute",
-      left: "0px",
-      zIndex: 1
+      position: 'absolute',
+      left: '0px',
+      zIndex: 1,
     },
     rearFacing: {
       margin: spacing.unit,
-      position: "absolute",
-      left: "60px",
-      zIndex: 1
+      position: 'absolute',
+      left: '60px',
+      zIndex: 1,
     },
     frontFacing: {
       margin: spacing.unit,
-      position: "absolute",
-      left: "120px",
-      zIndex: 1
+      position: 'absolute',
+      left: '120px',
+      zIndex: 1,
     },
     textField: {
-      width: WIDTH + "px",
+      width: WIDTH + 'px',
       marginLeft: spacing.unit,
-      marginRight: spacing.unit
-    }
+      marginRight: spacing.unit,
+    },
   });
 
 const videoRef = createRef<HTMLVideoElement>();
-
-const readAsDataURL = async () => {
-  let { videoWidth, videoHeight } = videoRef.current as any;
-  if (videoWidth > WIDTH) {
-    videoHeight = ~~((WIDTH * videoHeight) / videoWidth);
-    videoWidth = WIDTH;
-  }
-  const canvas = document.createElement("canvas");
-  canvas.width = videoWidth;
-  canvas.height = videoHeight;
-  const ctx = canvas.getContext("2d");
-  if (ctx !== null) {
-    ctx.drawImage(videoRef.current as any, 0, 0, videoWidth, videoHeight);
-    return ctx.canvas.toDataURL();
-  }
-};
 
 type Actions = {
   showMessage: typeof showMessage;
@@ -106,23 +90,42 @@ const YoutubeComponent = ({
   showMessage,
   changeYoutubeUrl,
   fetchMp4Url,
-  addImages
+  addImages,
 }: YoutubeComponentProps) => {
+  const readAsDataURL = async () => {
+    let { videoWidth, videoHeight } = videoRef.current as any;
+    if (videoWidth > WIDTH) {
+      videoHeight = ~~((WIDTH * videoHeight) / videoWidth);
+      videoWidth = WIDTH;
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = videoWidth;
+    canvas.height = videoHeight;
+    const ctx = canvas.getContext('2d');
+    if (ctx !== null) {
+      ctx.drawImage(videoRef.current as any, 0, 0, videoWidth, videoHeight);
+      return ctx.canvas.toDataURL();
+    }
+  };
   const textFieldHandler = ({ target }: ChangeEvent<HTMLInputElement>) =>
     changeYoutubeUrl(target!.value);
   const playHandler = () => fetchMp4Url(youtubeUrl);
-  const screenshotHandler = async () =>
+  const screenshotHandler = async () => {
+    const src = (await readAsDataURL()) || '';
     addImages([
-      {
-        name: `Video-${new Date()
-          .toLocaleString("en-GB")
-          .replace("/", "-")
-          .replace(/[,]/g, "")}.jpg`,
-        width: WIDTH,
-        height: HEIGHT,
-        preview: (await readAsDataURL()) || ""
-      }
+      await new Promise<HTMLImageElement>((resolve, reject) => {
+        const imgEl = new Image();
+        imgEl.title = `Video-${new Date()
+          .toLocaleString('en-GB')
+          .replace('/', '-')
+          .replace(/[,]/g, '')}.jpg`;
+        imgEl.onload = () => resolve(imgEl);
+        imgEl.onerror = error => reject(error);
+        imgEl.src = src;
+      }),
     ]);
+  };
+  const youtubeUrlTrimmed = (youtubeUrl || '').replace(/^\s+|\s+$/g, '');
   return (
     <div className={classes!.container}>
       <div>
@@ -137,7 +140,7 @@ const YoutubeComponent = ({
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
-                {!!youtubeUrl && youtubeUrl !== youtubeUrlLoaded && (
+                {!!youtubeUrlTrimmed && youtubeUrlTrimmed !== youtubeUrlLoaded && (
                   <IconButton
                     aria-label="Take screenshot"
                     onClick={playHandler}
@@ -154,7 +157,7 @@ const YoutubeComponent = ({
                   </IconButton>
                 )}
               </InputAdornment>
-            )
+            ),
           }}
         />
       </div>
@@ -169,15 +172,17 @@ const YoutubeComponent = ({
           muted={true}
           style={{
             borderWidth: 5,
-            borderStyle: "solid",
-            borderColor: "#ccc"
+            borderStyle: 'solid',
+            borderColor: '#ccc',
           }}
           crossOrigin="anonymous"
         >
           <source src={`${CORS_PROXY_URL}${mp4Url}`} type="video/mp4" />
         </video>
       ) : (
-        !!youtubeUrl && <CircularProgress className={classes!.progress} />
+        !!youtubeUrlTrimmed && (
+          <CircularProgress className={classes!.progress} />
+        )
       )}
     </div>
   );
@@ -187,12 +192,12 @@ const cameraPanelSelector = ({
   videoRef,
   youtubeUrl,
   youtubeUrlLoaded,
-  mp4Url
+  mp4Url,
 }: CameraPanelModel) => ({
   videoRef,
   youtubeUrl,
   youtubeUrlLoaded,
-  mp4Url
+  mp4Url,
 });
 
 const mapStateToProps = ({ cameraPanel }: RootState) =>
@@ -200,10 +205,10 @@ const mapStateToProps = ({ cameraPanel }: RootState) =>
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   showMessage: (message: string) => dispatch(showMessage(message)),
-  addImages: (images: Readonly<ImageModel>[]) => dispatch(addImages(images)),
+  addImages: (images: HTMLImageElement[]) => dispatch(addImages(images)),
   changeYoutubeUrl: (youtubeUrl: string) =>
     dispatch(changeYoutubeUrl(youtubeUrl)),
-  fetchMp4Url: (youtubeUrl: string) => dispatch(fetchMp4Url(youtubeUrl))
+  fetchMp4Url: (youtubeUrl: string) => dispatch(fetchMp4Url(youtubeUrl)),
 });
 
 export default connect(

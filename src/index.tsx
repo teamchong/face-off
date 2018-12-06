@@ -2,6 +2,7 @@ import configureStore from './configureStore';
 import CameraPanel from './components/CameraPanel';
 import { Card, CardContent, Grid } from '@material-ui/core';
 import * as React from 'react';
+import { Component, ReactType } from 'react';
 import { render } from 'react-dom';
 import { Provider } from 'react-redux';
 

@@ -1,16 +1,10 @@
-import { RefObject } from "react";
-
-export interface ImageModel {
-  name: string;
-  width: number;
-  height: number;
-  preview: string;
-}
+import { RefObject } from 'react';
 
 export interface CameraPanelModel {
+  readonly appStarted: boolean;
   readonly tab: string;
   readonly message: string;
-  readonly images: Readonly<ImageModel>[];
+  readonly images: HTMLImageElement[];
   readonly facingMode: string;
   readonly youtubeUrl: string;
   readonly youtubeUrlLoaded: string;

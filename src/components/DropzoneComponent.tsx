@@ -2,7 +2,7 @@ import { Button, Typography } from '@material-ui/core';
 import {
   createStyles,
   StyledComponentProps,
-  withStyles
+  withStyles,
 } from '@material-ui/core/styles';
 import { Collections } from '@material-ui/icons';
 import * as React from 'react';
@@ -11,7 +11,7 @@ import * as Dropzone from 'react-dropzone';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { addImages, showMessage } from '../actions/cameraPanelActions';
-import { CameraPanelModel, ImageModel } from '../models';
+import { CameraPanelModel } from '../models';
 import { RootState } from '../reducers';
 
 const MAX_WIDTH = 640;
@@ -19,52 +19,15 @@ const MAX_WIDTH = 640;
 const styles = () =>
   createStyles({
     typography: {
-      color: 'rgba(255,255,255,0.9)'
+      color: 'rgba(255,255,255,0.9)',
     },
     br: {
-      width: '100%'
+      width: '100%',
     },
     iconSmall: {
-      fontSize: 20
-    }
+      fontSize: 20,
+    },
   });
-
-const readAsDataURL = async (file: File) => {
-  const dataUrl = await new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = error => reject(error);
-    reader.readAsDataURL(file);
-  });
-  const img = await new Promise<HTMLImageElement>((resolve, reject) => {
-    const imgEl = new Image();
-    imgEl.onload = () => resolve(imgEl);
-    imgEl.onerror = error => reject(error);
-    imgEl.src = dataUrl;
-  });
-  if (img.width > MAX_WIDTH) {
-    const newHeight = ~~((MAX_WIDTH * img.height) / img.width);
-    const canvas = document.createElement('canvas');
-    canvas.width = MAX_WIDTH;
-    canvas.height = newHeight;
-    const ctx = canvas.getContext('2d');
-    if (ctx !== null) {
-      ctx.drawImage(img, 0, 0, MAX_WIDTH, newHeight);
-      return {
-        name: img.name,
-        width: canvas.width,
-        height: canvas.height,
-        preview: ctx.canvas.toDataURL()
-      };
-    }
-  }
-  return {
-    name: img.name,
-    width: img.width,
-    height: img.height,
-    preview: dataUrl
-  };
-};
 
 /*
 Prop name	Type	Default	Description
@@ -178,10 +141,42 @@ type DropzoneComponentProps = StyledComponentProps &
   Partial<CameraPanelModel>;
 const DropzoneComponent = ({
   classes,
-  images,
   addImages,
-  showMessage
+  showMessage,
 }: DropzoneComponentProps) => {
+  const readAsDataURL = async (file: File): Promise<HTMLImageElement> => {
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+      reader.readAsDataURL(file);
+    });
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const imgEl = new Image();
+      imgEl.title = file.name;
+      imgEl.onload = () => resolve(imgEl);
+      imgEl.onerror = error => reject(error);
+      imgEl.src = dataUrl;
+    });
+    if (img.width > MAX_WIDTH) {
+      const newHeight = ~~((MAX_WIDTH * img.height) / img.width);
+      const canvas = document.createElement('canvas');
+      canvas.width = MAX_WIDTH;
+      canvas.height = newHeight;
+      const ctx = canvas.getContext('2d');
+      if (ctx !== null) {
+        ctx.drawImage(img, 0, 0, MAX_WIDTH, newHeight);
+        return await new Promise<HTMLImageElement>((resolve, reject) => {
+          const imgEl = new Image();
+          imgEl.title = file.name;
+          imgEl.onload = () => resolve(imgEl);
+          imgEl.onerror = error => reject(error);
+          imgEl.src = ctx.canvas.toDataURL();
+        });
+      }
+    }
+    return img;
+  };
   const dropHandler = async (acceptedFiles: File[], rejectedFiles: File[]) => {
     /*
     lastModified: 1541910129972
@@ -221,7 +216,7 @@ ${rejectedMessage}`);
           alignContent: 'center',
           justifyContent: 'center',
           flexFlow: 'row wrap',
-          display: 'flex'
+          display: 'flex',
         }}
       >
         <Typography
@@ -246,15 +241,15 @@ ${rejectedMessage}`);
 };
 
 const cameraPanelSelector = ({ message }: CameraPanelModel) => ({
-  message
+  message,
 });
 
 const mapStateToProps = ({ cameraPanel }: RootState) =>
   cameraPanelSelector(cameraPanel);
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  addImages: (images: Readonly<ImageModel>[]) => dispatch(addImages(images)),
-  showMessage: (message: string) => dispatch(showMessage(message))
+  addImages: (images: HTMLImageElement[]) => dispatch(addImages(images)),
+  showMessage: (message: string) => dispatch(showMessage(message)),
 });
 
 export default connect(
