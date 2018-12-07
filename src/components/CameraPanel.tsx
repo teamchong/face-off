@@ -6,6 +6,7 @@ import {
   CardActions,
   CardContent,
   CardMedia,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -21,6 +22,7 @@ import {
   Delete,
   DeleteSweep,
   Done,
+  Info,
   Videocam,
   VideoLibrary,
 } from '@material-ui/icons';
@@ -117,6 +119,8 @@ const CameraPanel = ({
   classes,
   message,
   tab,
+  isModelsLoaded,
+  isFaceDetecting,
   switchTab,
   hideMessage,
   showMessage,
@@ -161,6 +165,17 @@ const CameraPanel = ({
           </DialogActions>
         </Dialog>
       </div>
+      {!isModelsLoaded ? (
+        <div>
+          <CircularProgress size={12} /> Please wait while loading face
+          detection models.
+        </div>
+      ) : (
+        <div>
+          {isFaceDetecting ? <CircularProgress size={12} /> : <Info />} Face
+          detection is on.
+        </div>
+      )}
       {!!images.length && (
         <div>
           <Button
@@ -221,10 +236,18 @@ const withActiveTab = (Container: ReactType) => (
     <Container {...props} ActiveTab={YoutubeComponent} />
   );
 
-const cameraPanelSelector = ({ tab, message, images }: CameraPanelModel) => ({
+const cameraPanelSelector = ({
   tab,
   message,
   images,
+  isModelsLoaded,
+  isFaceDetecting,
+}: CameraPanelModel) => ({
+  tab,
+  message,
+  images,
+  isModelsLoaded,
+  isFaceDetecting,
 });
 
 const mapStateToProps = ({ cameraPanel }: RootState) =>

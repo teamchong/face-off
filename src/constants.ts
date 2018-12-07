@@ -13,11 +13,12 @@ export const CHANGE_YOUTUBEURL = 'CHANGE_YOUTUBEURL';
 export const FETCH_MP4URL = 'FETCH_MP4URL';
 export const FETCHED_MP4URL = 'FETCHED_MP4URL';
 
-export const APP_START = 'APP_START';
-export const APP_STOP = 'APP_STOP';
+export const START_APP = 'START_APP';
+export const STOP_APP = 'STOP_APP';
 export const LOADED_MODELS = 'LOADED_MODELS';
 
 export const DETECT_FACES = 'DETECT_FACES';
+export const DETECTED_FACES = 'DETECTED_FACES';
 
 /* constants */
 export const FACINGMODE_REAR = 'environment';

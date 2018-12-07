@@ -9,11 +9,22 @@ import {
   filter,
   map,
   mergeMap,
+  last,
   switchMap,
+  delayWhen,
   tap,
 } from 'rxjs/operators';
 import { ActionType, isOfType } from 'typesafe-actions';
-import * as faceapi from 'face-api.js';
+// import {
+//   detectAllFaces,
+//   loadSsdMobilenetv1Model,
+//   SsdMobilenetv1Options,
+// } from 'face-api.js';
+import {
+  detectAllFaces,
+  TinyFaceDetectorOptions,
+  TinyFaceDetectorOptions,
+} from 'face-api.js';
 import { CameraPanelModel } from './models';
 import * as actions from './actions';
 import {
@@ -21,8 +32,8 @@ import {
   fetchedMp4Url,
   loadedModels,
   detectFaces,
+  detectedFaces,
 } from './actions';
-import * as faceapi from 'face-api.js';
 import {
   SWITCHTAB_CAMERAPANEL,
   SHOW_MESSAGE,
@@ -33,10 +44,11 @@ import {
   CHANGE_YOUTUBEURL,
   FETCH_MP4URL,
   FETCHED_MP4URL,
-  APP_START,
-  APP_STOP,
+  START_APP,
+  STOP_APP,
   LOADED_MODELS,
   DETECT_FACES,
+  DETECTED_FACES,
   FACINGMODE_REAR,
   YOUTUBE_API,
   DEFAULT_YOUTUBE_URL,
@@ -50,15 +62,15 @@ export type RootState = {
 export const rootEpic = combineEpics(
   (action$: Observable<RootActions>) =>
     action$.pipe(
-      filter(isOfType(APP_START)),
+      filter(isOfType(START_APP)),
       map(() => fetchMp4Url(DEFAULT_YOUTUBE_URL))
     ),
   (action$: Observable<RootActions>) =>
     action$.pipe(
-      filter(isOfType(APP_START)),
+      filter(isOfType(START_APP)),
       switchMap(() =>
         from(
-          faceapi.loadSsdMobilenetv1Model(
+          loadSsdMobilenetv1Model(
             'https://justadudewhohacks.github.io/face-api.js/models/'
           )
         )
@@ -75,26 +87,36 @@ export const rootEpic = combineEpics(
       filter(isOfType(DETECT_FACES)),
       filter(() => {
         const { cameraPanel } = state$.value;
-        return cameraPanel.appStarted;
+        const { isAppStarted } = cameraPanel;
+        return isAppStarted;
       }),
-      switchMap(() => {
+      concatMap(() => {
         const { cameraPanel } = state$.value;
         const { tab, videoRef } = cameraPanel;
         if (tab === 'one' && videoRef.current) {
           return from(
-            faceapi.detectAllFaces(
-              videoRef.current,
-              new faceapi.SsdMobilenetv1Options()
-            )
+            detectAllFaces(videoRef.current, new SsdMobilenetv1Options())
           ).pipe(
-            map(result => {
-              
+            tap(result => {
+              console.log(result);
             })
           );
         }
         return of([]);
       }),
-      concatMap(() => of(detectFaces()).pipe(delay(1000)))
+      map(() => detectedFaces()),
+      last()
+    ),
+  (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
+    action$.pipe(
+      filter(isOfType(DETECTED_FACES)),
+      filter(() => {
+        const { cameraPanel } = state$.value;
+        const { isAppStarted, isModelsLoaded } = cameraPanel;
+        return isAppStarted && isModelsLoaded;
+      }),
+      delay(1000),
+      map(() => detectFaces())
     ),
   (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
     action$.pipe(
@@ -118,7 +140,7 @@ export const rootEpic = combineEpics(
 export const rootReducer = combineReducers<RootState, RootActions>({
   cameraPanel(
     state = {
-      appStarted: false,
+      isAppStarted: false,
       tab: 'one',
       message: '',
       images: [],
@@ -127,7 +149,8 @@ export const rootReducer = combineReducers<RootState, RootActions>({
       youtubeUrlLoaded: '',
       mp4Url: '',
       videoRef: createRef<HTMLVideoElement>(),
-      modelsLoaded: false,
+      isModelsLoaded: false,
+      isFaceDetecting: false,
     },
     action
   ) {
@@ -175,17 +198,23 @@ export const rootReducer = combineReducers<RootState, RootActions>({
         return { ...state, youtubeUrlLoaded, mp4Url };
       }
       case LOADED_MODELS: {
-        return { ...state, modelsLoaded: true };
+        return { ...state, isModelsLoaded: true };
       }
-      case APP_START: {
-        return { ...state, appStarted: true };
+      case START_APP: {
+        return { ...state, isAppStarted: true };
       }
-      case APP_STOP: {
-        return { ...state, appStarted: false };
+      case STOP_APP: {
+        return { ...state, isAppStarted: false };
       }
-      case DETECT_FACES:
-      default:
+      case DETECT_FACES: {
+        return { ...state, isFaceDetecting: true };
+      }
+      case DETECTED_FACES: {
+        return { ...state, isFaceDetecting: false };
+      }
+      default: {
         return state;
+      }
     }
   },
 });

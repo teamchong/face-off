@@ -10,10 +10,11 @@ import {
   CHANGE_YOUTUBEURL,
   FETCH_MP4URL,
   FETCHED_MP4URL,
-  APP_START,
-  APP_STOP,
+  START_APP,
+  STOP_APP,
   LOADED_MODELS,
   DETECT_FACES,
+  DETECTED_FACES,
 } from '../constants';
 
 export const switchTab = (tab: string) => action(SWITCHTAB_CAMERAPANEL, tab);
@@ -39,9 +40,11 @@ export const fetchedMp4Url = (payload: {
   mp4Url: string;
 }) => action(FETCHED_MP4URL, payload);
 
-export const appStart = () => action(APP_START);
-export const appStop = () => action(APP_STOP);
+export const startApp = () => action(START_APP);
+export const stopApp = () => action(STOP_APP);
 
 export const loadedModels = () => action(LOADED_MODELS);
 
 export const detectFaces = () => action(DETECT_FACES);
+
+export const detectedFaces = () => action(DETECTED_FACES);

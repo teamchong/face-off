@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 export interface CameraPanelModel {
-  readonly appStarted: boolean;
+  readonly isAppStarted: boolean;
   readonly tab: string;
   readonly message: string;
   readonly images: HTMLImageElement[];
@@ -10,5 +10,6 @@ export interface CameraPanelModel {
   readonly youtubeUrlLoaded: string;
   readonly mp4Url: string;
   readonly videoRef: RefObject<HTMLVideoElement>;
-  readonly modelsLoaded: boolean;
+  readonly isModelsLoaded: boolean;
+  readonly isFaceDetecting: boolean;
 }
