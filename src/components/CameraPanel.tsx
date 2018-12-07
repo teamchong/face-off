@@ -172,8 +172,12 @@ const CameraPanel = ({
         </div>
       ) : (
         <div>
-          {isFaceDetecting ? <CircularProgress size={12} /> : <Info size={12} />} Face
-          detection is on.
+          {isFaceDetecting ? (
+            <CircularProgress size={12} />
+          ) : (
+            <Info size={12} />
+          )}{' '}
+          Face detection is on.
         </div>
       )}
       {!!images.length && (

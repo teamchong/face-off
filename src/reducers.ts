@@ -13,6 +13,7 @@ import {
   last,
   switchMap,
   delayWhen,
+  timeout,
   tap,
 } from 'rxjs/operators';
 import { ActionType, isOfType } from 'typesafe-actions';
@@ -77,8 +78,7 @@ export const rootEpic = combineEpics(
           loadTinyFaceDetectorModel(
             'https://justadudewhohacks.github.io/face-api.js/models/'
           )
-        ).pipe(
-          map(() => loadedModels()))
+        ).pipe(map(() => loadedModels()))
       )
     ),
   (action$: Observable<RootActions>) =>
@@ -97,23 +97,31 @@ export const rootEpic = combineEpics(
       concatMap(() => {
         const { cameraPanel } = state$.value;
         const { tab, videoRef } = cameraPanel;
-        console.log(videoRef.current);
         if (tab === 'one' && videoRef.current) {
           return from(
             //detectAllFaces(videoRef.current, new SsdMobilenetv1Options())
             detectAllFaces(videoRef.current, new TinyFaceDetectorOptions())
-          ).pipe(map(() => detectedFaces()));
+          ).pipe(
+            tap(result => {
+              if (result.length) {
+                console.log(result);
+              }
+            }),
+            timeout(2000),
+            catchError(() => of(null))
+          );
         }
-        return of(detectedFaces());
-      })
+        return of(null);
+      }),
+      map(() => detectedFaces())
     ),
   (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
     action$.pipe(
       filter(isOfType(DETECTED_FACES)),
       filter(() => {
         const { cameraPanel } = state$.value;
-        const { isAppStarted, isModelsLoaded } = cameraPanel;
-        return isAppStarted && isModelsLoaded;
+        const { isAppStarted } = cameraPanel;
+        return isAppStarted;
       }),
       delay(1000),
       map(() => detectFaces())
