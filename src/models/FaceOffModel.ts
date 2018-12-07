@@ -14,7 +14,6 @@ export interface FaceOffModel {
   readonly mp4Url: string;
   readonly videoRef: RefObject<HTMLVideoElement>;
   readonly isModelsLoaded: boolean;
-  readonly isFaceDetecting: boolean;
   readonly isVideoLoaded: boolean;
   readonly isWebcamLoaded: boolean;
 }

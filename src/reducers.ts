@@ -9,6 +9,7 @@ import {
   filter,
   ignoreElements,
   map,
+  mapTo,
   mergeMap,
   last,
   switchMap,
@@ -71,24 +72,24 @@ export const rootEpic = combineEpics(
   (action$: Observable<RootActions>) =>
     action$.pipe(
       filter(isOfType(START_APP)),
-      map(() => fetchMp4Url(DEFAULT_YOUTUBE_URL))
+      mapTo(fetchMp4Url(DEFAULT_YOUTUBE_URL))
     ),
   (action$: Observable<RootActions>) =>
     action$.pipe(
       filter(isOfType(START_APP)),
-      mergeMap(() =>
+      switchMap(() =>
         from(
           //loadSsdMobilenetv1Model(
           loadTinyFaceDetectorModel(
             'https://justadudewhohacks.github.io/face-api.js/models/'
           )
-        ).pipe(map(() => loadedModels()))
+        ).pipe(mapTo(loadedModels()))
       )
     ),
   (action$: Observable<RootActions>) =>
     action$.pipe(
       filter(isOfType(LOADED_MODELS)),
-      map(() => detectFaces())
+      mapTo(detectFaces())
     ),
   (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
     action$.pipe(
@@ -98,7 +99,7 @@ export const rootEpic = combineEpics(
         const { isAppStarted } = faceOffPanel;
         return isAppStarted;
       }),
-      concatMap(() => {
+      mergeMap(() => {
         const { faceOffPanel } = state$.value;
         const { tab, videoRef, isVideoLoaded } = faceOffPanel;
         if (tab === 'one' && videoRef.current && isVideoLoaded) {
@@ -111,12 +112,14 @@ export const rootEpic = combineEpics(
                 console.log(result);
               }
             }),
-            map(result => detectedFaces(VIDEO_INDEX, result)),
+            map(result => detectedFaces({ index: VIDEO_INDEX, result })),
             timeout(2000),
-            catchError(() => of(detectedFaces(VIDEO_INDEX, [])))
+            catchError(() =>
+              of(detectedFaces({ index: VIDEO_INDEX, result: [] }))
+            )
           );
         }
-        return of(detectedFaces(VIDEO_INDEX, []));
+        return of(detectedFaces({ index: VIDEO_INDEX, result: [] }));
       }),
       concatMap(() => {
         const { faceOffPanel } = state$.value;
@@ -130,30 +133,21 @@ export const rootEpic = combineEpics(
                   console.log(result);
                 }
               }),
-              map(result => detectedFaces(i, result)),
+              map(result => detectedFaces({ index: i, result })),
               timeout(2000),
-              catchError(() => detectedFaces(i, []))
+              catchError(() => detectedFaces({ index: i, result: [] }))
             )
           );
-      })
-    ),
-  (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
-    action$.pipe(
-      filter(isOfType(DETECTED_FACES)),
-      filter(() => {
-        const { faceOffPanel } = state$.value;
-        const { isAppStarted } = faceOffPanel;
-        return isAppStarted;
       }),
       delay(1000),
-      map(() => detectFaces())
+      concatMap(() => detectFaces())
     ),
   (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
     action$.pipe(
       filter(isOfType(FETCH_MP4URL)),
-      concatMap(({ payload: youtubeUrl }) =>
+      mergeMap(({ payload: youtubeUrl }) =>
         from(fetch(`${YOUTUBE_API}${youtubeUrl}`)).pipe(
-          switchMap(result => result.json()),
+          mergeMap(result => result.json()),
           map(result => result.filter(r => /^video\/mp4;/.test(r.type))),
           filter(result => !!result.length),
           map(result =>
@@ -183,7 +177,6 @@ export const rootReducer = combineReducers<RootState, RootActions>({
       mp4Url: '',
       videoRef: createRef<HTMLVideoElement>(),
       isModelsLoaded: false,
-      isFaceDetecting: false,
       isVideoLoaded: false,
       isWebcamLoaded: false,
     },
@@ -253,30 +246,26 @@ export const rootReducer = combineReducers<RootState, RootActions>({
         return { ...state, isAppStarted: false };
       }
       case DETECT_FACES: {
-        return { ...state, isFaceDetecting: true };
+        return { ...state };
       }
       case DETECTED_FACES: {
         const { index, result } = action.payload;
         if (index === VIDEO_INDEX) {
           return {
             ...state,
-            isFaceDetecting: false,
             videoDetectResults: result,
           };
         } else if (index === WEBCAM_INDEX) {
           return {
             ...state,
-            isFaceDetecting: false,
             webcamDetectResults: result,
           };
         } else {
           return {
             ...state,
-            isFaceDetecting: false,
-            imageDetectResults: [
-              ...state.imageDetectResults,
-              { [index]: result },
-            ],
+            imageDetectResults: Object.assign([], state.imageDetectResults, {
+              [index]: result,
+            }),
           };
         }
       }

@@ -76,6 +76,9 @@ const styles = ({ palette, spacing }: Theme) =>
       alignItems: 'flex-start',
       alignContent: 'flex-start',
     },
+    alignCenter: {
+      verticalAlign: 'middle',
+    },
     title: {
       position: 'absolute',
     },
@@ -120,7 +123,6 @@ const FaceOffPanel = ({
   message,
   tab,
   isModelsLoaded,
-  isFaceDetecting,
   switchTab,
   hideMessage,
   showMessage,
@@ -167,17 +169,13 @@ const FaceOffPanel = ({
       </div>
       {!isModelsLoaded ? (
         <div>
-          <CircularProgress size={12} /> Please wait while loading face
-          detection models.
+          <CircularProgress size={12} className={classes!.alignCenter} /> Please
+          wait while loading face detection models.
         </div>
       ) : (
         <div>
-          {isFaceDetecting ? (
-            <CircularProgress size={12} />
-          ) : (
-            <Info size={12} />
-          )}{' '}
-          Face detection is on.
+          <Info size={12} className={classes!.alignCenter} /> Face detection is
+          on.
         </div>
       )}
       {!!images.length && (
@@ -245,13 +243,11 @@ const faceOffPanelSelector = ({
   message,
   images,
   isModelsLoaded,
-  isFaceDetecting,
 }: FaceOffPanelModel) => ({
   tab,
   message,
   images,
   isModelsLoaded,
-  isFaceDetecting,
 });
 
 const mapStateToProps = ({ faceOffPanel }: RootState) =>

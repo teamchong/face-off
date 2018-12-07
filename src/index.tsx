@@ -5,20 +5,31 @@ import * as React from 'react';
 import { Component, ReactType } from 'react';
 import { render } from 'react-dom';
 import { Provider } from 'react-redux';
+import { startApp, stopApp } from './actions';
 
 import './index.css';
 
 const store = configureStore();
 
-const App = () => (
-  <Grid container={true}>
-    <Card raised={true}>
-      <CardContent>
-        <FaceOffPanel />
-      </CardContent>
-    </Card>
-  </Grid>
-);
+class App extends Component {
+  componentDidMount() {
+    store.dispatch(startApp());
+  }
+  componentWillUnmount() {
+    store.dispatch(stopApp());
+  }
+  render() {
+    return (
+      <Grid container={true}>
+        <Card raised={true}>
+          <CardContent>
+            <FaceOffPanel />
+          </CardContent>
+        </Card>
+      </Grid>
+    );
+  }
+}
 
 render(
   <Provider store={store}>
