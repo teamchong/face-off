@@ -1,5 +1,5 @@
 /* actions */
-export const SWITCHTAB_CAMERAPANEL = 'SWITCHTAB_CAMERAPANEL';
+export const SWITCH_TAB = 'SWITCH_TAB';
 
 export const SHOW_MESSAGE = 'SHOW_MESSAGE';
 export const HIDE_MESSAGE = 'HIDE_MESSAGE';
@@ -17,10 +17,14 @@ export const START_APP = 'START_APP';
 export const STOP_APP = 'STOP_APP';
 export const LOADED_MODELS = 'LOADED_MODELS';
 
-export const ENABLED_CAMERA = 'ENABLED_CAMERA';
+export const LOADED_VIDEO = 'LOADED_VIDEO';
+export const LOADED_WEBCAM = 'LOADED_WEBCAM';
 
 export const DETECT_FACES = 'DETECT_FACES';
 export const DETECTED_FACES = 'DETECTED_FACES';
+
+export const VIDEO_INDEX = -1;
+export const WEBCAM_INDEX = -2;
 
 /* constants */
 export const FACINGMODE_REAR = 'environment';

@@ -45,8 +45,8 @@ import {
   showMessage,
   hideMessage,
   removeImages,
-} from '../actions/cameraPanelActions';
-import { CameraPanelModel } from '../models';
+} from '../actions/FaceOffActions';
+import { FaceOffPanelModel } from '../models';
 import { RootState } from '../reducers';
 
 type Actions = {
@@ -56,12 +56,12 @@ type Actions = {
   removeImages: typeof removeImages;
 };
 type ActiveTypeProps = { ActiveTab: ReactType };
-type CameraPanelConnectedProps = Props<ReactNode> &
+type FaceOffPanelConnectedProps = Props<ReactNode> &
   ActiveTypeProps &
   StyledComponentProps &
   Actions &
-  CameraPanelModel;
-type ContainerProps = CameraPanelModel & Props<ReactNode>;
+  FaceOffPanelModel;
+type ContainerProps = FaceOffPanelModel & Props<ReactNode>;
 
 const styles = ({ palette, spacing }: Theme) =>
   createStyles({
@@ -114,7 +114,7 @@ const TabContainer = ({ children }: Props<ReactNode>): ReactElement<any> => (
   </Typography>
 );
 
-const CameraPanel = ({
+const FaceOffPanel = ({
   ActiveTab,
   classes,
   message,
@@ -126,7 +126,7 @@ const CameraPanel = ({
   showMessage,
   removeImages,
   images,
-}: CameraPanelConnectedProps): ReactElement<any> => {
+}: FaceOffPanelConnectedProps): ReactElement<any> => {
   const removeAllHandler = () => removeImages(images.map((image, i) => i));
   const switchTabHandler = (_: any, value: string) => switchTab(value);
   return (
@@ -240,13 +240,13 @@ const withActiveTab = (Container: ReactType) => (
     <Container {...props} ActiveTab={YoutubeComponent} />
   );
 
-const cameraPanelSelector = ({
+const faceOffPanelSelector = ({
   tab,
   message,
   images,
   isModelsLoaded,
   isFaceDetecting,
-}: CameraPanelModel) => ({
+}: FaceOffPanelModel) => ({
   tab,
   message,
   images,
@@ -254,8 +254,8 @@ const cameraPanelSelector = ({
   isFaceDetecting,
 });
 
-const mapStateToProps = ({ cameraPanel }: RootState) =>
-  cameraPanelSelector(cameraPanel);
+const mapStateToProps = ({ faceOffPanel }: RootState) =>
+  faceOffPanelSelector(faceOffPanel);
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   switchTab(tab: string) {
@@ -275,4 +275,4 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(withStyles(styles)(withActiveTab(CameraPanel)));
+)(withStyles(styles)(withActiveTab(FaceOffPanel)));

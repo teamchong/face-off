@@ -1,1 +1,1 @@
-export * from './actions/cameraPanelActions';
+export * from './actions/FaceOffActions';

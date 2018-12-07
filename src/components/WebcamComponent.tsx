@@ -16,9 +16,9 @@ import {
   showMessage,
   switchFacingMode,
   addImages,
-  enabledCamera,
-} from '../actions/cameraPanelActions';
-import { CameraPanelModel } from '../models';
+  loadedWebcam,
+} from '../actions/FaceOffActions';
+import { FaceOffModel } from '../models';
 import { RootState } from '../reducers';
 
 // declare namespace Webcam {
@@ -85,7 +85,7 @@ type Actions = {
 };
 type WebcamComponentProps = StyledComponentProps &
   Actions &
-  Partial<CameraPanelModel>;
+  Partial<FaceOffModel>;
 const WebcamComponent = ({
   classes,
   isCameraEnabled,
@@ -168,7 +168,7 @@ const WebcamComponent = ({
 const cameraPanelSelector = ({
   facingMode,
   isCameraEnabled,
-}: CameraPanelModel) => ({
+}: FaceOffModel) => ({
   facingMode,
   isCameraEnabled,
 });

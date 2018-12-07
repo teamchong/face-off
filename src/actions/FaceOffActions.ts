@@ -1,7 +1,7 @@
 import * as Dropzone from 'react-dropzone';
 import { action } from 'typesafe-actions';
 import {
-  SWITCHTAB_CAMERAPANEL,
+  SWITCH_TAB,
   SHOW_MESSAGE,
   HIDE_MESSAGE,
   ADD_IMAGES,
@@ -15,10 +15,11 @@ import {
   LOADED_MODELS,
   DETECT_FACES,
   DETECTED_FACES,
-  ENABLED_CAMERA,
+  LOADED_VIDEO,
+  LOADED_WEBCAM,
 } from '../constants';
 
-export const switchTab = (tab: string) => action(SWITCHTAB_CAMERAPANEL, tab);
+export const switchTab = (tab: string) => action(SWITCH_TAB, tab);
 export const showMessage = (message: string) => action(SHOW_MESSAGE, message);
 export const hideMessage = () => action(HIDE_MESSAGE);
 
@@ -46,8 +47,11 @@ export const stopApp = () => action(STOP_APP);
 
 export const loadedModels = () => action(LOADED_MODELS);
 
-export const detectFaces = () => action(DETECT_FACES);
+export const detectFaces = (payload: { index: number; result: any[] }) =>
+  action(DETECT_FACES, payload);
 
 export const detectedFaces = () => action(DETECTED_FACES);
 
-export const enabledCamera = () => action(ENABLED_CAMERA);
+export const loadedVideo = () => action(LOADED_VIDEO);
+
+export const loadedWebcam = () => action(LOADED_WEBCAM);

@@ -27,7 +27,7 @@ import {
   loadTinyFaceDetectorModel,
   TinyFaceDetectorOptions,
 } from 'face-api.js';
-import { CameraPanelModel } from './models';
+import { FaceOffModel } from './models';
 import * as actions from './actions';
 import {
   fetchMp4Url,
@@ -35,17 +35,19 @@ import {
   loadedModels,
   detectFaces,
   detectedFaces,
-  enabledCamera,
+  loadedVideo,
+  loadedWebcam,
 } from './actions';
 import {
-  SWITCHTAB_CAMERAPANEL,
+  SWITCH_TAB,
   SHOW_MESSAGE,
   HIDE_MESSAGE,
   ADD_IMAGES,
   REMOVE_IMAGES,
   SWITCH_FACINGMODE,
   CHANGE_YOUTUBEURL,
-  ENABLED_CAMERA,
+  LOADED_VIDEO,
+  LOADED_WEBCAM,
   FETCH_MP4URL,
   FETCHED_MP4URL,
   START_APP,
@@ -56,11 +58,13 @@ import {
   FACINGMODE_REAR,
   YOUTUBE_API,
   DEFAULT_YOUTUBE_URL,
+  VIDEO_INDEX,
+  WEBCAM_INDEX,
 } from './constants';
 
 export type RootActions = ActionType<typeof actions>;
 export type RootState = {
-  readonly cameraPanel: CameraPanelModel;
+  readonly faceOffPanel: FaceOffModel;
 };
 
 export const rootEpic = combineEpics(
@@ -90,14 +94,14 @@ export const rootEpic = combineEpics(
     action$.pipe(
       filter(isOfType(DETECT_FACES)),
       filter(() => {
-        const { cameraPanel } = state$.value;
-        const { isAppStarted } = cameraPanel;
+        const { faceOffPanel } = state$.value;
+        const { isAppStarted } = faceOffPanel;
         return isAppStarted;
       }),
       concatMap(() => {
-        const { cameraPanel } = state$.value;
-        const { tab, videoRef } = cameraPanel;
-        if (tab === 'one' && videoRef.current) {
+        const { faceOffPanel } = state$.value;
+        const { tab, videoRef, isVideoLoaded } = faceOffPanel;
+        if (tab === 'one' && videoRef.current && isVideoLoaded) {
           return from(
             //detectAllFaces(videoRef.current, new SsdMobilenetv1Options())
             detectAllFaces(videoRef.current, new TinyFaceDetectorOptions())
@@ -107,20 +111,38 @@ export const rootEpic = combineEpics(
                 console.log(result);
               }
             }),
+            map(result => detectedFaces(VIDEO_INDEX, result)),
             timeout(2000),
-            catchError(() => of(null))
+            catchError(() => of(detectedFaces(VIDEO_INDEX, [])))
           );
         }
-        return of(null);
+        return of(detectedFaces());
       }),
-      map(() => detectedFaces())
+      concatMap(() => {
+        const { faceOffPanel } = state$.value;
+        const { images, imageFaceDetctResults } = faceOffPanel;
+        return images.map((image, i) =>
+          imageFaceDetctResults[i]
+            ? of(detectedFaces(i, imageFaceDetctResults[i]))
+            : from(detectAllFaces(image, new TinyFaceDetectorOptions())).pipe(
+                tap(result => {
+                  if (result.length) {
+                    console.log(result);
+                  }
+                }),
+                map(result => detectedFaces(i, result)),
+                timeout(2000),
+                catchError(() => detectedFaces(i, []))
+              )
+        );
+      })
     ),
   (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
     action$.pipe(
       filter(isOfType(DETECTED_FACES)),
       filter(() => {
-        const { cameraPanel } = state$.value;
-        const { isAppStarted } = cameraPanel;
+        const { faceOffPanel } = state$.value;
+        const { isAppStarted } = faceOffPanel;
         return isAppStarted;
       }),
       delay(1000),
@@ -129,7 +151,7 @@ export const rootEpic = combineEpics(
   (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
     action$.pipe(
       filter(isOfType(FETCH_MP4URL)),
-      switchMap(({ payload: youtubeUrl }) =>
+      concatMap(({ payload: youtubeUrl }) =>
         from(fetch(`${YOUTUBE_API}${youtubeUrl}`)).pipe(
           switchMap(result => result.json()),
           map(result => result.filter(r => /^video\/mp4;/.test(r.type))),
@@ -146,12 +168,15 @@ export const rootEpic = combineEpics(
 );
 
 export const rootReducer = combineReducers<RootState, RootActions>({
-  cameraPanel(
+  faceOffPanel(
     state = {
       isAppStarted: false,
       tab: 'one',
       message: '',
       images: [],
+      imageFaceDetctResults: [],
+      videoDetctResults: [],
+      webcamDetctResults: [],
       facingMode: FACINGMODE_REAR,
       youtubeUrl: DEFAULT_YOUTUBE_URL,
       youtubeUrlLoaded: '',
@@ -159,12 +184,13 @@ export const rootReducer = combineReducers<RootState, RootActions>({
       videoRef: createRef<HTMLVideoElement>(),
       isModelsLoaded: false,
       isFaceDetecting: false,
-      isCameraEnabled: false,
+      isVideoLoaded: false,
+      isWebcamLoaded: false,
     },
-    action
+    action: RootActions
   ) {
     switch (action.type) {
-      case SWITCHTAB_CAMERAPANEL: {
+      case SWITCH_TAB: {
         const { payload: tab } = action;
         return { ...state, tab };
       }
@@ -177,13 +203,24 @@ export const rootReducer = combineReducers<RootState, RootActions>({
       }
       case ADD_IMAGES: {
         const { payload: images } = action;
-        return { ...state, images: [...state.images, ...images] };
+        const imageFaceDetctResults = images.map(() => null);
+        return {
+          ...state,
+          images: [...state.images, ...images],
+          imageFaceDetctResults: [
+            ...state.imageFaceDetctResults,
+            ...imageFaceDetctResults,
+          ],
+        };
       }
       case REMOVE_IMAGES: {
         const { payload: imageIndexes } = action;
         return {
           ...state,
           images: state.images.filter((img, i) => imageIndexes.indexOf(i) < 0),
+          imageFaceDetctResults: state.imageFaceDetctResults.filter(
+            (img, i) => imageIndexes.indexOf(i) < 0
+          ),
         };
       }
       case SWITCH_FACINGMODE: {
@@ -200,11 +237,11 @@ export const rootReducer = combineReducers<RootState, RootActions>({
           /^\s+|\s+$/g,
           ''
         );
-        return { ...state, youtubeUrl, mp4Url: '' };
+        return { ...state, youtubeUrl, mp4Url: '', isVideoLoaded: false };
       }
       case FETCHED_MP4URL: {
         const { youtubeUrlLoaded, mp4Url } = action.payload;
-        return { ...state, youtubeUrlLoaded, mp4Url };
+        return { ...state, youtubeUrlLoaded, mp4Url, isVideoLoaded: false };
       }
       case LOADED_MODELS: {
         return { ...state, isModelsLoaded: true };
@@ -216,15 +253,16 @@ export const rootReducer = combineReducers<RootState, RootActions>({
         return { ...state, isAppStarted: false };
       }
       case DETECT_FACES: {
-        console.log({ detect: { ...state, isFaceDetecting: true } });
         return { ...state, isFaceDetecting: true };
       }
       case DETECTED_FACES: {
-        console.log({ detected: { ...state, isFaceDetecting: false } });
         return { ...state, isFaceDetecting: false };
       }
-      case ENABLED_CAMERA: {
-        return { ...state, isCameraEnabled: true };
+      case LOADED_VIDEO: {
+        return { ...state, isVideoLoaded: true };
+      }
+      case LOADED_WEBCAM: {
+        return { ...state, isWebcamLoaded: true };
       }
       default: {
         return state;

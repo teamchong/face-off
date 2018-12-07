@@ -1,1 +1,1 @@
-export * from './models/CameraPanelModel';
+export * from './models/FaceOffModel';

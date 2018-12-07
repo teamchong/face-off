@@ -10,8 +10,8 @@ import { Fragment, ReactElement } from 'react';
 import * as Dropzone from 'react-dropzone';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
-import { addImages, showMessage } from '../actions/cameraPanelActions';
-import { CameraPanelModel } from '../models';
+import { addImages, showMessage } from '../actions/FaceOffActions';
+import { FaceOffModel } from '../models';
 import { RootState } from '../reducers';
 
 const MAX_WIDTH = 640;
@@ -138,7 +138,7 @@ type Actions = {
 };
 type DropzoneComponentProps = StyledComponentProps &
   Actions &
-  Partial<CameraPanelModel>;
+  Partial<FaceOffModel>;
 const DropzoneComponent = ({
   classes,
   addImages,
@@ -240,12 +240,12 @@ ${rejectedMessage}`);
   );
 };
 
-const cameraPanelSelector = ({ message }: CameraPanelModel) => ({
+const faceOffPanelSelector = ({ message }: FaceOffModel) => ({
   message,
 });
 
-const mapStateToProps = ({ cameraPanel }: RootState) =>
-  cameraPanelSelector(cameraPanel);
+const mapStateToProps = ({ faceOffPanel }: RootState) =>
+  faceOffPanelSelector(faceOffPanel);
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   addImages: (images: HTMLImageElement[]) => dispatch(addImages(images)),

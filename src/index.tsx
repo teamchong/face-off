@@ -1,5 +1,5 @@
 import configureStore from './configureStore';
-import CameraPanel from './components/CameraPanel';
+import FaceOffPanel from './components/FaceOffPanel';
 import { Card, CardContent, Grid } from '@material-ui/core';
 import * as React from 'react';
 import { Component, ReactType } from 'react';
@@ -14,7 +14,7 @@ const App = () => (
   <Grid container={true}>
     <Card raised={true}>
       <CardContent>
-        <CameraPanel />
+        <FaceOffPanel />
       </CardContent>
     </Card>
   </Grid>

@@ -30,8 +30,9 @@ import {
   changeYoutubeUrl,
   addImages,
   fetchMp4Url,
-} from '../actions/cameraPanelActions';
-import { CameraPanelModel } from '../models';
+  loadedVideo,
+} from '../actions/FaceOffActions';
+import { FaceOffModel } from '../models';
 import { RootState } from '../reducers';
 
 const WIDTH = 640;
@@ -76,11 +77,12 @@ type Actions = {
   showMessage: typeof showMessage;
   changeYoutubeUrl: typeof changeYoutubeUrl;
   fetchMp4Url: typeof fetchMp4Url;
+  loadedVideo: typeof loadedVideo;
   addImages: typeof addImages;
 };
 type YoutubeComponentProps = StyledComponentProps &
   Actions &
-  Partial<CameraPanelModel>;
+  Partial<FaceOffModel>;
 const YoutubeComponent = ({
   classes,
   videoRef,
@@ -90,6 +92,7 @@ const YoutubeComponent = ({
   showMessage,
   changeYoutubeUrl,
   fetchMp4Url,
+  loadedVideo,
   addImages,
 }: YoutubeComponentProps) => {
   const readAsDataURL = async () => {
@@ -126,6 +129,7 @@ const YoutubeComponent = ({
     ]);
   };
   const youtubeUrlTrimmed = (youtubeUrl || '').replace(/^\s+|\s+$/g, '');
+  const loadedDataHandler = () => loadedVideo();
   return (
     <div className={classes!.container}>
       <div>
@@ -176,6 +180,7 @@ const YoutubeComponent = ({
             borderColor: '#ccc',
           }}
           crossOrigin="anonymous"
+          onCanPlay={loadedDataHandler}
         >
           <source src={`${CORS_PROXY_URL}${mp4Url}`} type="video/mp4" />
         </video>
@@ -188,20 +193,20 @@ const YoutubeComponent = ({
   );
 };
 
-const cameraPanelSelector = ({
+const faceOffPanelSelector = ({
   videoRef,
   youtubeUrl,
   youtubeUrlLoaded,
   mp4Url,
-}: CameraPanelModel) => ({
+}: FaceOffPanelModel) => ({
   videoRef,
   youtubeUrl,
   youtubeUrlLoaded,
   mp4Url,
 });
 
-const mapStateToProps = ({ cameraPanel }: RootState) =>
-  cameraPanelSelector(cameraPanel);
+const mapStateToProps = ({ faceOffPanel }: RootState) =>
+  faceOffPanelSelector(faceOffPanel);
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   showMessage: (message: string) => dispatch(showMessage(message)),
@@ -209,6 +214,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   changeYoutubeUrl: (youtubeUrl: string) =>
     dispatch(changeYoutubeUrl(youtubeUrl)),
   fetchMp4Url: (youtubeUrl: string) => dispatch(fetchMp4Url(youtubeUrl)),
+  loadedVideo: () => dispatch(loadedVideo()),
 });
 
 export default connect(
