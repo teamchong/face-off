@@ -5,9 +5,9 @@ export interface FaceOffModel {
   readonly tab: string;
   readonly message: string;
   readonly images: HTMLImageElement[];
-  readonly imageFaceDetctResults: Array<any[]>;
-  readonly videoDetctResults: any[];
-  readonly webcamDetctResults: any[];
+  readonly imageDetectResults: Array<any[]>;
+  readonly videoDetectResults: any[];
+  readonly webcamDetectResults: any[];
   readonly facingMode: string;
   readonly youtubeUrl: string;
   readonly youtubeUrlLoaded: string;

@@ -47,10 +47,10 @@ export const stopApp = () => action(STOP_APP);
 
 export const loadedModels = () => action(LOADED_MODELS);
 
-export const detectFaces = (payload: { index: number; result: any[] }) =>
-  action(DETECT_FACES, payload);
+export const detectFaces = () => action(DETECT_FACES);
 
-export const detectedFaces = () => action(DETECTED_FACES);
+export const detectedFaces = (payload: { index: number; result: any[] }) =>
+  action(DETECTED_FACES, payload);
 
 export const loadedVideo = () => action(LOADED_VIDEO);
 
