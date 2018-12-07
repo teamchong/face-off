@@ -216,9 +216,11 @@ export const rootReducer = combineReducers<RootState, RootActions>({
         return { ...state, isAppStarted: false };
       }
       case DETECT_FACES: {
+        console.log({ detect: { ...state, isFaceDetecting: true } });
         return { ...state, isFaceDetecting: true };
       }
       case DETECTED_FACES: {
+        console.log({ detected: { ...state, isFaceDetecting: false } });
         return { ...state, isFaceDetecting: false };
       }
       case ENABLED_CAMERA: {
