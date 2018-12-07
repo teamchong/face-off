@@ -1,4 +1,4 @@
-import { Fab } from '@material-ui/core';
+import { CircularProgress, Fab } from '@material-ui/core';
 import {
   createStyles,
   StyledComponentProps,
@@ -7,7 +7,7 @@ import {
 import { Theme } from '@material-ui/core/styles/createMuiTheme';
 import { CameraFront, CameraRear, PhotoCamera } from '@material-ui/icons';
 import * as React from 'react';
-import { createRef } from 'react';
+import { createRef, Fragment } from 'react';
 import { connect } from 'react-redux';
 import * as Webcam from 'react-webcam';
 import { Dispatch } from 'redux';
@@ -16,6 +16,7 @@ import {
   showMessage,
   switchFacingMode,
   addImages,
+  enabledCamera,
 } from '../actions/cameraPanelActions';
 import { CameraPanelModel } from '../models';
 import { RootState } from '../reducers';
@@ -50,19 +51,24 @@ const styles = ({ spacing }: Theme) =>
     container: {
       position: 'relative',
     },
-    screenshot: {
+    loading: {
+      position: 'absolute',
+      marginTop: '-6px',
+      marginLeft: '-6px',
+    },
+    rearFacing: {
       margin: spacing.unit,
       position: 'absolute',
       left: '0px',
       zIndex: 1,
     },
-    rearFacing: {
+    frontFacing: {
       margin: spacing.unit,
       position: 'absolute',
       left: '60px',
       zIndex: 1,
     },
-    frontFacing: {
+    screenshot: {
       margin: spacing.unit,
       position: 'absolute',
       left: '120px',
@@ -82,10 +88,12 @@ type WebcamComponentProps = StyledComponentProps &
   Partial<CameraPanelModel>;
 const WebcamComponent = ({
   classes,
+  isCameraEnabled,
   facingMode,
   showMessage,
   switchFacingMode,
   addImages,
+  enabledCamera,
 }: WebcamComponentProps) => {
   const screenshotHandler = async () => {
     if (cameraRef.current) {
@@ -103,34 +111,42 @@ const WebcamComponent = ({
       ]);
     }
   };
+  const userMediaHandler = () => enabledCamera();
   const switchRear = () => switchFacingMode(FACINGMODE_REAR);
   const switchFront = () => switchFacingMode(FACINGMODE_FRONT);
   return (
     <div className={classes!.container}>
-      <Fab
-        color="primary"
-        aria-label="Take screenshot"
-        className={classes!.screenshot}
-        onClick={screenshotHandler}
-      >
-        <PhotoCamera />
-      </Fab>
-      <Fab
-        color="primary"
-        aria-label="Use rear camera"
-        className={classes!.rearFacing}
-        onClick={switchRear}
-      >
-        <CameraRear />
-      </Fab>
-      <Fab
-        color="primary"
-        aria-label="Use front camera"
-        className={classes!.frontFacing}
-        onClick={switchFront}
-      >
-        <CameraFront />
-      </Fab>
+      <div className={classes!.rearFacing}>
+        {!isCameraEnabled && (
+          <CircularProgress className={classes!.loading} size={68} />
+        )}
+        <Fab color="primary" aria-label="Use rear camera" onClick={switchRear}>
+          <CameraRear />
+        </Fab>
+      </div>
+      <div className={classes!.frontFacing}>
+        {!isCameraEnabled && (
+          <CircularProgress className={classes!.loading} size={68} />
+        )}
+        <Fab
+          color="primary"
+          aria-label="Use front camera"
+          onClick={switchFront}
+        >
+          <CameraFront />
+        </Fab>
+      </div>
+      <div className={classes!.screenshot}>
+        {!!isCameraEnabled && (
+          <Fab
+            color="primary"
+            aria-label="Take screenshot"
+            onClick={screenshotHandler}
+          >
+            <PhotoCamera />
+          </Fab>
+        )}
+      </div>
       <Webcam
         ref={cameraRef}
         width={WIDTH}
@@ -138,6 +154,7 @@ const WebcamComponent = ({
         videoConstraints={{ facingMode }}
         audio={false}
         screenshotFormat="image/jpeg"
+        onUserMedia={userMediaHandler}
         style={{
           borderWidth: 5,
           borderStyle: 'solid',
@@ -148,8 +165,12 @@ const WebcamComponent = ({
   );
 };
 
-const cameraPanelSelector = ({ facingMode }: CameraPanelModel) => ({
+const cameraPanelSelector = ({
   facingMode,
+  isCameraEnabled,
+}: CameraPanelModel) => ({
+  facingMode,
+  isCameraEnabled,
 });
 
 const mapStateToProps = ({ cameraPanel }: RootState) =>
@@ -160,6 +181,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   addImages: (images: HTMLImageElement[]) => dispatch(addImages(images)),
   switchFacingMode: (facingMode: string) =>
     dispatch(switchFacingMode(facingMode)),
+  enabledCamera: () => dispatch(enabledCamera()),
 });
 
 export default connect(

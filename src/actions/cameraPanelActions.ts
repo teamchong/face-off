@@ -15,6 +15,7 @@ import {
   LOADED_MODELS,
   DETECT_FACES,
   DETECTED_FACES,
+  ENABLED_CAMERA,
 } from '../constants';
 
 export const switchTab = (tab: string) => action(SWITCHTAB_CAMERAPANEL, tab);
@@ -48,3 +49,5 @@ export const loadedModels = () => action(LOADED_MODELS);
 export const detectFaces = () => action(DETECT_FACES);
 
 export const detectedFaces = () => action(DETECTED_FACES);
+
+export const enabledCamera = () => action(ENABLED_CAMERA);

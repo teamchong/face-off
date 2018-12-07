@@ -33,6 +33,7 @@ import {
   loadedModels,
   detectFaces,
   detectedFaces,
+  enabledCamera,
 } from './actions';
 import {
   SWITCHTAB_CAMERAPANEL,
@@ -42,6 +43,7 @@ import {
   REMOVE_IMAGES,
   SWITCH_FACINGMODE,
   CHANGE_YOUTUBEURL,
+  ENABLED_CAMERA,
   FETCH_MP4URL,
   FETCHED_MP4URL,
   START_APP,
@@ -94,6 +96,7 @@ export const rootEpic = combineEpics(
       concatMap(() => {
         const { cameraPanel } = state$.value;
         const { tab, videoRef } = cameraPanel;
+        console.log(videoRef.current);
         if (tab === 'one' && videoRef.current) {
           return from(
             //detectAllFaces(videoRef.current, new SsdMobilenetv1Options())
@@ -106,8 +109,12 @@ export const rootEpic = combineEpics(
         }
         return of([]);
       }),
-      map(() => detectedFaces()),
-      last()
+      tap(result => console.log({ afterConcat: result })),
+      map(() => {
+        const result = detectedFaces();
+        return result;
+      }),
+      tap(result => console.log({ beforeLast: result }))
     ),
   (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
     action$.pipe(
@@ -153,6 +160,7 @@ export const rootReducer = combineReducers<RootState, RootActions>({
       videoRef: createRef<HTMLVideoElement>(),
       isModelsLoaded: false,
       isFaceDetecting: false,
+      isCameraEnabled: false,
     },
     action
   ) {
@@ -213,6 +221,9 @@ export const rootReducer = combineReducers<RootState, RootActions>({
       }
       case DETECTED_FACES: {
         return { ...state, isFaceDetecting: false };
+      }
+      case ENABLED_CAMERA: {
+        return { ...state, isCameraEnabled: true };
       }
       default: {
         return state;

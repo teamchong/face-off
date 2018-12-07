@@ -17,6 +17,8 @@ export const START_APP = 'START_APP';
 export const STOP_APP = 'STOP_APP';
 export const LOADED_MODELS = 'LOADED_MODELS';
 
+export const ENABLED_CAMERA = 'ENABLED_CAMERA';
+
 export const DETECT_FACES = 'DETECT_FACES';
 export const DETECTED_FACES = 'DETECTED_FACES';
 

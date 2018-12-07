@@ -12,4 +12,5 @@ export interface CameraPanelModel {
   readonly videoRef: RefObject<HTMLVideoElement>;
   readonly isModelsLoaded: boolean;
   readonly isFaceDetecting: boolean;
+  readonly isCameraEnabled: boolean;
 }
