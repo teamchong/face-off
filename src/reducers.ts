@@ -116,7 +116,7 @@ export const rootEpic = combineEpics(
             catchError(() => of(detectedFaces(VIDEO_INDEX, [])))
           );
         }
-        return of(detectedFaces());
+        return of(detectedFaces(VIDEO_INDEX, []));
       }),
       concatMap(() => {
         const { faceOffPanel } = state$.value;
