@@ -22,7 +22,7 @@ import { ActionType, isOfType } from 'typesafe-actions';
 // } from 'face-api.js';
 import {
   detectAllFaces,
-  TinyFaceDetectorOptions,
+  loadTinyFaceDetectorModel,
   TinyFaceDetectorOptions,
 } from 'face-api.js';
 import { CameraPanelModel } from './models';
@@ -70,7 +70,8 @@ export const rootEpic = combineEpics(
       filter(isOfType(START_APP)),
       switchMap(() =>
         from(
-          loadSsdMobilenetv1Model(
+          //loadSsdMobilenetv1Model(
+          loadTinyFaceDetectorModel(
             'https://justadudewhohacks.github.io/face-api.js/models/'
           )
         )
@@ -95,7 +96,8 @@ export const rootEpic = combineEpics(
         const { tab, videoRef } = cameraPanel;
         if (tab === 'one' && videoRef.current) {
           return from(
-            detectAllFaces(videoRef.current, new SsdMobilenetv1Options())
+            //detectAllFaces(videoRef.current, new SsdMobilenetv1Options())
+            detectAllFaces(videoRef.current, new TinyFaceDetectorOptions())
           ).pipe(
             tap(result => {
               console.log(result);
