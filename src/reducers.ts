@@ -7,6 +7,7 @@ import {
   concatMap,
   delay,
   filter,
+  ignoreElements,
   map,
   mergeMap,
   last,
@@ -70,15 +71,15 @@ export const rootEpic = combineEpics(
   (action$: Observable<RootActions>) =>
     action$.pipe(
       filter(isOfType(START_APP)),
-      switchMap(() =>
+      mergeMap(() =>
         from(
           //loadSsdMobilenetv1Model(
           loadTinyFaceDetectorModel(
             'https://justadudewhohacks.github.io/face-api.js/models/'
           )
-        )
-      ),
-      map(() => loadedModels())
+        ).pipe(
+          map(() => loadedModels()))
+      )
     ),
   (action$: Observable<RootActions>) =>
     action$.pipe(
@@ -101,20 +102,10 @@ export const rootEpic = combineEpics(
           return from(
             //detectAllFaces(videoRef.current, new SsdMobilenetv1Options())
             detectAllFaces(videoRef.current, new TinyFaceDetectorOptions())
-          ).pipe(
-            tap(result => {
-              console.log(result);
-            })
-          );
+          ).pipe(map(() => detectedFaces()));
         }
-        return of([]);
-      }),
-      tap(result => console.log({ afterConcat: result })),
-      map(() => {
-        const result = detectedFaces();
-        return result;
-      }),
-      tap(result => console.log({ beforeLast: result }))
+        return of(detectedFaces());
+      })
     ),
   (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
     action$.pipe(
