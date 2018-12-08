@@ -150,20 +150,20 @@ const YoutubeComponent = ({
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
-                {!!youtubeUrlTrimmed && youtubeUrlTrimmed !== youtubeUrlLoaded && (
-                  <IconButton
-                    aria-label="Take screenshot"
-                    onClick={playHandler}
-                  >
-                    <PlayCircleFilled />
-                  </IconButton>
-                )}
                 {!!mp4Url && (
                   <IconButton
                     aria-label="Take screenshot"
                     onClick={screenshotHandler}
                   >
                     <PhotoCamera />
+                  </IconButton>
+                )}
+                {!!youtubeUrlTrimmed && youtubeUrlTrimmed !== youtubeUrlLoaded && (
+                  <IconButton
+                    aria-label="Take screenshot"
+                    onClick={playHandler}
+                  >
+                    <PlayCircleFilled />
                   </IconButton>
                 )}
               </InputAdornment>

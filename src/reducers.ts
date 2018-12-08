@@ -286,6 +286,7 @@ export const rootEpic = combineEpics(
       switchMap(({ payload: youtubeUrl }) =>
         from(fetch(`${YOUTUBE_API}${youtubeUrl}`)).pipe(
           switchMap(result => result.json()),
+          tap(result => console.log(result)),
           map(result => result.filter(r => /^video\/mp4;/.test(r.type))),
           filter(result => !!result.length),
           map(result =>
