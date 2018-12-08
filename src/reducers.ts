@@ -212,19 +212,20 @@ export const rootEpic = combineEpics(
               case 'one': {
                 const {
                   faceOffPanel: {
-                    videoRef: {
-                      current: { videoWidth, videoHeight },
-                    },
+                    videoRef,
                     videoOverlayRef,
                     videoDetectResults,
                   },
                 } = state$.value;
-                drawDetections(
-                  videoDetectResults,
-                  videoOverlayRef.current,
-                  videoWidth,
-                  videoHeight
-                );
+                if (videoRef.current) {
+                  const { videoWidth, videoHeight } = videoRef.current;
+                  drawDetections(
+                    videoDetectResults,
+                    videoOverlayRef.current,
+                    videoWidth,
+                    videoHeight
+                  );
+                }
                 break;
               }
               case 'two': {
@@ -235,17 +236,17 @@ export const rootEpic = combineEpics(
                     webcamDetectResults,
                   },
                 } = state$.value;
-                const {
-                  current: {
+                if (webcamRef.current && (webcamRef.current as any).video) {
+                  const {
                     video: { videoWidth, videoHeight },
-                  },
-                } = webcamRef as any;
-                drawDetections(
-                  webcamDetectResults,
-                  webcamOverlayRef.current,
-                  videoWidth,
-                  videoHeight
-                );
+                  } = webcamRef.current as any;
+                  drawDetections(
+                    webcamDetectResults,
+                    webcamOverlayRef.current,
+                    videoWidth,
+                    videoHeight
+                  );
+                }
                 break;
               }
             }
@@ -308,17 +309,18 @@ export const rootEpic = combineEpics(
               catchError(() => of([]))
             );
             const result = await query.toPromise();
-            const {
-              videoWidth,
-              videoHeight,
-            } = (webcamRef.current as any).video;
-            drawDetections(
-              result,
-              webcamOverlayRef.current,
-              videoWidth,
-              videoHeight
-            );
-            observer.next(detectedWebcamFaces(result));
+            if (webcamRef.current && (webcamRef.current as any).video) {
+              const {
+                video: { videoWidth, videoHeight },
+              } = webcamRef.current as any;
+              drawDetections(
+                result,
+                webcamOverlayRef.current,
+                videoWidth,
+                videoHeight
+              );
+              observer.next(detectedWebcamFaces(result));
+            }
           }
 
           for (let i = 0, iL = images.length; i < iL; i++) {
