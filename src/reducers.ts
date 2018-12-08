@@ -38,6 +38,7 @@ import * as actions from './actions';
 import {
   fetchMp4Url,
   fetchedMp4Url,
+  screenshotVideo,
   loadedModels,
   detectFaces,
   detectedVideoFaces,
@@ -58,6 +59,7 @@ import {
   LOADED_WEBCAM,
   FETCH_MP4URL,
   FETCHED_MP4URL,
+  SCREENSHOT_VIDEO,
   START_APP,
   STOP_APP,
   LOADED_MODELS,
@@ -181,6 +183,30 @@ export const rootEpic = combineEpics(
         })
       )
     ),
+  (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
+    action$.pipe(
+      filter(isOfType(SCREENSHOT_VIDEO)),
+      switchMap(async () => {
+        const {
+          faceOffPanel: { videoCtx },
+        } = state$.value;
+        const src = createObjectURL(
+          await canvasToBlob(videoCtx.canvas, 'image/png')
+        );
+        return actions.addImages([
+          await new Promise<HTMLImageElement>((resolve, reject) => {
+            const imgEl = new Image();
+            imgEl.title = `WebCam-${new Date()
+              .toLocaleString('en-GB')
+              .replace('/', '-')
+              .replace(/[,]/g, '')}.jpg`;
+            imgEl.onload = () => resolve(imgEl);
+            imgEl.onerror = error => reject(error);
+            imgEl.src = src;
+          }),
+        ]);
+      })
+    ),
   (action$: Observable<RootActions>) =>
     action$.pipe(
       filter(isOfType(START_APP)),
@@ -211,40 +237,28 @@ export const rootEpic = combineEpics(
             switch (tab) {
               case 'one': {
                 const {
-                  faceOffPanel: {
-                    videoRef,
-                    videoOverlayRef,
-                    videoDetectResults,
-                  },
+                  faceOffPanel: { videoOverlayRef, videoDetectResults },
                 } = state$.value;
-                if (videoRef.current) {
-                  const { videoWidth, videoHeight } = videoRef.current;
+                if (videoOverlayRef.current) {
                   drawDetections(
                     videoDetectResults,
                     videoOverlayRef.current,
-                    videoWidth,
-                    videoHeight
+                    videoCtx.canvas.width,
+                    videoCtx.canvas.height
                   );
                 }
                 break;
               }
               case 'two': {
                 const {
-                  faceOffPanel: {
-                    webcamRef,
-                    webcamOverlayRef,
-                    webcamDetectResults,
-                  },
+                  faceOffPanel: { webcamOverlayRef, webcamDetectResults },
                 } = state$.value;
-                if (webcamRef.current && (webcamRef.current as any).video) {
-                  const {
-                    video: { videoWidth, videoHeight },
-                  } = webcamRef.current as any;
+                if (webcamOverlayRef.current) {
                   drawDetections(
                     webcamDetectResults,
                     webcamOverlayRef.current,
-                    videoWidth,
-                    videoHeight
+                    videoCtx.canvas.width,
+                    videoCtx.canvas.width
                   );
                 }
                 break;

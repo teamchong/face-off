@@ -18,7 +18,7 @@ import {
 } from '@material-ui/icons';
 import { createObjectURL } from 'blob-util';
 import * as React from 'react';
-import { createRef, ChangeEvent, Fragment } from 'react';
+import { createRef, ChangeEvent, Fragment, KeyboardEvent } from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import {
@@ -32,6 +32,7 @@ import {
   addImages,
   fetchMp4Url,
   loadedVideo,
+  screenshotVideo,
 } from '../actions/FaceOffActions';
 import { MAX_WIDTH, MAX_HEIGHT } from '../constants';
 import { FaceOffModel } from '../models';
@@ -80,12 +81,14 @@ const faceOffPanelSelector = ({
   videoOverlayRef,
   videoUrl,
   videoUrlLoaded,
+  videoCtx,
   mp4Url,
 }: FaceOffModel) => ({
   videoRef,
   videoOverlayRef,
   videoUrl,
   videoUrlLoaded,
+  videoCtx,
   mp4Url,
 });
 
@@ -98,6 +101,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   changeVideoUrl: (videoUrl: string) => dispatch(changeVideoUrl(videoUrl)),
   fetchMp4Url: (videoUrl: string) => dispatch(fetchMp4Url(videoUrl)),
   loadedVideo: () => dispatch(loadedVideo()),
+  screenshotVideo: () => dispatch(screenshotVideo()),
 });
 
 const VideoComponent = ({
@@ -106,6 +110,7 @@ const VideoComponent = ({
   videoOverlayRef,
   videoUrl,
   videoUrlLoaded,
+  videoCtx,
   mp4Url,
   showMessage,
   changeVideoUrl,
@@ -133,7 +138,16 @@ const VideoComponent = ({
     });
   const textFieldHandler = ({ target }: ChangeEvent<HTMLInputElement>) =>
     changeVideoUrl(target!.value);
-  const playHandler = () => fetchMp4Url(videoUrl);
+  const loadMp4Handler = () => fetchMp4Url(videoUrl);
+  const playHandler = () => {
+    if (videoRef.current) {
+      const video: HTMLVideoElement = videoRef.current;
+      const { videoWidth, videoHeight } = video;
+      videoCtx.canvas.width = videoWidth;
+      videoCtx.canvas.height = videoHeight;
+      videoCtx.drawImage(video, 0, 0, videoWidth, videoHeight);
+    }
+  };
   const screenshotHandler = async () => {
     const src = (await readAsDataURL()) || '';
     addImages([
@@ -151,10 +165,10 @@ const VideoComponent = ({
   };
   const videoUrlTrimmed = (videoUrl || '').replace(/^\s+|\s+$/g, '');
   const loadedDataHandler = () => loadedVideo();
-  const keyDownHandler = (ev: KeyboardEvent) => {
+  const keyDownHandler = (ev: KeyboardEvent<HTMLElement>) => {
     switch (ev.charCode) {
       case 13:
-        playHandler();
+        loadMp4Handler();
         break;
     }
   };
@@ -184,7 +198,7 @@ const VideoComponent = ({
                 {!!videoUrlTrimmed && videoUrlTrimmed !== videoUrlLoaded && (
                   <IconButton
                     aria-label="Take screenshot"
-                    onClick={playHandler}
+                    onClick={loadMp4Handler}
                   >
                     <PlayCircleFilled />
                   </IconButton>
@@ -210,6 +224,7 @@ const VideoComponent = ({
             autoPlay={false}
             loop={true}
             muted={true}
+            playsInline={true}
             style={{
               borderWidth: 5,
               borderStyle: 'solid',
@@ -217,6 +232,7 @@ const VideoComponent = ({
             }}
             crossOrigin="anonymous"
             onCanPlay={loadedDataHandler}
+            onPlay={playHandler}
           >
             <source
               src={`${/^http/i.test(mp4Url) ? CORS_PROXY_URL : ''}${mp4Url}`}

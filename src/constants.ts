@@ -17,6 +17,7 @@ export const START_APP = 'START_APP';
 export const STOP_APP = 'STOP_APP';
 export const LOADED_MODELS = 'LOADED_MODELS';
 
+export const SCREENSHOT_VIDEO = 'SCREENSHOT_VIDEO';
 export const LOADED_VIDEO = 'LOADED_VIDEO';
 export const LOADED_WEBCAM = 'LOADED_WEBCAM';
 

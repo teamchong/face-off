@@ -18,6 +18,7 @@ import {
   switchFacingMode,
   addImages,
   loadedWebcam,
+  screenshotVideo,
 } from '../actions/FaceOffActions';
 import { MAX_WIDTH, MAX_HEIGHT } from '../constants';
 import { FaceOffModel } from '../models';
@@ -85,11 +86,13 @@ const faceOffPanelSelector = ({
   isWebcamLoaded,
   webcamRef,
   webcamOverlayRef,
+  videoCtx,
 }: FaceOffModel) => ({
   facingMode,
   isWebcamLoaded,
   webcamRef,
   webcamOverlayRef,
+  videoCtx,
 });
 
 const mapStateToProps = ({ faceOffPanel }: RootState) =>
@@ -101,6 +104,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   switchFacingMode: (facingMode: string) =>
     dispatch(switchFacingMode(facingMode)),
   loadedWebcam: () => dispatch(loadedWebcam()),
+  screenshotVideo: () => dispatch(screenshotVideo()),
 });
 
 const WebcamComponent = ({
@@ -109,6 +113,7 @@ const WebcamComponent = ({
   webcamRef,
   webcamOverlayRef,
   facingMode,
+  videoCtx,
   showMessage,
   switchFacingMode,
   addImages,
@@ -116,29 +121,21 @@ const WebcamComponent = ({
 }: StyledComponentProps &
   ReturnType<typeof mapStateToProps> &
   ReturnType<typeof mapDispatchToProps>) => {
-  const screenshotHandler = async () => {
+  const onPlayHandler = () => {
     if (webcamRef.current && (webcamRef.current as any).video) {
       const video: HTMLVideoElement = (webcamRef.current as any).video;
-      const ctx = document.createElement('canvas').getContext('2d');
-      ctx.canvas.width = video.videoWidth;
-      ctx.canvas.height = video.videoHeight;
-      ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-      const src = createObjectURL(await canvasToBlob(ctx.canvas, 'image/png'));
-      addImages([
-        await new Promise<HTMLImageElement>((resolve, reject) => {
-          const imgEl = new Image();
-          imgEl.title = `WebCam-${new Date()
-            .toLocaleString('en-GB')
-            .replace('/', '-')
-            .replace(/[,]/g, '')}.jpg`;
-          imgEl.onload = () => resolve(imgEl);
-          imgEl.onerror = error => reject(error);
-          imgEl.src = src;
-        }),
-      ]);
+      const { videoWidth, videoHeight } = video;
+      videoCtx.canvas.width = videoWidth;
+      videoCtx.canvas.height = videoHeight;
+      videoCtx.drawImage(video, 0, 0, videoWidth, videoHeight);
     }
   };
-  const userMediaHandler = () => loadedWebcam();
+  const userMediaHandler = () => {
+    if (webcamRef.current && (webcamRef.current as any).video) {
+      (webcamRef.current as any).video.onPlay = onPlayHandler;
+    }
+    loadedWebcam();
+  };
   const switchRear = () => switchFacingMode(FACINGMODE_REAR);
   const switchFront = () => switchFacingMode(FACINGMODE_FRONT);
   return (
@@ -168,7 +165,7 @@ const WebcamComponent = ({
           <Fab
             color="primary"
             aria-label="Take screenshot"
-            onClick={screenshotHandler}
+            onClick={screenshotVideo}
           >
             <PhotoCamera />
           </Fab>
@@ -182,9 +179,9 @@ const WebcamComponent = ({
       />
       <Webcam
         ref={webcamRef}
+        audio={false}
         width={MAX_WIDTH}
         height={MAX_HEIGHT}
-        audio={false}
         screenshotFormat="image/png"
         onUserMedia={userMediaHandler}
         style={{

@@ -10,6 +10,7 @@ import {
   CHANGE_VIDEOURL,
   FETCH_MP4URL,
   FETCHED_MP4URL,
+  SCREENSHOT_VIDEO,
   START_APP,
   STOP_APP,
   LOADED_MODELS,
@@ -45,6 +46,8 @@ export const fetchedMp4Url = (payload: {
 
 export const startApp = () => action(START_APP);
 export const stopApp = () => action(STOP_APP);
+
+export const screenshotVideo = () => action(SCREENSHOT_VIDEO);
 
 export const loadedModels = () => action(LOADED_MODELS);
 
