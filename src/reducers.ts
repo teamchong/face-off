@@ -162,7 +162,7 @@ export const rootEpic = combineEpics(
             if (!file) {
               continue;
             }
-            if (file.type === 'video/mp4') {
+            if (/^video\/(?:mp4|webm)$/i.test(file.type)) {
               videoFiles.push(createObjectURL(file));
             } else if (/^image\/.+$/i.test(file.type)) {
               imageFiles.push(await readAsImage(file));
@@ -370,8 +370,10 @@ export const rootEpic = combineEpics(
       switchMap(({ payload: videoUrl }) =>
         from(fetch(`${VIDEO_API}${videoUrl}`)).pipe(
           switchMap(result => result.json()),
-          //tap(result => console.log(result)),
-          map(result => result.filter(r => /^video\/mp4;/.test(r.type))),
+          tap(result => console.log(result)),
+          map(result =>
+            result.filter(r => /^video\/(?:mp4|webm);/.test(r.type))
+          ),
           map(result =>
             !result.length
               ? fetchedMp4Url({

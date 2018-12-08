@@ -187,7 +187,7 @@ const DropzoneComponent = ({
         if (!file) {
           continue;
         }
-        if (file.type === 'video/mp4') {
+        if (/^video\/(?:mp4|webm)$/i.test(file.type)) {
           videoFiles.push(createObjectURL(file));
         } else if (/^image\/.+$/i.test(file.type)) {
           imageFiles.push(await readAsImage(file));
@@ -211,7 +211,7 @@ ${rejectedMessage}`);
   };
   return (
     <Dropzone
-      accept="image/*, video/mp4"
+      accept="image/*, video/mp4, video/webm"
       onDrop={dropHandler}
       className="color-bg"
       style={{
@@ -232,7 +232,7 @@ ${rejectedMessage}`);
         gutterBottom={true}
         className={classes!.typography}
       >
-        Drop your images/mp4 here...
+        Drop your images/video here...
       </Typography>
       <div className={classes!.br} />
       <Button variant="contained" color="secondary" className={classes!.button}>

@@ -220,7 +220,6 @@ const VideoComponent = ({
           >
             <source
               src={`${/^http/i.test(mp4Url) ? CORS_PROXY_URL : ''}${mp4Url}`}
-              type="video/mp4"
             />
           </video>
         </Fragment>
