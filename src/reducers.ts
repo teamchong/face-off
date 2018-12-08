@@ -89,6 +89,27 @@ export type RootState = {
   readonly faceOffPanel: FaceOffModel;
 };
 
+const drawDetections = (
+  detection: any[],
+  canvas: HTMLCanvasElement,
+  srcWidth: number,
+  srcHeight: number
+) => {
+  if (canvas) {
+    const { width, height } = canvas;
+    const ctx = canvas.getContext('2d');
+    //console.log({ width, height, videoWidth, videoHeight });
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, width, height);
+    ctx.translate(~~((width - srcWidth) / 2.0), ~~((height - srcHeight) / 2.0));
+    if (detection.length) {
+      drawDetection(canvas, detection, { withScore: false });
+      //console.log({ video: payload });
+    }
+    //observer.next(detectedVideoFaces(result));
+  }
+};
+
 export const rootEpic = combineEpics(
   (action$: Observable<RootActions>) =>
     action$.pipe(
@@ -121,6 +142,9 @@ export const rootEpic = combineEpics(
               tab,
               videoRef,
               webcamRef,
+              videoOverlayRef,
+              webcamOverlayRef,
+              imagesOverlayRef,
               isVideoLoaded,
               isWebcamLoaded,
               images,
@@ -137,10 +161,22 @@ export const rootEpic = combineEpics(
               catchError(() => of([]))
             );
             const result = await query.toPromise();
+            const { videoWidth, videoHeight } = videoRef.current;
+            drawDetections(
+              result,
+              videoOverlayRef.current,
+              videoWidth,
+              videoHeight
+            );
             observer.next(detectedVideoFaces(result));
           }
 
-          if (tab === 'three' && webcamRef.current && isWebcamLoaded) {
+          if (
+            tab === 'three' &&
+            webcamRef.current &&
+            (webcamRef.current as any).video &&
+            isWebcamLoaded
+          ) {
             //const result = await detectAllFaces(videoRef.current, new SsdMobilenetv1Options());
             const query = from(
               detectAllFaces(
@@ -152,21 +188,36 @@ export const rootEpic = combineEpics(
               catchError(() => of([]))
             );
             const result = await query.toPromise();
+            const {
+              videoWidth,
+              videoHeight,
+            } = (webcamRef.current as any).video;
+            drawDetections(
+              result,
+              webcamOverlayRef.current,
+              videoWidth,
+              videoHeight
+            );
             observer.next(detectedWebcamFaces(result));
           }
 
           for (let i = 0, iL = images.length; i < iL; i++) {
-            const { id } = images[i];
+            const image = images[i];
+            const { id } = image;
             if (id in imagesDetectResults) {
               continue;
             }
-            const query = from(
-              detectAllFaces(images[i], FaceDetectOptions)
-            ).pipe(
+            const query = from(detectAllFaces(image, FaceDetectOptions)).pipe(
               timeout(2000),
               catchError(() => of([]))
             );
             const result = await query.toPromise();
+            drawDetections(
+              result,
+              (imagesOverlayRef[id] || ({} as any)).current,
+              image.width,
+              image.height
+            );
             observer.next(detectedImageFaces({ id, result }));
           }
           await timer(100).toPromise();
@@ -179,84 +230,7 @@ export const rootEpic = combineEpics(
     action$.pipe(
       filter(isOfType(DETECTED_VIDEOFACES)),
       filter(() => state$.value.faceOffPanel.isAppRunning),
-      tap(({ payload }) => {
-        const {
-          faceOffPanel: {
-            videoOverlayRef,
-            videoRef: {
-              current: { videoWidth, videoHeight },
-            },
-          },
-        } = state$.value;
-        if (videoOverlayRef.current) {
-          const canvas = videoOverlayRef.current;
-          const { width, height } = canvas;
-          const ctx = canvas.getContext('2d');
-          //console.log({ width, height, videoWidth, videoHeight });
-          ctx.setTransform(1, 0, 0, 1, 0, 0);
-          ctx.clearRect(0, 0, width, height);
-          ctx.translate(
-            ~~((width - videoWidth) / 2.0),
-            ~~((height - videoHeight) / 2.0)
-          );
-          if (payload.length) {
-            drawDetection(canvas, payload);
-            //console.log({ video: payload });
-          }
-        }
-      }),
-      ignoreElements()
-    ),
-  (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
-    action$.pipe(
-      filter(isOfType(DETECTED_WEBCAMFACES)),
-      filter(() => state$.value.faceOffPanel.isAppRunning),
-      tap(({ payload }) => {
-        const {
-          faceOffPanel: { webcamOverlayRef, webcamRef },
-        } = state$.value;
-        const {
-          current: {
-            video: { videoWidth, videoHeight },
-          },
-        } = webcamRef as any;
-        if (webcamOverlayRef.current) {
-          const canvas = webcamOverlayRef.current;
-          const { width, height } = canvas;
-          const ctx = canvas.getContext('2d');
-          ctx.setTransform(1, 0, 0, 1, 0, 0);
-          ctx.clearRect(0, 0, width, height);
-          ctx.translate(
-            ~~((width - videoWidth) / 2.0),
-            ~~((height - videoHeight) / 2.0)
-          );
-          if (payload.length) {
-            drawDetection(canvas, payload);
-            console.log({ webcam: payload });
-          }
-        }
-      }),
-      ignoreElements()
-    ),
-  (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
-    action$.pipe(
-      filter(isOfType(DETECTED_IMAGEFACES)),
-      filter(() => state$.value.faceOffPanel.isAppRunning),
-      tap(({ payload: { id, result } }) => {
-        const {
-          faceOffPanel: { imagesOverlayRef },
-        } = state$.value;
-        if (imagesOverlayRef[id] && imagesOverlayRef[id].current) {
-          const canvas = imagesOverlayRef[id].current;
-          const { width, height } = canvas;
-          const ctx = canvas.getContext('2d');
-          ctx.clearRect(0, 0, width, height);
-          if (result.length) {
-            drawDetection(canvas, result);
-            console.log({ [id]: result });
-          }
-        }
-      }),
+      tap(({ payload }) => {}),
       ignoreElements()
     ),
   (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
@@ -338,10 +312,7 @@ export const rootReducer = combineReducers<RootState, RootActions>({
           imagesOverlayRef: {
             ...state.imagesOverlayRef,
             ...images.reduce((result, image) => {
-              const canvas = document.createElement('canvas');
-              canvas.width = image.width;
-              canvas.height = image.height;
-              result[image.id] = canvas;
+              result[image.id] = createRef<HTMLCanvasElement>();
               return result;
             }, {}),
           },
