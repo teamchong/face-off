@@ -164,6 +164,7 @@ const DropzoneComponent = ({
   addImages,
   showMessage,
   fetchMp4Url,
+  switchTab,
 }: StyledComponentProps &
   ReturnType<typeof mapStateToProps> &
   ReturnType<typeof mapDispatchToProps>) => {

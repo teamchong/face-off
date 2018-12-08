@@ -432,7 +432,10 @@ export const rootReducer = combineReducers<RootState, RootActions>({
       }
       case DETECTED_IMAGEFACES: {
         const {
-          payload: { id, result },
+          payload: {
+            image: { id },
+            result,
+          },
         } = action;
         return {
           ...state,
