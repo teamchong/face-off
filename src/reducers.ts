@@ -250,7 +250,7 @@ export const rootEpic = combineEpics(
               videoCtx.canvas.height
             );
           } catch (ex) {}
-          await timer(30).toPromise();
+          await timer(100).toPromise();
         }
       }),
       mapTo(detectFaces())
@@ -308,7 +308,7 @@ export const rootEpic = combineEpics(
             observer.next(detectedVideoFaces([]));
           }
 
-          await timer(30).toPromise();
+          await timer(100).toPromise();
 
           for (let i = 0, iL = images.length; i < iL; i++) {
             const image = images[i];
@@ -324,7 +324,7 @@ export const rootEpic = combineEpics(
             );
             const result = await query.toPromise();
             observer.next(detectedImageFaces({ image, result }));
-            await timer(30).toPromise();
+            await timer(100).toPromise();
           }
           observer.next(detectFaces());
           observer.complete();
