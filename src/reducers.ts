@@ -1,5 +1,5 @@
 import { revokeObjectURL } from 'blob-util';
-import { createRef } from 'react';
+import { canvasToBlob, createObjectURL, createRef } from 'react';
 import * as Webcam from 'react-webcam';
 import { combineReducers } from 'redux';
 import { combineEpics, StateObservable } from 'redux-observable';
@@ -68,6 +68,8 @@ import {
   FACINGMODE_REAR,
   VIDEO_API,
   DEFAULT_VIDEO_URL,
+  MAX_WIDTH,
+  MAX_HEIGHT,
 } from './constants';
 
 // import {
@@ -115,33 +117,67 @@ const drawDetections = (
   }
 };
 
+export const readAsImage = async (file: File): Promise<HTMLImageElement> => {
+  const dataUrl = createObjectURL(file);
+  const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const imgEl = new Image();
+    imgEl.title = file.name;
+    imgEl.onload = () => resolve(imgEl);
+    imgEl.onerror = error => reject(error);
+    imgEl.src = dataUrl;
+  });
+  if (img.width > MAX_WIDTH) {
+    const newHeight = ~~((MAX_WIDTH * img.height) / img.width);
+    const canvas = document.createElement('canvas');
+    canvas.width = MAX_WIDTH;
+    canvas.height = newHeight;
+    const ctx = canvas.getContext('2d');
+    if (ctx !== null) {
+      ctx.drawImage(img, 0, 0, MAX_WIDTH, newHeight);
+      const src = createObjectURL(await canvasToBlob(ctx.canvas, 'image/png'));
+      return await new Promise<HTMLImageElement>((resolve, reject) => {
+        const imgEl = new Image();
+        imgEl.title = file.name;
+        imgEl.onload = () => resolve(imgEl);
+        imgEl.onerror = error => reject(error);
+        imgEl.src = src;
+        revokeObjectURL(dataUrl);
+      });
+    }
+  }
+  return img;
+};
+
 export const rootEpic = combineEpics(
+  fromEvent(window, 'paste').pipe(
+    map((evt: ClipboardEvent) => evt.clipboardData.items),
+    switchMap(items =>
+      Observable.create(async observer => {
+        const imageFiles = [];
+        const videoFiles = [];
+        for (let i = 0, iL = items.length; i < iL; i++) {
+          const file = items[i];
+
+          if (file.type === 'video/mp4') {
+            videoFiles.push(createObjectURL(file));
+          } else {
+            imageFiles.push(await readAsImage(file));
+          }
+        }
+        if (imageFiles.length) {
+          observer.next(actions.addImages(imageFiles));
+        }
+        if (videoFiles.length) {
+          observer.next(actions.fetchMp4Url(videoFiles[videoFiles.length - 1]));
+          observer.next(actions.switchTab('one'));
+        }
+        observer.complete();
+      })
+    )
+  ),
   (action$: Observable<RootActions>) =>
     action$.pipe(
       filter(isOfType(START_APP)),
-      tap(() => {
-        fromEvent(window, 'paste')
-          .pipe(
-            map((evt: ClipboardEvent) => evt.clipboardData.items),
-            concatAll()
-          )
-          .subscribe(item => {
-            const videoFiles = [];
-            for (let i = 0, iL = acceptedFiles.length; i < iL; i++) {
-              const file = acceptedFiles[i];
-
-              if (file.type === 'video/mp4') {
-                videoFiles.push(createObjectURL(file));
-              } else {
-                addImages(await readAsImage(file));
-              }
-            }
-            if (videoFiles.length) {
-              fetchMp4Url(videoFiles[videoFiles.length - 1]);
-              switchTab('one');
-            }
-          });
-      }),
       mapTo(fetchMp4Url(DEFAULT_VIDEO_URL))
     ),
   (action$: Observable<RootActions>) =>

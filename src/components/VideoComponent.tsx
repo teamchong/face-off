@@ -33,11 +33,9 @@ import {
   fetchMp4Url,
   loadedVideo,
 } from '../actions/FaceOffActions';
+import { MAX_WIDTH, MAX_HEIGHT } from '../constants';
 import { FaceOffModel } from '../models';
 import { RootState } from '../reducers';
-
-const WIDTH = 640;
-const HEIGHT = 480;
 
 const styles = ({ spacing }: Theme) =>
   createStyles({
@@ -71,7 +69,7 @@ const styles = ({ spacing }: Theme) =>
       zIndex: 1,
     },
     textField: {
-      width: WIDTH + 'px',
+      width: MAX_WIDTH + 'px',
       marginLeft: spacing.unit,
       marginRight: spacing.unit,
     },
@@ -120,9 +118,9 @@ const VideoComponent = ({
   const readAsDataURL = () =>
     new Promise<string>(resolve => {
       let { videoWidth, videoHeight } = videoRef.current as any;
-      if (videoWidth > WIDTH) {
-        videoHeight = ~~((WIDTH * videoHeight) / videoWidth);
-        videoWidth = WIDTH;
+      if (videoWidth > MAX_WIDTH) {
+        videoHeight = ~~((MAX_WIDTH * videoHeight) / videoWidth);
+        videoWidth = MAX_WIDTH;
       }
       const canvas = document.createElement('canvas');
       canvas.width = videoWidth;
@@ -192,14 +190,14 @@ const VideoComponent = ({
         <Fragment>
           <canvas
             className={classes!.overlay}
-            width={WIDTH}
-            height={HEIGHT}
+            width={MAX_WIDTH}
+            height={MAX_HEIGHT}
             ref={videoOverlayRef}
           />
           <video
             ref={videoRef}
-            width={WIDTH}
-            height={HEIGHT}
+            width={MAX_WIDTH}
+            height={MAX_HEIGHT}
             controls={true}
             autoPlay={false}
             loop={true}

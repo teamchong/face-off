@@ -4,7 +4,7 @@ import {
   StyledComponentProps,
   withStyles,
 } from '@material-ui/core/styles';
-import { canvasToBlob, createObjectURL, revokeObjectURL } from 'blob-util';
+import { createObjectURL } from 'blob-util';
 import { Collections } from '@material-ui/icons';
 import * as React from 'react';
 import { Fragment, ReactElement, ReactType } from 'react';
@@ -18,11 +18,11 @@ import {
   fetchMp4Url,
   switchTab,
 } from '../actions/FaceOffActions';
+import { MAX_WIDTH, MAX_HEIGHT } from '../constants';
 import { FaceOffModel } from '../models';
-import { RootState } from '../reducers';
+import { readAsImage, RootState } from '../reducers';
 
 const Dropzone: ReactType = DropzoneType as any;
-const MAX_WIDTH = 640;
 
 const styles = () =>
   createStyles({
@@ -168,38 +168,6 @@ const DropzoneComponent = ({
 }: StyledComponentProps &
   ReturnType<typeof mapStateToProps> &
   ReturnType<typeof mapDispatchToProps>) => {
-  const readAsImage = async (file: File): Promise<HTMLImageElement> => {
-    const dataUrl = createObjectURL(file);
-    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
-      const imgEl = new Image();
-      imgEl.title = file.name;
-      imgEl.onload = () => resolve(imgEl);
-      imgEl.onerror = error => reject(error);
-      imgEl.src = dataUrl;
-    });
-    if (img.width > MAX_WIDTH) {
-      const newHeight = ~~((MAX_WIDTH * img.height) / img.width);
-      const canvas = document.createElement('canvas');
-      canvas.width = MAX_WIDTH;
-      canvas.height = newHeight;
-      const ctx = canvas.getContext('2d');
-      if (ctx !== null) {
-        ctx.drawImage(img, 0, 0, MAX_WIDTH, newHeight);
-        const src = createObjectURL(
-          await canvasToBlob(ctx.canvas, 'image/png')
-        );
-        return await new Promise<HTMLImageElement>((resolve, reject) => {
-          const imgEl = new Image();
-          imgEl.title = file.name;
-          imgEl.onload = () => resolve(imgEl);
-          imgEl.onerror = error => reject(error);
-          imgEl.src = src;
-          revokeObjectURL(dataUrl);
-        });
-      }
-    }
-    return img;
-  };
   const dropHandler = async (acceptedFiles: File[], rejectedFiles: File[]) => {
     /*
     lastModified: 1541910129972
@@ -248,8 +216,8 @@ ${rejectedMessage}`);
         borderStyle: 'dashed',
         borderColor: 'rgba(0,0,0,0.2)',
         borderRadius: 5,
-        width: 640,
-        height: 480,
+        width: MAX_WIDTH,
+        height: MAX_HEIGHT,
         alignContent: 'center',
         justifyContent: 'center',
         flexFlow: 'row wrap',

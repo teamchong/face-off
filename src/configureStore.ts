@@ -1,6 +1,5 @@
 import { applyMiddleware, createStore } from 'redux';
 import { createEpicMiddleware } from 'redux-observable';
-import { fromEvent } from 'rxjs';
 import { rootEpic, rootReducer } from './reducers';
 
 export default () => {

@@ -19,6 +19,7 @@ import {
   addImages,
   loadedWebcam,
 } from '../actions/FaceOffActions';
+import { MAX_WIDTH, MAX_HEIGHT } from '../constants';
 import { FaceOffModel } from '../models';
 import { RootState } from '../reducers';
 
@@ -43,9 +44,6 @@ screenshotQuality	number	0.92	quality of screenshot(0 to 1)
 audioConstraints	object		MediaStreamConstraint(s) for the audio
 videoConstraints	object		MediaStreamConstraints(s) for the video
 */
-
-const WIDTH = 640;
-const HEIGHT = 480;
 
 const styles = ({ spacing }: Theme) =>
   createStyles({
@@ -175,14 +173,14 @@ const WebcamComponent = ({
       </div>
       <canvas
         className={classes!.overlay}
-        width={WIDTH}
-        height={HEIGHT}
+        width={MAX_WIDTH}
+        height={MAX_HEIGHT}
         ref={webcamOverlayRef}
       />
       <Webcam
         ref={webcamRef}
-        width={WIDTH}
-        height={HEIGHT}
+        width={MAX_WIDTH}
+        height={MAX_HEIGHT}
         audio={false}
         screenshotFormat="image/png"
         onUserMedia={userMediaHandler}
