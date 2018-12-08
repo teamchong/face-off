@@ -228,4 +228,4 @@ const VideoComponent = ({
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(withStyles(styles)(videoComponent));
+)(withStyles(styles)(VideoComponent));
