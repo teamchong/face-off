@@ -146,12 +146,8 @@ export const rootEpic = combineEpics(
               observer.next(detectedFaces({ index: i, result }));
             }
           }
-          observer.next(
-            of(detectFaces()).pipe(
-              delay(2000),
-              map(action => action)
-            )
-          );
+          await new Promise(resolve => setTimeout(resolve, 500));
+          observer.next(detectFaces());
           observer.complete();
         })
       )
