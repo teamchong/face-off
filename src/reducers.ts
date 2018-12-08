@@ -193,7 +193,7 @@ export const rootEpic = combineEpics(
           const { width, height } = canvas;
           const ctx = canvas.getContext('2d');
           //console.log({ width, height, videoWidth, videoHeight });
-          ctx.translate(0, 0);
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
           ctx.clearRect(0, 0, width, height);
           ctx.translate(
             ~~((width - videoWidth) / 2.0),
@@ -224,7 +224,7 @@ export const rootEpic = combineEpics(
           const canvas = webcamOverlayRef.current;
           const { width, height } = canvas;
           const ctx = canvas.getContext('2d');
-          ctx.translate(0, 0);
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
           ctx.clearRect(0, 0, width, height);
           ctx.translate(
             ~~((width - videoWidth) / 2.0),
