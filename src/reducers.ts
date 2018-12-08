@@ -214,7 +214,7 @@ export const rootEpic = combineEpics(
             const query = from(
               detectAllFaces(
                 videoRef.current,
-                FaceDetectOptions({ inputSize: 128 })
+                FaceDetectOptions({ inputSize: 320 })
               )
             ).pipe(
               timeout(2000),
@@ -234,7 +234,7 @@ export const rootEpic = combineEpics(
             const query = from(
               detectAllFaces(
                 (webcamRef.current as any).video,
-                FaceDetectOptions({ inputSize: 128 })
+                FaceDetectOptions({ inputSize: 320 })
               )
             ).pipe(
               timeout(2000),
