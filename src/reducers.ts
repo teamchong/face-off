@@ -137,9 +137,7 @@ export const rootEpic = combineEpics(
               catchError(() => of([]))
             );
             const result = await query.toPromise();
-            if (result.length) {
-              observer.next(detectedVideoFaces(result));
-            }
+            observer.next(detectedVideoFaces(result));
           }
 
           if (tab === 'three' && webcamRef.current && isWebcamLoaded) {
@@ -154,9 +152,7 @@ export const rootEpic = combineEpics(
               catchError(() => of([]))
             );
             const result = await query.toPromise();
-            if (result.length) {
-              observer.next(detectedWebcamFaces(result));
-            }
+            observer.next(detectedWebcamFaces(result));
           }
 
           for (let i = 0, iL = images.length; i < iL; i++) {
@@ -171,11 +167,9 @@ export const rootEpic = combineEpics(
               catchError(() => of([]))
             );
             const result = await query.toPromise();
-            if (result.length) {
-              observer.next(detectedImageFaces({ id, result }));
-            }
+            observer.next(detectedImageFaces({ id, result }));
           }
-          await timer(500).toPromise();
+          await timer(100).toPromise();
           observer.next(detectFaces());
           observer.complete();
         })
@@ -194,8 +188,10 @@ export const rootEpic = combineEpics(
           const { width, height } = canvas;
           const ctx = canvas.getContext('2d');
           ctx.clearRect(0, 0, width, height);
-          drawDetection(canvas, payload);
-          console.log({ video: payload });
+          if (payload.length) {
+            drawDetection(canvas, payload);
+            //console.log({ video: payload });
+          }
         }
       }),
       ignoreElements()
@@ -213,8 +209,10 @@ export const rootEpic = combineEpics(
           const { width, height } = canvas;
           const ctx = canvas.getContext('2d');
           ctx.clearRect(0, 0, width, height);
-          drawDetection(canvas, payload);
-          console.log({ webcam: payload });
+          if (payload.length) {
+            drawDetection(canvas, payload);
+            console.log({ webcam: payload });
+          }
         }
       }),
       ignoreElements()
@@ -230,10 +228,12 @@ export const rootEpic = combineEpics(
         if (imagesOverlayRef[id] && imagesOverlayRef[id].current) {
           const canvas = imagesOverlayRef[id].current;
           const { width, height } = canvas;
-          ctx.clearRect(0, 0, width, height);
           const ctx = canvas.getContext('2d');
-          drawDetection(canvas, result);
-          console.log({ [id]: result });
+          ctx.clearRect(0, 0, width, height);
+          if (result.length) {
+            drawDetection(canvas, result);
+            console.log({ [id]: result });
+          }
         }
       }),
       ignoreElements()
