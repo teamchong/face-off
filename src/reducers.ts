@@ -295,7 +295,7 @@ export const rootEpic = combineEpics(
                   mp4Url: videoUrl,
                 })
               : fetchedMp4Url({
-                  videoUrlLoaded: vidoeUrl,
+                  videoUrlLoaded: videoUrl,
                   mp4Url: result[result.length - 1].url,
                 })
           )
