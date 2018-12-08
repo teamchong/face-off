@@ -142,15 +142,6 @@ const VideoComponent = ({
   const textFieldHandler = ({ target }: ChangeEvent<HTMLInputElement>) =>
     changeVideoUrl(target!.value);
   const loadMp4Handler = () => fetchMp4Url(videoUrl);
-  const playHandler = () => {
-    if (tab === 'one' && videoRef.current) {
-      const video: HTMLVideoElement = videoRef.current;
-      const { videoWidth, videoHeight } = video;
-      videoCtx.canvas.width = videoWidth;
-      videoCtx.canvas.height = videoHeight;
-      videoCtx.drawImage(video, 0, 0, videoWidth, videoHeight);
-    }
-  };
   const screenshotHandler = async () => {
     const src = (await readAsDataURL()) || '';
     addImages([
@@ -235,7 +226,6 @@ const VideoComponent = ({
             }}
             crossOrigin="anonymous"
             onCanPlay={loadedDataHandler}
-            onPlay={playHandler}
           >
             <source
               src={`${/^http/i.test(mp4Url) ? CORS_PROXY_URL : ''}${mp4Url}`}

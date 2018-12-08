@@ -123,25 +123,7 @@ const WebcamComponent = ({
 }: StyledComponentProps &
   ReturnType<typeof mapStateToProps> &
   ReturnType<typeof mapDispatchToProps>) => {
-  const playHandler = () => {
-    if (
-      tab === 'two' &&
-      webcamRef.current &&
-      (webcamRef.current as any).video
-    ) {
-      const video: HTMLVideoElement = (webcamRef.current as any).video;
-      const { videoWidth, videoHeight } = video;
-      videoCtx.canvas.width = videoWidth;
-      videoCtx.canvas.height = videoHeight;
-      videoCtx.drawImage(video, 0, 0, videoWidth, videoHeight);
-    }
-  };
-  const userMediaHandler = () => {
-    if (webcamRef.current && (webcamRef.current as any).video) {
-      (webcamRef.current as any).video.onPlay = playHandler;
-    }
-    loadedWebcam();
-  };
+  const userMediaHandler = () => loadedWebcam();
   const switchRear = () => switchFacingMode(FACINGMODE_REAR);
   const switchFront = () => switchFacingMode(FACINGMODE_FRONT);
   return (

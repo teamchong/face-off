@@ -277,7 +277,21 @@ export const rootEpic = combineEpics(
             },
           } = state$.value;
 
-          if (tab === 'one' || tab === 'two') {
+          let video: HTMLVideoElement = null;
+          if (tab === 'one' && videoRef.current) {
+            video = videoRef.current;
+          } else if (
+            tab === 'two' &&
+            webcamRef.current &&
+            (webcamRef.current as any).video
+          ) {
+            video = (webcamRef.current as any).video;
+          }
+          if (video) {
+            const { videoWidth, videoHeight } = video;
+            videoCtx.canvas.width = videoWidth;
+            videoCtx.canvas.height = videoHeight;
+            videoCtx.drawImage(video, 0, 0, videoWidth, videoHeight);
             //const result = await detectAllFaces(videoRef.current, new SsdMobilenetv1Options());
             const query = from(
               detectAllFaces(
@@ -290,6 +304,8 @@ export const rootEpic = combineEpics(
             );
             const result = await query.toPromise();
             observer.next(detectedVideoFaces(result));
+          } else {
+            observer.next(detectedVideoFaces([]));
           }
 
           for (let i = 0, iL = images.length; i < iL; i++) {
