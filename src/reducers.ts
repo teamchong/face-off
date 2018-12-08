@@ -228,13 +228,6 @@ export const rootEpic = combineEpics(
     ),
   (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
     action$.pipe(
-      filter(isOfType(DETECTED_VIDEOFACES)),
-      filter(() => state$.value.faceOffPanel.isAppRunning),
-      tap(({ payload }) => {}),
-      ignoreElements()
-    ),
-  (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
-    action$.pipe(
       filter(isOfType(FETCH_MP4URL)),
       switchMap(({ payload: youtubeUrl }) =>
         from(fetch(`${YOUTUBE_API}${youtubeUrl}`)).pipe(
