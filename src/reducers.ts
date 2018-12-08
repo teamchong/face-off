@@ -181,13 +181,23 @@ export const rootEpic = combineEpics(
       filter(() => state$.value.faceOffPanel.isAppRunning),
       tap(({ payload }) => {
         const {
-          faceOffPanel: { videoOverlayRef },
+          faceOffPanel: {
+            videoOverlayRef,
+            videoRef: {
+              current: { videoWidth, videoHeight },
+            },
+          },
         } = state$.value;
         if (videoOverlayRef.current) {
           const canvas = videoOverlayRef.current;
           const { width, height } = canvas;
           const ctx = canvas.getContext('2d');
+          ctx.translate(0, 0);
           ctx.clearRect(0, 0, width, height);
+          ctx.translate(
+            ~~((width - videoWidth) / 2),
+            ~~((height - videoHeight) / 2)
+          );
           if (payload.length) {
             drawDetection(canvas, payload);
             //console.log({ video: payload });
@@ -202,13 +212,23 @@ export const rootEpic = combineEpics(
       filter(() => state$.value.faceOffPanel.isAppRunning),
       tap(({ payload }) => {
         const {
-          faceOffPanel: { webcamOverlayRef },
+          faceOffPanel: { webcamOverlayRef, webcamRef },
         } = state$.value;
+        const {
+          current: {
+            video: { videoWidth, videoHeight },
+          },
+        } = webcamRef as any;
         if (webcamOverlayRef.current) {
           const canvas = webcamOverlayRef.current;
           const { width, height } = canvas;
           const ctx = canvas.getContext('2d');
+          ctx.translate(0, 0);
           ctx.clearRect(0, 0, width, height);
+          ctx.translate(
+            ~~((width - videoWidth) / 2),
+            ~~((height - videoHeight) / 2)
+          );
           if (payload.length) {
             drawDetection(canvas, payload);
             console.log({ webcam: payload });
