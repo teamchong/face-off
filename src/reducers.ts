@@ -1,3 +1,4 @@
+import { revokeObjectURL } from 'blob-util';
 import { createRef } from 'react';
 import * as Webcam from 'react-webcam';
 import { combineReducers } from 'redux';
@@ -7,6 +8,7 @@ import {
   concat,
   empty,
   from,
+  fromEvent,
   interval,
   of,
   Observable,
@@ -117,6 +119,29 @@ export const rootEpic = combineEpics(
   (action$: Observable<RootActions>) =>
     action$.pipe(
       filter(isOfType(START_APP)),
+      tap(() => {
+        fromEvent(window, 'paste')
+          .pipe(
+            map((evt: ClipboardEvent) => evt.clipboardData.items),
+            concatAll()
+          )
+          .subscribe(item => {
+            const videoFiles = [];
+            for (let i = 0, iL = acceptedFiles.length; i < iL; i++) {
+              const file = acceptedFiles[i];
+
+              if (file.type === 'video/mp4') {
+                videoFiles.push(createObjectURL(file));
+              } else {
+                addImages(await readAsImage(file));
+              }
+            }
+            if (videoFiles.length) {
+              fetchMp4Url(videoFiles[videoFiles.length - 1]);
+              switchTab('one');
+            }
+          });
+      }),
       mapTo(fetchMp4Url(DEFAULT_VIDEO_URL))
     ),
   (action$: Observable<RootActions>) =>
@@ -389,6 +414,12 @@ export const rootReducer = combineReducers<RootState, RootActions>({
       }
       case REMOVE_IMAGES: {
         const { payload: imageIndexes } = action;
+        for (const imageIndex of imageIndexes) {
+          const image = state.images[imageIndex];
+          if (/^blob:/i.test(image.src)) {
+            revokeObjectURL(image.src);
+          }
+        }
         const imageIds = state.images
           .filter((image, i) => imageIndexes.indexOf(i) < 0)
           .map(image => image.id);
@@ -415,7 +446,11 @@ export const rootReducer = combineReducers<RootState, RootActions>({
       }
       case FETCH_MP4URL: {
         const { payload: videoUrlBeforeTrim } = action;
+        const { mp4Url: previousMp4Url } = state;
         const videoUrl = (videoUrlBeforeTrim || '').replace(/^\s+|\s+$/g, '');
+        if (/^blob:/i.test(previousMp4Url) && previousMp4Url !== videoUrl) {
+          revokeObjectURL(previousMp4Url);
+        }
         return { ...state, videoUrl, mp4Url: '', isVideoLoaded: false };
       }
       case FETCHED_MP4URL: {
@@ -431,7 +466,21 @@ export const rootReducer = combineReducers<RootState, RootActions>({
         return { ...state, isAppRunning: true };
       }
       case STOP_APP: {
-        return { ...state, isAppRunning: false };
+        for (const image of state.images) {
+          if (/^blob:/i.test(image.src)) {
+            revokeObjectURL(image.src);
+          }
+        }
+        if (/^blob:/i.test(state.mp4Url)) {
+          revokeObjectURL(state.mp4Url);
+        }
+        return {
+          ...state,
+          mp4Url: '',
+          images: [],
+          imagesDetectResults: [],
+          isAppRunning: false,
+        };
       }
       case DETECTED_VIDEOFACES: {
         const { payload: videoDetectResults } = action;

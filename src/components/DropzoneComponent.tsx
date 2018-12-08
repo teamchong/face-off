@@ -211,7 +211,6 @@ const DropzoneComponent = ({
     __proto__: File
     */
     if (!!(acceptedFiles || []).length) {
-      const imageFiles = [];
       const videoFiles = [];
       for (let i = 0, iL = acceptedFiles.length; i < iL; i++) {
         const file = acceptedFiles[i];
@@ -219,11 +218,8 @@ const DropzoneComponent = ({
         if (file.type === 'video/mp4') {
           videoFiles.push(createObjectURL(file));
         } else {
-          imageFiles.push(await readAsImage(file));
+          addImages(await readAsImage(file));
         }
-      }
-      if (imageFiles.length) {
-        addImages(imageFiles);
       }
       if (videoFiles.length) {
         fetchMp4Url(videoFiles[videoFiles.length - 1]);
