@@ -126,9 +126,63 @@ export const rootEpic = combineEpics(
       ),
       mapTo(loadedModels())
     ),
-  (action$: Observable<RootActions>) =>
+  (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
     action$.pipe(
       filter(isOfType(LOADED_MODELS)),
+      tap(async () => {
+        while (true) {
+          try {
+            const {
+              faceOffPanel: { isAppRunning, tab },
+            } = state$.value;
+            if (!isAppRunning) {
+              return;
+            }
+            switch (tab) {
+              case 'one': {
+                const {
+                  faceOffPanel: {
+                    videoRef: {
+                      current: { videoWidth, videoHeight },
+                    },
+                    videoOverlayRef,
+                    videoDetectResults,
+                  },
+                } = state$.value;
+                drawDetections(
+                  videoDetectResults,
+                  videoOverlayRef.current,
+                  videoWidth,
+                  videoHeight
+                );
+                break;
+              }
+              case 'two': {
+                const {
+                  faceOffPanel: {
+                    webcamRef,
+                    webcamOverlayRef,
+                    webcamDetectResults,
+                  },
+                } = state$.value;
+                const {
+                  current: {
+                    video: { videoWidth, videoHeight },
+                  },
+                } = webcamRef as any;
+                drawDetections(
+                  webcamDetectResults,
+                  webcamOverlayRef.current,
+                  videoWidth,
+                  videoHeight
+                );
+                break;
+              }
+            }
+          } catch (ex) {}
+          await timer(100).toPromise();
+        }
+      }),
       mapTo(detectFaces())
     ),
   (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
@@ -218,50 +272,6 @@ export const rootEpic = combineEpics(
           observer.complete();
         })
       )
-    ),
-  (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
-    action$.pipe(
-      filter(isOfType(DETECTED_VIDEOFACES)),
-      filter(() => state$.value.faceOffPanel.isAppRunning),
-      tap(({ payload }) => {
-        const {
-          faceOffPanel: {
-            videoRef: {
-              current: { videoWidth, videoHeight },
-            },
-            videoOverlayRef,
-          },
-        } = state$.value;
-        drawDetections(
-          payload,
-          videoOverlayRef.current,
-          videoWidth,
-          videoHeight
-        );
-      }),
-      ignoreElements()
-    ),
-  (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
-    action$.pipe(
-      filter(isOfType(DETECTED_WEBCAMFACES)),
-      filter(() => state$.value.faceOffPanel.isAppRunning),
-      tap(({ payload }) => {
-        const {
-          faceOffPanel: { webcamRef, webcamOverlayRef },
-        } = state$.value;
-        const {
-          current: {
-            video: { videoWidth, videoHeight },
-          },
-        } = webcamRef as any;
-        drawDetections(
-          payload,
-          webcamOverlayRef.current,
-          videoWidth,
-          videoHeight
-        );
-      }),
-      ignoreElements()
     ),
   (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
     action$.pipe(
