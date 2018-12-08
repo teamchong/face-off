@@ -1,5 +1,5 @@
-import { revokeObjectURL } from 'blob-util';
-import { canvasToBlob, createObjectURL, createRef } from 'react';
+import { canvasToBlob, createObjectURL, revokeObjectURL } from 'blob-util';
+import { createRef } from 'react';
 import * as Webcam from 'react-webcam';
 import { combineReducers } from 'redux';
 import { combineEpics, StateObservable } from 'redux-observable';
@@ -149,32 +149,35 @@ export const readAsImage = async (file: File): Promise<HTMLImageElement> => {
 };
 
 export const rootEpic = combineEpics(
-  fromEvent(window, 'paste').pipe(
-    map((evt: ClipboardEvent) => evt.clipboardData.items),
-    switchMap(items =>
-      Observable.create(async observer => {
-        const imageFiles = [];
-        const videoFiles = [];
-        for (let i = 0, iL = items.length; i < iL; i++) {
-          const file = items[i];
+  () =>
+    fromEvent(window, 'paste').pipe(
+      map((evt: ClipboardEvent) => evt.clipboardData.items),
+      switchMap(items =>
+        Observable.create(async observer => {
+          const imageFiles = [];
+          const videoFiles = [];
+          for (let i = 0, iL = items.length; i < iL; i++) {
+            const file = items[i];
 
-          if (file.type === 'video/mp4') {
-            videoFiles.push(createObjectURL(file));
-          } else {
-            imageFiles.push(await readAsImage(file));
+            if (file.type === 'video/mp4') {
+              videoFiles.push(createObjectURL(file));
+            } else {
+              imageFiles.push(await readAsImage(file));
+            }
           }
-        }
-        if (imageFiles.length) {
-          observer.next(actions.addImages(imageFiles));
-        }
-        if (videoFiles.length) {
-          observer.next(actions.fetchMp4Url(videoFiles[videoFiles.length - 1]));
-          observer.next(actions.switchTab('one'));
-        }
-        observer.complete();
-      })
-    )
-  ),
+          if (imageFiles.length) {
+            observer.next(actions.addImages(imageFiles));
+          }
+          if (videoFiles.length) {
+            observer.next(
+              actions.fetchMp4Url(videoFiles[videoFiles.length - 1])
+            );
+            observer.next(actions.switchTab('one'));
+          }
+          observer.complete();
+        })
+      )
+    ),
   (action$: Observable<RootActions>) =>
     action$.pipe(
       filter(isOfType(START_APP)),
