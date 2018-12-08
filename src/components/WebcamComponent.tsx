@@ -118,6 +118,7 @@ const WebcamComponent = ({
   videoCtx,
   showMessage,
   switchFacingMode,
+  screenshotVideo,
   addImages,
   loadedWebcam,
 }: StyledComponentProps &
