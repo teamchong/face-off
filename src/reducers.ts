@@ -138,7 +138,6 @@ export const rootEpic = combineEpics(
             );
             const result = await query.toPromise();
             if (result.length) {
-              console.log({ video: result });
               observer.next(detectedVideoFaces(result));
             }
           }
@@ -156,7 +155,6 @@ export const rootEpic = combineEpics(
             );
             const result = await query.toPromise();
             if (result.length) {
-              console.log({ webcam: result });
               observer.next(detectedWebcamFaces(result));
             }
           }
@@ -174,7 +172,6 @@ export const rootEpic = combineEpics(
             );
             const result = await query.toPromise();
             if (result.length) {
-              console.log({ id, result });
               observer.next(detectedImageFaces({ id, result }));
             }
           }
@@ -192,9 +189,16 @@ export const rootEpic = combineEpics(
         const {
           faceOffPanel: { videoOverlayRef },
         } = state$.value;
-        if (videoOverlayRef.current)
-          drawDetection(videoOverlayRef.current, payload);
-      })
+        if (videoOverlayRef.current) {
+          const canvas = videoOverlayRef.current;
+          const { width, height } = canvas;
+          const ctx = canvas.getContext('2d');
+          ctx.clearRect(0, 0, width, height);
+          drawDetection(canvas, payload);
+          console.log({ video: payload });
+        }
+      }),
+      ignoreElements()
     ),
   (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
     action$.pipe(
@@ -204,9 +208,16 @@ export const rootEpic = combineEpics(
         const {
           faceOffPanel: { webcamOverlayRef },
         } = state$.value;
-        if (webcamOverlayRef.current)
-          drawDetection(webcamOverlayRef.current, payload);
-      })
+        if (webcamOverlayRef.current) {
+          const canvas = webcamOverlayRef.current;
+          const { width, height } = canvas;
+          const ctx = canvas.getContext('2d');
+          ctx.clearRect(0, 0, width, height);
+          drawDetection(canvas, payload);
+          console.log({ webcam: payload });
+        }
+      }),
+      ignoreElements()
     ),
   (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
     action$.pipe(
@@ -216,8 +227,16 @@ export const rootEpic = combineEpics(
         const {
           faceOffPanel: { imagesOverlayRef },
         } = state$.value;
-        if (imagesOverlayRef[id]) drawDetection(imagesOverlayRef[id], result);
-      })
+        if (imagesOverlayRef[id] && imagesOverlayRef[id].current) {
+          const canvas = imagesOverlayRef[id].current;
+          ctx.clearRect(0, 0, width, height);
+          const { width, height } = canvas;
+          const ctx = canvas.getContext('2d');
+          drawDetection(canvas, result);
+          console.log({ [id]: result });
+        }
+      }),
+      ignoreElements()
     ),
   (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
     action$.pipe(
