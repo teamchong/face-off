@@ -229,8 +229,8 @@ export const rootEpic = combineEpics(
         } = state$.value;
         if (imagesOverlayRef[id] && imagesOverlayRef[id].current) {
           const canvas = imagesOverlayRef[id].current;
-          ctx.clearRect(0, 0, width, height);
           const { width, height } = canvas;
+          ctx.clearRect(0, 0, width, height);
           const ctx = canvas.getContext('2d');
           drawDetection(canvas, result);
           console.log({ [id]: result });
