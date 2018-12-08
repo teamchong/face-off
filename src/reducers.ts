@@ -222,11 +222,10 @@ export const rootEpic = combineEpics(
             );
             const result = await query.toPromise();
             observer.next(detectedVideoFaces(result));
-            await timer(100).toPromise();
           }
 
           if (
-            tab === 'three' &&
+            tab === 'two' &&
             webcamRef.current &&
             (webcamRef.current as any).video &&
             isWebcamLoaded
@@ -253,7 +252,6 @@ export const rootEpic = combineEpics(
               videoHeight
             );
             observer.next(detectedWebcamFaces(result));
-            await timer(100).toPromise();
           }
 
           for (let i = 0, iL = images.length; i < iL; i++) {
@@ -276,8 +274,8 @@ export const rootEpic = combineEpics(
             observer.next(detectedImageFaces({ image, result }));
             await timer(100).toPromise();
           }
-          observer.next(detectFaces());
           await timer(100).toPromise();
+          observer.next(detectFaces());
           observer.complete();
         })
       )
