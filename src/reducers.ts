@@ -192,11 +192,12 @@ export const rootEpic = combineEpics(
           const canvas = videoOverlayRef.current;
           const { width, height } = canvas;
           const ctx = canvas.getContext('2d');
-          ctx.translate(0, 0);
+          //console.log({ width, height, videoWidth, videoHeight });
+          ctx.translate(~~(width / 2.0), ~~(height / 2.0));
           ctx.clearRect(0, 0, width, height);
           ctx.translate(
-            ~~((width - videoWidth) / 2),
-            ~~((height - videoHeight) / 2)
+            ~~((width - videoWidth) / 2.0 + width / 2.0),
+            ~~((height - videoHeight) / 2.0 + height / 2.0)
           );
           if (payload.length) {
             drawDetection(canvas, payload);
@@ -223,11 +224,11 @@ export const rootEpic = combineEpics(
           const canvas = webcamOverlayRef.current;
           const { width, height } = canvas;
           const ctx = canvas.getContext('2d');
-          ctx.translate(0, 0);
+          ctx.translate(~~(width / 2.0), ~~(height / 2.0));
           ctx.clearRect(0, 0, width, height);
           ctx.translate(
-            ~~((width - videoWidth) / 2),
-            ~~((height - videoHeight) / 2)
+            ~~((width - videoWidth) / 2.0 + width / 2.0),
+            ~~((height - videoHeight) / 2.0 + height / 2.0)
           );
           if (payload.length) {
             drawDetection(canvas, payload);
