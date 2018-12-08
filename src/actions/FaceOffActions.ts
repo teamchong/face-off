@@ -7,7 +7,7 @@ import {
   ADD_IMAGES,
   REMOVE_IMAGES,
   SWITCH_FACINGMODE,
-  CHANGE_YOUTUBEURL,
+  CHANGE_VIDEOURL,
   FETCH_MP4URL,
   FETCHED_MP4URL,
   START_APP,
@@ -33,14 +33,13 @@ export const removeImages = (imageIndexes: number[]) =>
 export const switchFacingMode = (facingMode: string) =>
   action(SWITCH_FACINGMODE, facingMode);
 
-export const changeYoutubeUrl = (youtubeUrl: string) =>
-  action(CHANGE_YOUTUBEURL, youtubeUrl);
+export const changeVideoUrl = (videoUrl: string) =>
+  action(CHANGE_VIDEOURL, videoUrl);
 
-export const fetchMp4Url = (youtubeUrl: string) =>
-  action(FETCH_MP4URL, youtubeUrl);
+export const fetchMp4Url = (videoUrl: string) => action(FETCH_MP4URL, videoUrl);
 
 export const fetchedMp4Url = (payload: {
-  youtubeUrlLoaded: string;
+  videoUrlLoaded: string;
   mp4Url: string;
 }) => action(FETCHED_MP4URL, payload);
 

@@ -51,7 +51,7 @@ import {
   ADD_IMAGES,
   REMOVE_IMAGES,
   SWITCH_FACINGMODE,
-  CHANGE_YOUTUBEURL,
+  CHANGE_VIDEOURL,
   LOADED_VIDEO,
   LOADED_WEBCAM,
   FETCH_MP4URL,
@@ -64,8 +64,8 @@ import {
   DETECTED_WEBCAMFACES,
   DETECTED_IMAGEFACES,
   FACINGMODE_REAR,
-  YOUTUBE_API,
-  DEFAULT_YOUTUBE_URL,
+  VIDEO_API,
+  DEFAULT_VIDEO_URL,
 } from './constants';
 
 // import {
@@ -114,7 +114,7 @@ export const rootEpic = combineEpics(
   (action$: Observable<RootActions>) =>
     action$.pipe(
       filter(isOfType(START_APP)),
-      mapTo(fetchMp4Url(DEFAULT_YOUTUBE_URL))
+      mapTo(fetchMp4Url(DEFAULT_VIDEO_URL))
     ),
   (action$: Observable<RootActions>) =>
     action$.pipe(
@@ -283,19 +283,19 @@ export const rootEpic = combineEpics(
   (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
     action$.pipe(
       filter(isOfType(FETCH_MP4URL)),
-      switchMap(({ payload: youtubeUrl }) =>
-        from(fetch(`${YOUTUBE_API}${youtubeUrl}`)).pipe(
+      switchMap(({ payload: videoUrl }) =>
+        from(fetch(`${VIDEO_API}${videoUrl}`)).pipe(
           switchMap(result => result.json()),
           //tap(result => console.log(result)),
           map(result => result.filter(r => /^video\/mp4;/.test(r.type))),
           map(result =>
             !result.length
               ? fetchedMp4Url({
-                  youtubeUrlLoaded: youtubeUrl,
-                  mp4Url: youtubeUrl,
+                  videoUrlLoaded: videoUrl,
+                  mp4Url: videoUrl,
                 })
               : fetchedMp4Url({
-                  youtubeUrlLoaded: youtubeUrl,
+                  videoUrlLoaded: vidoeUrl,
                   mp4Url: result[result.length - 1].url,
                 })
           )
@@ -314,8 +314,8 @@ export const rootReducer = combineReducers<RootState, RootActions>({
       tab: 'one',
       message: '',
       facingMode: FACINGMODE_REAR,
-      youtubeUrl: DEFAULT_YOUTUBE_URL,
-      youtubeUrlLoaded: '',
+      videoUrl: DEFAULT_VIDEO_URL,
+      videoUrlLoaded: '',
       mp4Url: '',
       videoRef: createRef<HTMLVideoElement>(),
       webcamRef: createRef<Webcam>(),
@@ -392,21 +392,20 @@ export const rootReducer = combineReducers<RootState, RootActions>({
         const { payload: facingMode } = action;
         return { ...state, facingMode };
       }
-      case CHANGE_YOUTUBEURL: {
-        const { payload: youtubeUrl } = action;
-        return { ...state, youtubeUrl };
+      case CHANGE_VIDEOURL: {
+        const { payload: videoUrl } = action;
+        return { ...state, videoUrl };
       }
       case FETCH_MP4URL: {
-        const { payload: youtubeUrlBeforeTrim } = action;
-        const youtubeUrl = (youtubeUrlBeforeTrim || '').replace(
-          /^\s+|\s+$/g,
-          ''
-        );
-        return { ...state, youtubeUrl, mp4Url: '', isVideoLoaded: false };
+        const { payload: videoUrlBeforeTrim } = action;
+        const videoUrl = (videoUrlBeforeTrim || '').replace(/^\s+|\s+$/g, '');
+        return { ...state, videoUrl, mp4Url: '', isVideoLoaded: false };
       }
       case FETCHED_MP4URL: {
-        const { youtubeUrlLoaded, mp4Url } = action.payload;
-        return { ...state, youtubeUrlLoaded, mp4Url, isVideoLoaded: false };
+        const {
+          payload: { videoUrlLoaded, mp4Url },
+        } = action;
+        return { ...state, videoUrlLoaded, mp4Url, isVideoLoaded: false };
       }
       case LOADED_MODELS: {
         return { ...state, isModelsLoaded: true };

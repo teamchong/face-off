@@ -9,8 +9,8 @@ export interface FaceOffModel {
   readonly tab: string;
   readonly message: string;
   readonly facingMode: string;
-  readonly youtubeUrl: string;
-  readonly youtubeUrlLoaded: string;
+  readonly videoUrl: string;
+  readonly videoUrlLoaded: string;
   readonly mp4Url: string;
   readonly videoRef: RefObject<HTMLVideoElement>;
   readonly webcamRef: RefObject<Webcam>;

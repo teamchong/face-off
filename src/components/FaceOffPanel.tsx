@@ -37,7 +37,7 @@ import { Fragment } from 'react';
 import { Props, ReactElement, ReactNode, ReactType } from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
-import YoutubeComponent from './YoutubeComponent';
+import VideoComponent from './VideoComponent';
 import DropzoneComponent from './DropzoneComponent';
 import WebcamComponent from './WebcamComponent';
 import {
@@ -146,7 +146,7 @@ const withActiveTab = (Container: ReactType) => (
   ) : props.tab === 'two' ? (
     <Container {...props} ActiveTab={WebcamComponent} />
   ) : (
-    <Container {...props} ActiveTab={YoutubeComponent} />
+    <Container {...props} ActiveTab={VideoComponent} />
   );
 
 const FaceOffPanel = ({

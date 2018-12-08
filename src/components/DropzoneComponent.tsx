@@ -52,7 +52,7 @@ const mapStateToProps = ({ faceOffPanel }: RootState) =>
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   addImages: (images: HTMLImageElement[]) => dispatch(addImages(images)),
   showMessage: (message: string) => dispatch(showMessage(message)),
-  fetchMp4Url: (youtubeUrl: string) => dispatch(fetchMp4Url(youtubeUrl)),
+  fetchMp4Url: (videoUrl: string) => dispatch(fetchMp4Url(videoUrl)),
   switchTab: (tab: string) => dispatch(switchTab(tab)),
 });
 
@@ -214,19 +214,19 @@ const DropzoneComponent = ({
       const videoFiles = [];
       for (let i = 0, iL = acceptedFiles.length; i < iL; i++) {
         const file = acceptedFiles[i];
+
         if (file.type === 'video/mp4') {
-          videoFiles.push(file);
+          videoFiles.push(createObjectURL(file));
         } else {
-          imageFiles.push(file);
+          imageFiles.push(await readAsImage(file));
         }
       }
       if (imageFiles.length) {
-        addImages(
-          await Promise.all(imageFiles.map(image => readAsImage(image)))
-        );
+        addImages(imageFiles);
       }
       if (videoFiles.length) {
-        fetchMp4Url;
+        fetchMp4Url(videoFiles[videoFiles.length - 1]);
+        switchTab('one');
       }
     }
     const rejectedMessage = (rejectedFiles || [])

@@ -28,7 +28,7 @@ import {
 } from '../constants';
 import {
   showMessage,
-  changeYoutubeUrl,
+  changeVideoUrl,
   addImages,
   fetchMp4Url,
   loadedVideo,
@@ -80,14 +80,14 @@ const styles = ({ spacing }: Theme) =>
 const faceOffPanelSelector = ({
   videoRef,
   videoOverlayRef,
-  youtubeUrl,
-  youtubeUrlLoaded,
+  videoUrl,
+  videoUrlLoaded,
   mp4Url,
 }: FaceOffModel) => ({
   videoRef,
   videoOverlayRef,
-  youtubeUrl,
-  youtubeUrlLoaded,
+  videoUrl,
+  videoUrlLoaded,
   mp4Url,
 });
 
@@ -97,21 +97,20 @@ const mapStateToProps = ({ faceOffPanel }: RootState) =>
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   showMessage: (message: string) => dispatch(showMessage(message)),
   addImages: (images: HTMLImageElement[]) => dispatch(addImages(images)),
-  changeYoutubeUrl: (youtubeUrl: string) =>
-    dispatch(changeYoutubeUrl(youtubeUrl)),
-  fetchMp4Url: (youtubeUrl: string) => dispatch(fetchMp4Url(youtubeUrl)),
+  changeVideoUrl: (videoUrl: string) => dispatch(changeVideoUrl(videoUrl)),
+  fetchMp4Url: (videoUrl: string) => dispatch(fetchMp4Url(videoUrl)),
   loadedVideo: () => dispatch(loadedVideo()),
 });
 
-const YoutubeComponent = ({
+const VideoComponent = ({
   classes,
   videoRef,
   videoOverlayRef,
-  youtubeUrl,
-  youtubeUrlLoaded,
+  videoUrl,
+  videoUrlLoaded,
   mp4Url,
   showMessage,
-  changeYoutubeUrl,
+  changeVideoUrl,
   fetchMp4Url,
   loadedVideo,
   addImages,
@@ -135,8 +134,8 @@ const YoutubeComponent = ({
       }
     });
   const textFieldHandler = ({ target }: ChangeEvent<HTMLInputElement>) =>
-    changeYoutubeUrl(target!.value);
-  const playHandler = () => fetchMp4Url(youtubeUrl);
+    changeVideoUrl(target!.value);
+  const playHandler = () => fetchMp4Url(videoUrl);
   const screenshotHandler = async () => {
     const src = (await readAsDataURL()) || '';
     addImages([
@@ -152,15 +151,15 @@ const YoutubeComponent = ({
       }),
     ]);
   };
-  const youtubeUrlTrimmed = (youtubeUrl || '').replace(/^\s+|\s+$/g, '');
+  const videoUrlTrimmed = (videoUrl || '').replace(/^\s+|\s+$/g, '');
   const loadedDataHandler = () => loadedVideo();
   return (
     <div className={classes!.container}>
       <div>
         <TextField
-          label="Youtube Url"
+          label="Video Url"
           className={classes!.textField}
-          value={youtubeUrl}
+          value={videoUrl}
           onChange={textFieldHandler}
           margin="normal"
           variant="outlined"
@@ -176,7 +175,7 @@ const YoutubeComponent = ({
                     <PhotoCamera />
                   </IconButton>
                 )}
-                {!!youtubeUrlTrimmed && youtubeUrlTrimmed !== youtubeUrlLoaded && (
+                {!!videoUrlTrimmed && videoUrlTrimmed !== videoUrlLoaded && (
                   <IconButton
                     aria-label="Take screenshot"
                     onClick={playHandler}
@@ -213,13 +212,14 @@ const YoutubeComponent = ({
             crossOrigin="anonymous"
             onCanPlay={loadedDataHandler}
           >
-            <source src={`${CORS_PROXY_URL}${mp4Url}`} type="video/mp4" />
+            <source
+              src={`${/^http/i.test(mp4Url) ? CORS_PROXY_URL : ''}${mp4Url}`}
+              type="video/mp4"
+            />
           </video>
         </Fragment>
       ) : (
-        !!youtubeUrlTrimmed && (
-          <CircularProgress className={classes!.progress} />
-        )
+        !!videoUrlTrimmed && <CircularProgress className={classes!.progress} />
       )}
     </div>
   );
@@ -228,4 +228,4 @@ const YoutubeComponent = ({
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(withStyles(styles)(YoutubeComponent));
+)(withStyles(styles)(videoComponent));
