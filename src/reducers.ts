@@ -14,6 +14,7 @@ import {
 } from 'rxjs';
 import {
   catchError,
+  concatAll,
   combineAll,
   concatMap,
   defaultIfEmpty,
@@ -30,16 +31,6 @@ import {
   tap,
 } from 'rxjs/operators';
 import { ActionType, isOfType } from 'typesafe-actions';
-// import {
-//   detectAllFaces,
-//   loadSsdMobilenetv1Model,
-//   SsdMobilenetv1Options,
-// } from 'face-api.js';
-import {
-  detectAllFaces,
-  loadTinyFaceDetectorModel,
-  TinyFaceDetectorOptions,
-} from 'face-api.js';
 import { FaceOffModel } from './models';
 import * as actions from './actions';
 import {
@@ -47,7 +38,9 @@ import {
   fetchedMp4Url,
   loadedModels,
   detectFaces,
-  detectedFaces,
+  detectedVideoFaces,
+  detectedWebcamFaces,
+  detectedImageFaces,
   loadedVideo,
   loadedWebcam,
 } from './actions';
@@ -67,14 +60,30 @@ import {
   STOP_APP,
   LOADED_MODELS,
   DETECT_FACES,
-  DETECTED_FACES,
+  DETECTED_VIDEOFACES,
+  DETECTED_WEBCAMFACES,
+  DETECTED_IMAGEFACES,
   FACINGMODE_REAR,
   YOUTUBE_API,
   DEFAULT_YOUTUBE_URL,
-  VIDEO_INDEX,
-  WEBCAM_INDEX,
 } from './constants';
 
+// import {
+//   detectAllFaces,
+//   loadSsdMobilenetv1Model,
+//   SsdMobilenetv1Options,
+//   drawDetection,
+// } from 'face-api.js';
+//const FaceDetectModel = loadSsdMobilenetv1Model;
+//const FaceDetectOptions = new SsdMobilenetv1Options();
+import {
+  detectAllFaces,
+  loadTinyFaceDetectorModel,
+  TinyFaceDetectorOptions,
+  drawDetection,
+} from 'face-api.js';
+const FaceDetectModel = loadTinyFaceDetectorModel;
+const FaceDetectOptions = new TinyFaceDetectorOptions();
 export type RootActions = ActionType<typeof actions>;
 export type RootState = {
   readonly faceOffPanel: FaceOffModel;
@@ -90,8 +99,7 @@ export const rootEpic = combineEpics(
     action$.pipe(
       filter(isOfType(START_APP)),
       switchMap(() =>
-        //loadSsdMobilenetv1Model(
-        loadTinyFaceDetectorModel(
+        FaceDetectModel(
           'https://justadudewhohacks.github.io/face-api.js/models/'
         )
       ),
@@ -105,47 +113,69 @@ export const rootEpic = combineEpics(
   (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
     action$.pipe(
       filter(isOfType(DETECT_FACES)),
-      filter(() => state$.value.faceOffPanel.isAppStarted),
+      filter(() => state$.value.faceOffPanel.isAppRunning),
       switchMap(() =>
         Observable.create(async observer => {
-          const { faceOffPanel } = state$.value;
           const {
-            tab,
-            videoRef,
-            isVideoLoaded,
-            images,
-            imageDetectResults,
-          } = faceOffPanel;
+            faceOffPanel: {
+              tab,
+              videoRef,
+              webcamRef,
+              isVideoLoaded,
+              isWebcamLoaded,
+              images,
+              imagesDetectResults,
+            },
+          } = state$.value;
 
           if (tab === 'one' && videoRef.current && isVideoLoaded) {
             //const result = await detectAllFaces(videoRef.current, new SsdMobilenetv1Options());
             const query = from(
-              detectAllFaces(videoRef.current, new TinyFaceDetectorOptions())
+              detectAllFaces(videoRef.current, FaceDetectOptions)
             ).pipe(
               timeout(2000),
               catchError(() => of([]))
             );
             const result = await query.toPromise();
             if (result.length) {
-              console.log({ index: VIDEO_INDEX, result });
-              observer.next(detectedFaces({ index: VIDEO_INDEX, result }));
+              console.log({ video: result });
+              observer.next(detectedVideoFaces(result));
+            }
+          }
+
+          if (tab === 'three' && webcamRef.current && isWebcamLoaded) {
+            //const result = await detectAllFaces(videoRef.current, new SsdMobilenetv1Options());
+            const query = from(
+              detectAllFaces(
+                (webcamRef.current as any).video,
+                FaceDetectOptions
+              )
+            ).pipe(
+              timeout(2000),
+              catchError(() => of([]))
+            );
+            const result = await query.toPromise();
+            if (result.length) {
+              console.log({ webcam: result });
+              observer.next(detectedWebcamFaces(result));
             }
           }
 
           for (let i = 0, iL = images.length; i < iL; i++) {
-            if (imageDetectResults[i]) {
+            const { id } = images[i];
+            if (id in imagesDetectResults) {
               continue;
             }
             const query = from(
-              detectAllFaces(images[i], new TinyFaceDetectorOptions())
+              detectAllFaces(images[i], FaceDetectOptions)
             ).pipe(
               timeout(2000),
               catchError(() => of([]))
             );
             const result = await query.toPromise();
             if (result.length) {
-              console.log({ [i]: result });
-              observer.next(detectedFaces({ index: i, result }));
+              console.log({ id, result });
+              observer.next(detectedImageFaces({ id, result }));
             }
           }
           await timer(500).toPromise();
@@ -153,6 +183,41 @@ export const rootEpic = combineEpics(
           observer.complete();
         })
       )
+    ),
+  (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
+    action$.pipe(
+      filter(isOfType(DETECTED_VIDEOFACES)),
+      filter(() => state$.value.faceOffPanel.isAppRunning),
+      tap(({ payload }) => {
+        const {
+          faceOffPanel: { videoOverlayRef },
+        } = state$.value;
+        if (videoOverlayRef.current)
+          drawDetection(videoOverlayRef.current, payload);
+      })
+    ),
+  (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
+    action$.pipe(
+      filter(isOfType(DETECTED_WEBCAMFACES)),
+      filter(() => state$.value.faceOffPanel.isAppRunning),
+      tap(({ payload }) => {
+        const {
+          faceOffPanel: { webcamOverlayRef },
+        } = state$.value;
+        if (webcamOverlayRef.current)
+          drawDetection(webcamOverlayRef.current, payload);
+      })
+    ),
+  (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
+    action$.pipe(
+      filter(isOfType(DETECTED_IMAGEFACES)),
+      filter(() => state$.value.faceOffPanel.isAppRunning),
+      tap(({ payload: { id, result } }) => {
+        const {
+          faceOffPanel: { imagesOverlayRef },
+        } = state$.value;
+        if (imagesOverlayRef[id]) drawDetection(imagesOverlayRef[id], result);
+      })
     ),
   (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
     action$.pipe(
@@ -176,22 +241,25 @@ export const rootEpic = combineEpics(
 export const rootReducer = combineReducers<RootState, RootActions>({
   faceOffPanel(
     state = {
-      isAppStarted: false,
+      isAppRunning: false,
+      isModelsLoaded: false,
+      isVideoLoaded: false,
+      isWebcamLoaded: false,
       tab: 'one',
       message: '',
-      images: [],
-      imageDetectResults: [],
-      videoDetectResults: [],
-      webcamDetectResults: [],
       facingMode: FACINGMODE_REAR,
       youtubeUrl: DEFAULT_YOUTUBE_URL,
       youtubeUrlLoaded: '',
       mp4Url: '',
       videoRef: createRef<HTMLVideoElement>(),
       webcamRef: createRef<Webcam>(),
-      isModelsLoaded: false,
-      isVideoLoaded: false,
-      isWebcamLoaded: false,
+      images: [],
+      videoOverlayRef: createRef<HTMLCanvasElement>(),
+      webcamOverlayRef: createRef<HTMLCanvasElement>(),
+      imagesOverlayRef: {},
+      imagesDetectResults: {},
+      videoDetectResults: [],
+      webcamDetectResults: [],
     },
     action: RootActions
   ) {
@@ -209,24 +277,52 @@ export const rootReducer = combineReducers<RootState, RootActions>({
       }
       case ADD_IMAGES: {
         const { payload: images } = action;
-        const imageDetectResults = images.map(() => null);
+        images.forEach(
+          image =>
+            (image.id =
+              '_' +
+              Math.random()
+                .toString(36)
+                .substr(2, 9))
+        );
         return {
           ...state,
           images: [...state.images, ...images],
-          imageFaceDetctResults: [
-            ...state.imageDetectResults,
-            ...imageDetectResults,
-          ],
+          imageFaceDetctResults: {
+            ...state.imagesDetectResults,
+            ...images.reduce((result, image) => {
+              result[image.id] = null;
+              return result;
+            }, {}),
+          },
+          imagesOverlayRef: {
+            ...state.imagesOverlayRef,
+            ...images.reduce((result, image) => {
+              const canvas = document.createElement('canvas');
+              canvas.width = image.width;
+              canvas.height = image.height;
+              result[image.id] = canvas;
+              return result;
+            }, {}),
+          },
         };
       }
       case REMOVE_IMAGES: {
         const { payload: imageIndexes } = action;
+        const imageIds = state.images
+          .filter((image, i) => imageIndexes.indexOf(i) < 0)
+          .map(image => image.id);
         return {
           ...state,
           images: state.images.filter((img, i) => imageIndexes.indexOf(i) < 0),
-          imageDetectResults: state.imageDetectResults.filter(
-            (img, i) => imageIndexes.indexOf(i) < 0
-          ),
+          imagesDetectResults: imageIds.reduce((result, imageId) => {
+            result[imageId] = state.imagesDetectResults[imageId];
+            return result;
+          }, {}),
+          imagesOverlayRef: imageIds.reduce((result, imageId) => {
+            result[imageId] = state.imagesOverlayRef[imageId];
+            return result;
+          }, {}),
         };
       }
       case SWITCH_FACINGMODE: {
@@ -253,34 +349,35 @@ export const rootReducer = combineReducers<RootState, RootActions>({
         return { ...state, isModelsLoaded: true };
       }
       case START_APP: {
-        return { ...state, isAppStarted: true };
+        return { ...state, isAppRunning: true };
       }
       case STOP_APP: {
-        return { ...state, isAppStarted: false };
+        return { ...state, isAppRunning: false };
       }
-      case DETECT_FACES: {
-        return { ...state };
+      case DETECTED_VIDEOFACES: {
+        const { payload: videoDetectResults } = action;
+        return {
+          ...state,
+          videoDetectResults,
+        };
       }
-      case DETECTED_FACES: {
-        const { index, result } = action.payload;
-        if (index === VIDEO_INDEX) {
-          return {
-            ...state,
-            videoDetectResults: result,
-          };
-        } else if (index === WEBCAM_INDEX) {
-          return {
-            ...state,
-            webcamDetectResults: result,
-          };
-        } else {
-          return {
-            ...state,
-            imageDetectResults: Object.assign([], state.imageDetectResults, {
-              [index]: result,
-            }),
-          };
-        }
+      case DETECTED_WEBCAMFACES: {
+        const { payload: webcamDetectResults } = action;
+        return {
+          ...state,
+          webcamDetectResults,
+        };
+      }
+      case DETECTED_IMAGEFACES: {
+        const {
+          payload: { id, result },
+        } = action;
+        return {
+          ...state,
+          imagesDetectResults: Object.assign({}, state.imagesDetectResults, {
+            [id]: result,
+          }),
+        };
       }
       case LOADED_VIDEO: {
         return { ...state, isVideoLoaded: true };

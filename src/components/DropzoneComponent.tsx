@@ -6,14 +6,15 @@ import {
 } from '@material-ui/core/styles';
 import { Collections } from '@material-ui/icons';
 import * as React from 'react';
-import { Fragment, ReactElement } from 'react';
-import * as Dropzone from 'react-dropzone';
+import { Fragment, ReactElement, ReactType } from 'react';
+import * as DropzoneType from 'react-dropzone';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { addImages, showMessage } from '../actions/FaceOffActions';
 import { FaceOffModel } from '../models';
 import { RootState } from '../reducers';
 
+const Dropzone: ReactType = DropzoneType as any;
 const MAX_WIDTH = 640;
 
 const styles = () =>
@@ -26,6 +27,11 @@ const styles = () =>
     },
     iconSmall: {
       fontSize: 20,
+    },
+    overlay: {
+      position: 'absolute',
+      pointerEvents: 'none',
+      zIndex: 1,
     },
   });
 
@@ -201,42 +207,36 @@ ${rejectedMessage}`);
     }
   };
   return (
-    <Fragment>
-      <Dropzone
-        accept="image/jpeg, image/png"
-        onDrop={dropHandler}
-        className="color-bg"
-        style={{
-          borderWidth: 5,
-          borderStyle: 'dashed',
-          borderColor: 'rgba(0,0,0,0.2)',
-          borderRadius: 5,
-          width: 640,
-          height: 480,
-          alignContent: 'center',
-          justifyContent: 'center',
-          flexFlow: 'row wrap',
-          display: 'flex',
-        }}
+    <Dropzone
+      accept="image/jpeg, image/png"
+      onDrop={dropHandler}
+      className="color-bg"
+      style={{
+        borderWidth: 5,
+        borderStyle: 'dashed',
+        borderColor: 'rgba(0,0,0,0.2)',
+        borderRadius: 5,
+        width: 640,
+        height: 480,
+        alignContent: 'center',
+        justifyContent: 'center',
+        flexFlow: 'row wrap',
+        display: 'flex',
+      }}
+    >
+      <Typography
+        variant="h4"
+        gutterBottom={true}
+        className={classes!.typography}
       >
-        <Typography
-          variant="h4"
-          gutterBottom={true}
-          className={classes!.typography}
-        >
-          Drop your file here...
-        </Typography>
-        <div className={classes!.br} />
-        <Button
-          variant="contained"
-          color="secondary"
-          className={classes!.button}
-        >
-          Browse...
-          <Collections />
-        </Button>
-      </Dropzone>
-    </Fragment>
+        Drop your file here...
+      </Typography>
+      <div className={classes!.br} />
+      <Button variant="contained" color="secondary" className={classes!.button}>
+        Browse...
+        <Collections />
+      </Button>
+    </Dropzone>
   );
 };
 

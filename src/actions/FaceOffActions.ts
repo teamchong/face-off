@@ -14,7 +14,9 @@ import {
   STOP_APP,
   LOADED_MODELS,
   DETECT_FACES,
-  DETECTED_FACES,
+  DETECTED_VIDEOFACES,
+  DETECTED_WEBCAMFACES,
+  DETECTED_IMAGEFACES,
   LOADED_VIDEO,
   LOADED_WEBCAM,
 } from '../constants';
@@ -49,8 +51,14 @@ export const loadedModels = () => action(LOADED_MODELS);
 
 export const detectFaces = () => action(DETECT_FACES);
 
-export const detectedFaces = (payload: { index: number; result: any[] }) =>
-  action(DETECTED_FACES, payload);
+export const detectedVideoFaces = (payload: any[]) =>
+  action(DETECTED_VIDEOFACES, payload);
+
+export const detectedWebcamFaces = (payload: any[]) =>
+  action(DETECTED_WEBCAMFACES, payload);
+
+export const detectedImageFaces = (payload: { id: string; result: any[] }) =>
+  action(DETECTED_IMAGEFACES, payload);
 
 export const loadedVideo = () => action(LOADED_VIDEO);
 

@@ -17,7 +17,7 @@ import {
   PlayCircleFilled,
 } from '@material-ui/icons';
 import * as React from 'react';
-import { createRef, ChangeEvent } from 'react';
+import { createRef, ChangeEvent, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import {
@@ -42,6 +42,11 @@ const styles = ({ spacing }: Theme) =>
   createStyles({
     container: {
       position: 'relative',
+    },
+    overlay: {
+      position: 'absolute',
+      pointerEvents: 'none',
+      zIndex: 1,
     },
     progress: {
       margin: spacing.unit * 2,
@@ -86,6 +91,7 @@ type YoutubeComponentProps = StyledComponentProps &
 const YoutubeComponent = ({
   classes,
   videoRef,
+  videoOverlayRef,
   youtubeUrl,
   youtubeUrlLoaded,
   mp4Url,
@@ -166,24 +172,32 @@ const YoutubeComponent = ({
         />
       </div>
       {!!mp4Url ? (
-        <video
-          ref={videoRef}
-          width={WIDTH}
-          height={HEIGHT}
-          controls={true}
-          autoPlay={false}
-          loop={true}
-          muted={true}
-          style={{
-            borderWidth: 5,
-            borderStyle: 'solid',
-            borderColor: '#ccc',
-          }}
-          crossOrigin="anonymous"
-          onCanPlay={loadedDataHandler}
-        >
-          <source src={`${CORS_PROXY_URL}${mp4Url}`} type="video/mp4" />
-        </video>
+        <Fragment>
+          <canvas
+            className={classes!.overlay}
+            width={WIDTH}
+            height={HEIGHT}
+            ref={videoOverlayRef}
+          />
+          <video
+            ref={videoRef}
+            width={WIDTH}
+            height={HEIGHT}
+            controls={true}
+            autoPlay={false}
+            loop={true}
+            muted={true}
+            style={{
+              borderWidth: 5,
+              borderStyle: 'solid',
+              borderColor: '#ccc',
+            }}
+            crossOrigin="anonymous"
+            onCanPlay={loadedDataHandler}
+          >
+            <source src={`${CORS_PROXY_URL}${mp4Url}`} type="video/mp4" />
+          </video>
+        </Fragment>
       ) : (
         !!youtubeUrlTrimmed && (
           <CircularProgress className={classes!.progress} />
@@ -195,11 +209,13 @@ const YoutubeComponent = ({
 
 const faceOffPanelSelector = ({
   videoRef,
+  videoOverlayRef,
   youtubeUrl,
   youtubeUrlLoaded,
   mp4Url,
-}: FaceOffPanelModel) => ({
+}: FaceOffModel) => ({
   videoRef,
+  videoOverlayRef,
   youtubeUrl,
   youtubeUrlLoaded,
   mp4Url,

@@ -2,20 +2,23 @@ import { RefObject } from 'react';
 import * as Webcam from 'react-webcam';
 
 export interface FaceOffModel {
-  readonly isAppStarted: boolean;
+  readonly isAppRunning: boolean;
+  readonly isModelsLoaded: boolean;
+  readonly isVideoLoaded: boolean;
+  readonly isWebcamLoaded: boolean;
   readonly tab: string;
   readonly message: string;
-  readonly images: HTMLImageElement[];
-  readonly imageDetectResults: Array<any[]>;
-  readonly videoDetectResults: any[];
-  readonly webcamDetectResults: any[];
   readonly facingMode: string;
   readonly youtubeUrl: string;
   readonly youtubeUrlLoaded: string;
   readonly mp4Url: string;
   readonly videoRef: RefObject<HTMLVideoElement>;
   readonly webcamRef: RefObject<Webcam>;
-  readonly isModelsLoaded: boolean;
-  readonly isVideoLoaded: boolean;
-  readonly isWebcamLoaded: boolean;
+  readonly images: HTMLImageElement[];
+  readonly videoOverlayRef: RefObject<HTMLCanvasElement>;
+  readonly webcamOverlayRef: RefObject<HTMLCanvasElement>;
+  readonly imagesOverlayRef: { [id: string]: RefObject<HTMLCanvasElement> };
+  readonly imagesDetectResults: { [id: string]: any[] };
+  readonly videoDetectResults: any[];
+  readonly webcamDetectResults: any[];
 }

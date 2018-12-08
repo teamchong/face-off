@@ -21,10 +21,9 @@ export const LOADED_VIDEO = 'LOADED_VIDEO';
 export const LOADED_WEBCAM = 'LOADED_WEBCAM';
 
 export const DETECT_FACES = 'DETECT_FACES';
-export const DETECTED_FACES = 'DETECTED_FACES';
-
-export const VIDEO_INDEX = -1;
-export const WEBCAM_INDEX = -2;
+export const DETECTED_VIDEOFACES = 'DETECTED_VIDEOFACES';
+export const DETECTED_WEBCAMFACES = 'DETECTED_WEBCAMFACES';
+export const DETECTED_IMAGEFACES = 'DETECTED_IMAGEFACES';
 
 /* constants */
 export const FACINGMODE_REAR = 'environment';

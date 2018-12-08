@@ -51,6 +51,11 @@ const styles = ({ spacing }: Theme) =>
     container: {
       position: 'relative',
     },
+    overlay: {
+      position: 'absolute',
+      pointerEvents: 'none',
+      zIndex: 1,
+    },
     loading: {
       position: 'absolute',
       marginTop: '-6px',
@@ -80,6 +85,7 @@ type Actions = {
   showMessage: typeof showMessage;
   switchFacingMode: typeof switchFacingMode;
   addImages: typeof addImages;
+  loadedWebcam: typeof loadedWebcam;
 };
 type WebcamComponentProps = StyledComponentProps &
   Actions &
@@ -88,6 +94,7 @@ const WebcamComponent = ({
   classes,
   isWebcamLoaded,
   webcamRef,
+  webcamOverlayRef,
   facingMode,
   showMessage,
   switchFacingMode,
@@ -146,11 +153,16 @@ const WebcamComponent = ({
           </Fab>
         )}
       </div>
+      <canvas
+        className={classes!.overlay}
+        width={WIDTH}
+        height={HEIGHT}
+        ref={webcamOverlayRef}
+      />
       <Webcam
         ref={webcamRef}
         width={WIDTH}
         height={HEIGHT}
-        videoConstraints={{ facingMode }}
         audio={false}
         screenshotFormat="image/jpeg"
         onUserMedia={userMediaHandler}
@@ -159,6 +171,7 @@ const WebcamComponent = ({
           borderStyle: 'solid',
           borderColor: '#ccc',
         }}
+        {...{ videoConstraints: facingMode }}
       />
     </div>
   );
@@ -168,10 +181,12 @@ const faceOffPanelSelector = ({
   facingMode,
   isWebcamLoaded,
   webcamRef,
+  webcamOverlayRef,
 }: FaceOffModel) => ({
   facingMode,
   isWebcamLoaded,
   webcamRef,
+  webcamOverlayRef,
 });
 
 const mapStateToProps = ({ faceOffPanel }: RootState) =>
