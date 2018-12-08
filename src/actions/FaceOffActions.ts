@@ -57,8 +57,10 @@ export const detectedVideoFaces = (payload: any[]) =>
 export const detectedWebcamFaces = (payload: any[]) =>
   action(DETECTED_WEBCAMFACES, payload);
 
-export const detectedImageFaces = (payload: { id: string; result: any[] }) =>
-  action(DETECTED_IMAGEFACES, payload);
+export const detectedImageFaces = (payload: {
+  image: HTMLImageElement;
+  result: any[];
+}) => action(DETECTED_IMAGEFACES, payload);
 
 export const loadedVideo = () => action(LOADED_VIDEO);
 

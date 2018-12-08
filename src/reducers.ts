@@ -161,13 +161,6 @@ export const rootEpic = combineEpics(
               catchError(() => of([]))
             );
             const result = await query.toPromise();
-            const { videoWidth, videoHeight } = videoRef.current;
-            drawDetections(
-              result,
-              videoOverlayRef.current,
-              videoWidth,
-              videoHeight
-            );
             observer.next(detectedVideoFaces(result));
           }
 
@@ -218,13 +211,74 @@ export const rootEpic = combineEpics(
               image.width,
               image.height
             );
-            observer.next(detectedImageFaces({ id, result }));
+            observer.next(detectedImageFaces({ image, result }));
           }
           await timer(100).toPromise();
           observer.next(detectFaces());
           observer.complete();
         })
       )
+    ),
+  (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
+    action$.pipe(
+      filter(isOfType(DETECTED_VIDEOFACES)),
+      filter(() => state$.value.faceOffPanel.isAppRunning),
+      tap(({ payload }) => {
+        const {
+          faceOffPanel: {
+            videoRef: {
+              current: { videoWidth, videoHeight },
+            },
+            videoOverlayRef,
+          },
+        } = state$.value;
+        drawDetections(
+          payload,
+          videoOverlayRef.current,
+          videoWidth,
+          videoHeight
+        );
+      }),
+      ignoreElements()
+    ),
+  (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
+    action$.pipe(
+      filter(isOfType(DETECTED_WEBCAMFACES)),
+      filter(() => state$.value.faceOffPanel.isAppRunning),
+      tap(({ payload }) => {
+        const {
+          faceOffPanel: { webcamRef, webcamOverlayRef },
+        } = state$.value;
+        const {
+          current: {
+            video: { videoWidth, videoHeight },
+          },
+        } = webcamRef as any;
+        drawDetections(
+          payload,
+          webcamOverlayRef.current,
+          videoWidth,
+          videoHeight
+        );
+      }),
+      ignoreElements()
+    ),
+  (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
+    action$.pipe(
+      filter(isOfType(DETECTED_IMAGEFACES)),
+      filter(() => state$.value.faceOffPanel.isAppRunning),
+      tap(({ payload: { image, result } }) => {
+        const {
+          faceOffPanel: { imagesOverlayRef },
+        } = state$.value;
+        drawDetections(
+          result,
+          (imagesOverlayRef[image.id] || ({} as any)).current,
+          image.width,
+          image.height
+        );
+      }),
+      ignoreElements()
     ),
   (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
     action$.pipe(
