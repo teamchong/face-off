@@ -119,21 +119,18 @@ const WebcamComponent = ({
   const screenshotHandler = async () => {
     if (webcamRef.current && (webcamRef.current as any).video) {
       const video: HTMLVideoElement = (webcamRef.current as any).video;
-      const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      canvas
-        .getContext('2d')
-        .drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-      var src = createObjectURL(await canvasToBlob(canvas, 'image/png'));
-      console.log(src);
+      const ctx = document.createElement('canvas').getContext('2d');
+      ctx.canvas.width = video.videoWidth;
+      ctx.canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+      const src = createObjectURL(await canvasToBlob(ctx.canvas, 'image/png'));
       addImages([
         await new Promise<HTMLImageElement>((resolve, reject) => {
           const imgEl = new Image();
           imgEl.title = `WebCam-${new Date()
             .toLocaleString('en-GB')
             .replace('/', '-')
-            .replace(/[,]/g, '')}.png`;
+            .replace(/[,]/g, '')}.jpg`;
           imgEl.onload = () => resolve(imgEl);
           imgEl.onerror = error => reject(error);
           imgEl.src = src;
