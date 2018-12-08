@@ -287,7 +287,7 @@ export const rootEpic = combineEpics(
           ) {
             video = (webcamRef.current as any).video;
           }
-          if (video) {
+          if (video && video.videoWidth) {
             const { videoWidth, videoHeight } = video;
             videoCtx.canvas.width = videoWidth;
             videoCtx.canvas.height = videoHeight;
@@ -308,6 +308,8 @@ export const rootEpic = combineEpics(
             observer.next(detectedVideoFaces([]));
           }
 
+          await timer(0).toPromise();
+
           for (let i = 0, iL = images.length; i < iL; i++) {
             const image = images[i];
             const { id } = image;
@@ -322,9 +324,8 @@ export const rootEpic = combineEpics(
             );
             const result = await query.toPromise();
             observer.next(detectedImageFaces({ image, result }));
-            await timer(100).toPromise();
+            await timer(0).toPromise();
           }
-          await timer(100).toPromise();
           observer.next(detectFaces());
           observer.complete();
         })
