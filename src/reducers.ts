@@ -229,41 +229,26 @@ export const rootEpic = combineEpics(
         while (true) {
           try {
             const {
-              faceOffPanel: { isAppRunning, tab, videoCtx },
+              faceOffPanel: {
+                tab,
+                videoCtx,
+                videoDetectResults,
+                videoOverlayRef,
+                webcamOverlayRef,
+              },
             } = state$.value;
-            if (!isAppRunning) {
-              return;
-            }
-            switch (tab) {
-              case 'one': {
-                const {
-                  faceOffPanel: { videoOverlayRef, videoDetectResults },
-                } = state$.value;
-                if (videoOverlayRef.current) {
-                  drawDetections(
-                    videoDetectResults,
-                    videoOverlayRef.current,
-                    videoCtx.canvas.width,
-                    videoCtx.canvas.height
-                  );
-                }
-                break;
-              }
-              case 'two': {
-                const {
-                  faceOffPanel: { webcamOverlayRef, webcamDetectResults },
-                } = state$.value;
-                if (webcamOverlayRef.current) {
-                  drawDetections(
-                    webcamDetectResults,
-                    webcamOverlayRef.current,
-                    videoCtx.canvas.width,
-                    videoCtx.canvas.width
-                  );
-                }
-                break;
-              }
-            }
+            const overlay =
+              tab == 'one'
+                ? videoOverlayRef.current
+                : tab == 'two'
+                ? webcamOverlayRef.current
+                : null;
+            drawDetections(
+              videoDetectResults,
+              overlay,
+              videoCtx.canvas.width,
+              videoCtx.canvas.height
+            );
           } catch (ex) {}
           await timer(100).toPromise();
         }
@@ -292,12 +277,8 @@ export const rootEpic = combineEpics(
             },
           } = state$.value;
 
-          if (tab === 'one' && videoRef.current && isVideoLoaded) {
+          if (tab === 'one' || tab === 'two') {
             //const result = await detectAllFaces(videoRef.current, new SsdMobilenetv1Options());
-            const { videoWidth, videoHeight } = videoRef.current;
-            videoCtx.canvas.width = videoWidth;
-            videoCtx.canvas.height = videoHeight;
-            videoCtx.drawImage(videoRef.current, 0, 0, videoWidth, videoHeight);
             const query = from(
               detectAllFaces(
                 videoCtx.canvas,
@@ -309,39 +290,6 @@ export const rootEpic = combineEpics(
             );
             const result = await query.toPromise();
             observer.next(detectedVideoFaces(result));
-          }
-
-          if (
-            tab === 'two' &&
-            webcamRef.current &&
-            (webcamRef.current as any).video &&
-            isWebcamLoaded
-          ) {
-            //const result = await detectAllFaces(videoRef.current, new SsdMobilenetv1Options());
-            const {
-              videoWidth,
-              videoHeight,
-            } = (webcamRef.current as any).video;
-            videoCtx.canvas.width = videoWidth;
-            videoCtx.canvas.height = videoHeight;
-            videoCtx.drawImage(
-              (webcamRef.current as any).video,
-              0,
-              0,
-              videoWidth,
-              videoHeight
-            );
-            const query = from(
-              detectAllFaces(
-                videoCtx.canvas,
-                FaceDetectOptions({ inputSize: 320 })
-              )
-            ).pipe(
-              timeout(2000),
-              catchError(() => of([]))
-            );
-            const result = await query.toPromise();
-            observer.next(detectedWebcamFaces(result));
           }
 
           for (let i = 0, iL = images.length; i < iL; i++) {

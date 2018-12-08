@@ -87,12 +87,14 @@ const faceOffPanelSelector = ({
   webcamRef,
   webcamOverlayRef,
   videoCtx,
+  tab,
 }: FaceOffModel) => ({
   facingMode,
   isWebcamLoaded,
   webcamRef,
   webcamOverlayRef,
   videoCtx,
+  tab,
 });
 
 const mapStateToProps = ({ faceOffPanel }: RootState) =>
@@ -121,8 +123,12 @@ const WebcamComponent = ({
 }: StyledComponentProps &
   ReturnType<typeof mapStateToProps> &
   ReturnType<typeof mapDispatchToProps>) => {
-  const onPlayHandler = () => {
-    if (webcamRef.current && (webcamRef.current as any).video) {
+  const playHandler = () => {
+    if (
+      tab === 'two' &&
+      webcamRef.current &&
+      (webcamRef.current as any).video
+    ) {
       const video: HTMLVideoElement = (webcamRef.current as any).video;
       const { videoWidth, videoHeight } = video;
       videoCtx.canvas.width = videoWidth;
@@ -132,7 +138,7 @@ const WebcamComponent = ({
   };
   const userMediaHandler = () => {
     if (webcamRef.current && (webcamRef.current as any).video) {
-      (webcamRef.current as any).video.onPlay = onPlayHandler;
+      (webcamRef.current as any).video.onPlay = playHandler;
     }
     loadedWebcam();
   };

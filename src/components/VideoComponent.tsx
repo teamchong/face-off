@@ -83,6 +83,7 @@ const faceOffPanelSelector = ({
   videoUrlLoaded,
   videoCtx,
   mp4Url,
+  tab,
 }: FaceOffModel) => ({
   videoRef,
   videoOverlayRef,
@@ -90,6 +91,7 @@ const faceOffPanelSelector = ({
   videoUrlLoaded,
   videoCtx,
   mp4Url,
+  tab,
 });
 
 const mapStateToProps = ({ faceOffPanel }: RootState) =>
@@ -112,6 +114,7 @@ const VideoComponent = ({
   videoUrlLoaded,
   videoCtx,
   mp4Url,
+  tab,
   showMessage,
   changeVideoUrl,
   fetchMp4Url,
@@ -140,7 +143,7 @@ const VideoComponent = ({
     changeVideoUrl(target!.value);
   const loadMp4Handler = () => fetchMp4Url(videoUrl);
   const playHandler = () => {
-    if (videoRef.current) {
+    if (tab === 'one' && videoRef.current) {
       const video: HTMLVideoElement = videoRef.current;
       const { videoWidth, videoHeight } = video;
       videoCtx.canvas.width = videoWidth;
