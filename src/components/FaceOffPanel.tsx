@@ -46,22 +46,8 @@ import {
   hideMessage,
   removeImages,
 } from '../actions/FaceOffActions';
-import { FaceOffPanelModel } from '../models';
+import { FaceOffModel } from '../models';
 import { RootState } from '../reducers';
-
-type Actions = {
-  switchTab: typeof switchTab;
-  showMessage: typeof showMessage;
-  hideMessage: typeof hideMessage;
-  removeImages: typeof removeImages;
-};
-type ActiveTypeProps = { ActiveTab: ReactType };
-type FaceOffPanelConnectedProps = Props<ReactNode> &
-  ActiveTypeProps &
-  StyledComponentProps &
-  Actions &
-  FaceOffPanelModel;
-type ContainerProps = FaceOffPanelModel & Props<ReactNode>;
 
 const styles = ({ palette, spacing }: Theme) =>
   createStyles({
@@ -107,6 +93,36 @@ const styles = ({ palette, spacing }: Theme) =>
     },
   });
 
+const faceOffPanelSelector = ({
+  tab,
+  message,
+  images,
+  isModelsLoaded,
+}: FaceOffModel) => ({
+  tab,
+  message,
+  images,
+  isModelsLoaded,
+});
+
+const mapStateToProps = ({ faceOffPanel }: RootState) =>
+  faceOffPanelSelector(faceOffPanel);
+
+const mapDispatchToProps = (dispatch: Dispatch) => ({
+  switchTab(tab: string) {
+    dispatch(switchTab(tab));
+  },
+  showMessage(message: string) {
+    dispatch(showMessage(message));
+  },
+  hideMessage() {
+    dispatch(hideMessage());
+  },
+  removeImages(imageIndexes: number[]) {
+    dispatch(removeImages(imageIndexes));
+  },
+});
+
 const Transition = (props: Props<ReactNode>) => (
   <Slide direction="up" {...props} />
 );
@@ -117,9 +133,25 @@ const TabContainer = ({ children }: Props<ReactNode>): ReactElement<any> => (
   </Typography>
 );
 
+type ContainerProps = StyledComponentProps &
+  ReturnType<typeof mapStateToProps> &
+  ReturnType<typeof mapDispatchToProps>;
+type ActiveTypeProps = { ActiveTab: ReactType };
+
+const withActiveTab = (Container: ReactType) => (
+  props: ContainerProps
+): ReactElement<ContainerProps & ActiveTypeProps> =>
+  props.tab === 'three' ? (
+    <Container {...props} ActiveTab={DropzoneComponent} />
+  ) : props.tab === 'two' ? (
+    <Container {...props} ActiveTab={WebcamComponent} />
+  ) : (
+    <Container {...props} ActiveTab={YoutubeComponent} />
+  );
+
 const FaceOffPanel = ({
-  ActiveTab,
   classes,
+  ActiveTab,
   message,
   tab,
   isModelsLoaded,
@@ -128,7 +160,7 @@ const FaceOffPanel = ({
   showMessage,
   removeImages,
   images,
-}: FaceOffPanelConnectedProps): ReactElement<any> => {
+}: ContainerProps & ActiveTypeProps): ReactElement<any> => {
   const removeAllHandler = () => removeImages(images.map((image, i) => i));
   const switchTabHandler = (_: any, value: string) => switchTab(value);
   return (
@@ -226,47 +258,6 @@ const FaceOffPanel = ({
     </Fragment>
   );
 };
-
-const withActiveTab = (Container: ReactType) => (
-  props: ContainerProps
-): ReactElement<ContainerProps & ActiveTypeProps> =>
-  props.tab === 'three' ? (
-    <Container {...props} ActiveTab={DropzoneComponent} />
-  ) : props.tab === 'two' ? (
-    <Container {...props} ActiveTab={WebcamComponent} />
-  ) : (
-    <Container {...props} ActiveTab={YoutubeComponent} />
-  );
-
-const faceOffPanelSelector = ({
-  tab,
-  message,
-  images,
-  isModelsLoaded,
-}: FaceOffPanelModel) => ({
-  tab,
-  message,
-  images,
-  isModelsLoaded,
-});
-
-const mapStateToProps = ({ faceOffPanel }: RootState) =>
-  faceOffPanelSelector(faceOffPanel);
-
-const mapDispatchToProps = (dispatch: Dispatch) => ({
-  switchTab(tab: string) {
-    dispatch(switchTab(tab));
-  },
-  showMessage(message: string) {
-    dispatch(showMessage(message));
-  },
-  hideMessage() {
-    dispatch(hideMessage());
-  },
-  removeImages(imageIndexes: number[]) {
-    dispatch(removeImages(imageIndexes));
-  },
-});
 
 export default connect(
   mapStateToProps,

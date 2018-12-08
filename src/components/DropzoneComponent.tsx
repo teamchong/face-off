@@ -11,7 +11,13 @@ import { Fragment, ReactElement, ReactType } from 'react';
 import * as DropzoneType from 'react-dropzone';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
-import { addImages, showMessage,fetchMp4Url } from '../actions/FaceOffActions';
+import { createSelector } from 'reselect';
+import {
+  addImages,
+  showMessage,
+  fetchMp4Url,
+  switchTab,
+} from '../actions/FaceOffActions';
 import { FaceOffModel } from '../models';
 import { RootState } from '../reducers';
 
@@ -35,6 +41,20 @@ const styles = () =>
       zIndex: 1,
     },
   });
+
+const faceOffPanelSelector = ({ message }: FaceOffModel) => ({
+  message,
+});
+
+const mapStateToProps = ({ faceOffPanel }: RootState) =>
+  faceOffPanelSelector(faceOffPanel);
+
+const mapDispatchToProps = (dispatch: Dispatch) => ({
+  addImages: (images: HTMLImageElement[]) => dispatch(addImages(images)),
+  showMessage: (message: string) => dispatch(showMessage(message)),
+  fetchMp4Url: (youtubeUrl: string) => dispatch(fetchMp4Url(youtubeUrl)),
+  switchTab: (tab: string) => dispatch(switchTab(tab)),
+});
 
 /*
 Prop name	Type	Default	Description
@@ -139,20 +159,14 @@ Method name	Parameters	Description
 open()		
 Open system file upload dialog.
 */
-type Actions = {
-  addImages: typeof addImages;
-  showMessage: typeof showMessage;
-  fetchMp4Url: typeof fetchMp4Url;
-};
-type DropzoneComponentProps = StyledComponentProps &
-  Actions &
-  Partial<FaceOffModel>;
 const DropzoneComponent = ({
   classes,
   addImages,
   showMessage,
   fetchMp4Url,
-}: DropzoneComponentProps) => {
+}: StyledComponentProps &
+  ReturnType<typeof mapStateToProps> &
+  ReturnType<typeof mapDispatchToProps>) => {
   const readAsImage = async (file: File): Promise<HTMLImageElement> => {
     const dataUrl = createObjectURL(file);
     const img = await new Promise<HTMLImageElement>((resolve, reject) => {
@@ -212,7 +226,7 @@ const DropzoneComponent = ({
         );
       }
       if (videoFiles.length) {
-        fetchMp4Url
+        fetchMp4Url;
       }
     }
     const rejectedMessage = (rejectedFiles || [])
@@ -256,19 +270,6 @@ ${rejectedMessage}`);
     </Dropzone>
   );
 };
-
-const faceOffPanelSelector = ({ message }: FaceOffModel) => ({
-  message,
-});
-
-const mapStateToProps = ({ faceOffPanel }: RootState) =>
-  faceOffPanelSelector(faceOffPanel);
-
-const mapDispatchToProps = (dispatch: Dispatch) => ({
-  addImages: (images: HTMLImageElement[]) => dispatch(addImages(images)),
-  showMessage: (message: string) => dispatch(showMessage(message)),
-  fetchMp4Url: (youtubeUrl: string) => dispatch(fetchMp4Url(youtubeUrl));
-});
 
 export default connect(
   mapStateToProps,

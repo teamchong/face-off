@@ -77,18 +77,32 @@ const styles = ({ spacing }: Theme) =>
     },
   });
 
-const videoRef = createRef<HTMLVideoElement>();
+const faceOffPanelSelector = ({
+  videoRef,
+  videoOverlayRef,
+  youtubeUrl,
+  youtubeUrlLoaded,
+  mp4Url,
+}: FaceOffModel) => ({
+  videoRef,
+  videoOverlayRef,
+  youtubeUrl,
+  youtubeUrlLoaded,
+  mp4Url,
+});
 
-type Actions = {
-  showMessage: typeof showMessage;
-  changeYoutubeUrl: typeof changeYoutubeUrl;
-  fetchMp4Url: typeof fetchMp4Url;
-  loadedVideo: typeof loadedVideo;
-  addImages: typeof addImages;
-};
-type YoutubeComponentProps = StyledComponentProps &
-  Actions &
-  Partial<FaceOffModel>;
+const mapStateToProps = ({ faceOffPanel }: RootState) =>
+  faceOffPanelSelector(faceOffPanel);
+
+const mapDispatchToProps = (dispatch: Dispatch) => ({
+  showMessage: (message: string) => dispatch(showMessage(message)),
+  addImages: (images: HTMLImageElement[]) => dispatch(addImages(images)),
+  changeYoutubeUrl: (youtubeUrl: string) =>
+    dispatch(changeYoutubeUrl(youtubeUrl)),
+  fetchMp4Url: (youtubeUrl: string) => dispatch(fetchMp4Url(youtubeUrl)),
+  loadedVideo: () => dispatch(loadedVideo()),
+});
+
 const YoutubeComponent = ({
   classes,
   videoRef,
@@ -101,7 +115,9 @@ const YoutubeComponent = ({
   fetchMp4Url,
   loadedVideo,
   addImages,
-}: YoutubeComponentProps) => {
+}: StyledComponentProps &
+  ReturnType<typeof mapStateToProps> &
+  ReturnType<typeof mapDispatchToProps>) => {
   const readAsDataURL = () =>
     new Promise<string>(resolve => {
       let { videoWidth, videoHeight } = videoRef.current as any;
@@ -208,32 +224,6 @@ const YoutubeComponent = ({
     </div>
   );
 };
-
-const faceOffPanelSelector = ({
-  videoRef,
-  videoOverlayRef,
-  youtubeUrl,
-  youtubeUrlLoaded,
-  mp4Url,
-}: FaceOffModel) => ({
-  videoRef,
-  videoOverlayRef,
-  youtubeUrl,
-  youtubeUrlLoaded,
-  mp4Url,
-});
-
-const mapStateToProps = ({ faceOffPanel }: RootState) =>
-  faceOffPanelSelector(faceOffPanel);
-
-const mapDispatchToProps = (dispatch: Dispatch) => ({
-  showMessage: (message: string) => dispatch(showMessage(message)),
-  addImages: (images: HTMLImageElement[]) => dispatch(addImages(images)),
-  changeYoutubeUrl: (youtubeUrl: string) =>
-    dispatch(changeYoutubeUrl(youtubeUrl)),
-  fetchMp4Url: (youtubeUrl: string) => dispatch(fetchMp4Url(youtubeUrl)),
-  loadedVideo: () => dispatch(loadedVideo()),
-});
 
 export default connect(
   mapStateToProps,

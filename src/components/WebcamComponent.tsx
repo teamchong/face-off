@@ -82,15 +82,29 @@ const styles = ({ spacing }: Theme) =>
     },
   });
 
-type Actions = {
-  showMessage: typeof showMessage;
-  switchFacingMode: typeof switchFacingMode;
-  addImages: typeof addImages;
-  loadedWebcam: typeof loadedWebcam;
-};
-type WebcamComponentProps = StyledComponentProps &
-  Actions &
-  Partial<FaceOffModel>;
+const faceOffPanelSelector = ({
+  facingMode,
+  isWebcamLoaded,
+  webcamRef,
+  webcamOverlayRef,
+}: FaceOffModel) => ({
+  facingMode,
+  isWebcamLoaded,
+  webcamRef,
+  webcamOverlayRef,
+});
+
+const mapStateToProps = ({ faceOffPanel }: RootState) =>
+  faceOffPanelSelector(faceOffPanel);
+
+const mapDispatchToProps = (dispatch: Dispatch) => ({
+  showMessage: (message: string) => dispatch(showMessage(message)),
+  addImages: (images: HTMLImageElement[]) => dispatch(addImages(images)),
+  switchFacingMode: (facingMode: string) =>
+    dispatch(switchFacingMode(facingMode)),
+  loadedWebcam: () => dispatch(loadedWebcam()),
+});
+
 const WebcamComponent = ({
   classes,
   isWebcamLoaded,
@@ -101,7 +115,9 @@ const WebcamComponent = ({
   switchFacingMode,
   addImages,
   loadedWebcam,
-}: WebcamComponentProps) => {
+}: StyledComponentProps &
+  ReturnType<typeof mapStateToProps> &
+  ReturnType<typeof mapDispatchToProps>) => {
   const screenshotHandler = async () => {
     if (webcamRef.current) {
       var src = createObjectURL(
@@ -180,29 +196,6 @@ const WebcamComponent = ({
     </div>
   );
 };
-
-const faceOffPanelSelector = ({
-  facingMode,
-  isWebcamLoaded,
-  webcamRef,
-  webcamOverlayRef,
-}: FaceOffModel) => ({
-  facingMode,
-  isWebcamLoaded,
-  webcamRef,
-  webcamOverlayRef,
-});
-
-const mapStateToProps = ({ faceOffPanel }: RootState) =>
-  faceOffPanelSelector(faceOffPanel);
-
-const mapDispatchToProps = (dispatch: Dispatch) => ({
-  showMessage: (message: string) => dispatch(showMessage(message)),
-  addImages: (images: HTMLImageElement[]) => dispatch(addImages(images)),
-  switchFacingMode: (facingMode: string) =>
-    dispatch(switchFacingMode(facingMode)),
-  loadedWebcam: () => dispatch(loadedWebcam()),
-});
 
 export default connect(
   mapStateToProps,
