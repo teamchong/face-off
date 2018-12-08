@@ -251,7 +251,7 @@ export const rootEpic = combineEpics(
               }
             }
           } catch (ex) {}
-          await timer(33).toPromise();
+          await timer(100).toPromise();
         }
       }),
       mapTo(detectFaces())
@@ -329,7 +329,9 @@ export const rootEpic = combineEpics(
             if (id in imagesDetectResults) {
               continue;
             }
-            const query = from(detectAllFaces(image, FaceDetectOptions())).pipe(
+            const query = from(
+              detectAllFaces(image, FaceDetectOptions({ inputSize: 608 }))
+            ).pipe(
               timeout(2000),
               catchError(() => of([]))
             );
@@ -341,9 +343,9 @@ export const rootEpic = combineEpics(
               image.height
             );
             observer.next(detectedImageFaces({ image, result }));
-            await timer(33).toPromise();
+            await timer(100).toPromise();
           }
-          await timer(33).toPromise();
+          await timer(100).toPromise();
           observer.next(detectFaces());
           observer.complete();
         })
@@ -405,6 +407,7 @@ export const rootReducer = combineReducers<RootState, RootActions>({
       videoUrl: DEFAULT_VIDEO_URL,
       videoUrlLoaded: '',
       mp4Url: '',
+      videoCtx: document.createElement('canvas').getContext('2d'),
       videoRef: createRef<HTMLVideoElement>(),
       webcamRef: createRef<Webcam>(),
       images: [],

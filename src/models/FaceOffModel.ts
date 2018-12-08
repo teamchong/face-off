@@ -12,6 +12,7 @@ export interface FaceOffModel {
   readonly videoUrl: string;
   readonly videoUrlLoaded: string;
   readonly mp4Url: string;
+  readonly videoCtx: CanvasRenderingContext2D;
   readonly videoRef: RefObject<HTMLVideoElement>;
   readonly webcamRef: RefObject<Webcam>;
   readonly images: HTMLImageElement[];

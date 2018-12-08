@@ -6,7 +6,7 @@ import {
 } from '@material-ui/core/styles';
 import { Theme } from '@material-ui/core/styles/createMuiTheme';
 import { CameraFront, CameraRear, PhotoCamera } from '@material-ui/icons';
-import { base64StringToBlob, createObjectURL } from 'blob-util';
+import { canvasToBlob, createObjectURL } from 'blob-util';
 import * as React from 'react';
 import { createRef, Fragment } from 'react';
 import { connect } from 'react-redux';
@@ -117,17 +117,23 @@ const WebcamComponent = ({
   ReturnType<typeof mapStateToProps> &
   ReturnType<typeof mapDispatchToProps>) => {
   const screenshotHandler = async () => {
-    if (webcamRef.current) {
-      var src = createObjectURL(
-        base64StringToBlob(webcamRef.current.getScreenshot(), 'image/png')
-      );
+    if (webcamRef.current && (webcamRef.current as any).video) {
+      const video: HTMLVideoElement = (webcamRef.current as any).video;
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas
+        .getContext('2d')
+        .drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+      var src = createObjectURL(await canvasToBlob(canvas, 'image/png'));
+      console.log(src);
       addImages([
         await new Promise<HTMLImageElement>((resolve, reject) => {
           const imgEl = new Image();
           imgEl.title = `WebCam-${new Date()
             .toLocaleString('en-GB')
             .replace('/', '-')
-            .replace(/[,]/g, '')}.jpg`;
+            .replace(/[,]/g, '')}.png`;
           imgEl.onload = () => resolve(imgEl);
           imgEl.onerror = error => reject(error);
           imgEl.src = src;
