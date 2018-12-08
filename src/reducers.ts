@@ -75,7 +75,8 @@ import {
 //   drawDetection,
 // } from 'face-api.js';
 //const FaceDetectModel = loadSsdMobilenetv1Model;
-//const FaceDetectOptions = new SsdMobilenetv1Options();
+// const FaceDetectOptions = (opts?: any) =>
+//   new (SsdMobilenetv1Options as any)(opts);
 import {
   detectAllFaces,
   loadTinyFaceDetectorModel,
@@ -83,7 +84,9 @@ import {
   drawDetection,
 } from 'face-api.js';
 const FaceDetectModel = loadTinyFaceDetectorModel;
-const FaceDetectOptions = new TinyFaceDetectorOptions();
+const FaceDetectOptions = (opts?: any) =>
+  new (TinyFaceDetectorOptions as any)(opts);
+
 export type RootActions = ActionType<typeof actions>;
 export type RootState = {
   readonly faceOffPanel: FaceOffModel;
@@ -209,7 +212,10 @@ export const rootEpic = combineEpics(
           if (tab === 'one' && videoRef.current && isVideoLoaded) {
             //const result = await detectAllFaces(videoRef.current, new SsdMobilenetv1Options());
             const query = from(
-              detectAllFaces(videoRef.current, FaceDetectOptions)
+              detectAllFaces(
+                videoRef.current,
+                FaceDetectOptions({ inputSize: 128 })
+              )
             ).pipe(
               timeout(2000),
               catchError(() => of([]))
@@ -228,7 +234,7 @@ export const rootEpic = combineEpics(
             const query = from(
               detectAllFaces(
                 (webcamRef.current as any).video,
-                FaceDetectOptions
+                FaceDetectOptions({ inputSize: 128 })
               )
             ).pipe(
               timeout(2000),
@@ -254,7 +260,7 @@ export const rootEpic = combineEpics(
             if (id in imagesDetectResults) {
               continue;
             }
-            const query = from(detectAllFaces(image, FaceDetectOptions)).pipe(
+            const query = from(detectAllFaces(image, FaceDetectOptions())).pipe(
               timeout(2000),
               catchError(() => of([]))
             );
