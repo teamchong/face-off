@@ -1,10 +1,20 @@
 import { createRef } from 'react';
 import { combineReducers } from 'redux';
 import { combineEpics, StateObservable } from 'redux-observable';
-import { combineLatest, empty, from, interval, of, Observable } from 'rxjs';
+import {
+  combineLatest,
+  concat,
+  empty,
+  from,
+  interval,
+  of,
+  Observable,
+} from 'rxjs';
 import {
   catchError,
+  combineAll,
   concatMap,
+  defaultIfEmpty,
   delay,
   filter,
   ignoreElements,
@@ -78,13 +88,12 @@ export const rootEpic = combineEpics(
     action$.pipe(
       filter(isOfType(START_APP)),
       switchMap(() =>
-        from(
-          //loadSsdMobilenetv1Model(
-          loadTinyFaceDetectorModel(
-            'https://justadudewhohacks.github.io/face-api.js/models/'
-          )
-        ).pipe(mapTo(loadedModels()))
-      )
+        //loadSsdMobilenetv1Model(
+        loadTinyFaceDetectorModel(
+          'https://justadudewhohacks.github.io/face-api.js/models/'
+        )
+      ),
+      mapTo(loadedModels())
     ),
   (action$: Observable<RootActions>) =>
     action$.pipe(
@@ -94,60 +103,65 @@ export const rootEpic = combineEpics(
   (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
     action$.pipe(
       filter(isOfType(DETECT_FACES)),
-      filter(() => {
-        const { faceOffPanel } = state$.value;
-        const { isAppStarted } = faceOffPanel;
-        return isAppStarted;
-      }),
-      mergeMap(() => {
-        const { faceOffPanel } = state$.value;
-        const { tab, videoRef, isVideoLoaded } = faceOffPanel;
-        if (tab === 'one' && videoRef.current && isVideoLoaded) {
-          return from(
-            //detectAllFaces(videoRef.current, new SsdMobilenetv1Options())
-            detectAllFaces(videoRef.current, new TinyFaceDetectorOptions())
-          ).pipe(
-            tap(result => {
-              if (result.length) {
-                console.log(result);
-              }
-            }),
-            map(result => detectedFaces({ index: VIDEO_INDEX, result })),
-            timeout(2000),
-            catchError(() =>
-              of(detectedFaces({ index: VIDEO_INDEX, result: [] }))
-            )
-          );
-        }
-        return of(detectedFaces({ index: VIDEO_INDEX, result: [] }));
-      }),
-      concatMap(() => {
-        const { faceOffPanel } = state$.value;
-        const { images, imageDetectResults } = faceOffPanel;
-        return images
-          .filter((image, i) => !imageDetectResults[i])
-          .map((image, i) =>
-            from(detectAllFaces(image, new TinyFaceDetectorOptions())).pipe(
-              tap(result => {
-                if (result.length) {
-                  console.log(result);
-                }
-              }),
-              map(result => detectedFaces({ index: i, result })),
+      filter(() => state$.value.faceOffPanel.isAppStarted),
+      switchMap(() =>
+        Observable.create(async observer => {
+          const { faceOffPanel } = state$.value;
+          const {
+            tab,
+            videoRef,
+            isVideoLoaded,
+            images,
+            imageDetectResults,
+          } = faceOffPanel;
+
+          if (tab === 'one' && videoRef.current && isVideoLoaded) {
+            //const result = await detectAllFaces(videoRef.current, new SsdMobilenetv1Options());
+            const query = from(
+              detectAllFaces(videoRef.current, new TinyFaceDetectorOptions())
+            ).pipe(
               timeout(2000),
-              catchError(() => detectedFaces({ index: i, result: [] }))
+              catchError(() => of([]))
+            );
+            const result = await query.toPromise();
+            if (result.length) {
+              console.log({ index: VIDEO_INDEX, result });
+              observer.next(detectedFaces({ index: VIDEO_INDEX, result }));
+            }
+          }
+
+          for (let i = 0, iL = images.length; i < iL; i++) {
+            if (imageDetectResults[i]) {
+              continue;
+            }
+            const query = from(
+              detectAllFaces(images[i], new TinyFaceDetectorOptions())
+            ).pipe(
+              timeout(2000),
+              catchError(() => of([]))
+            );
+            const result = await query.toPromise();
+            if (result.length) {
+              console.log({ [i]: result });
+              observer.next(detectedFaces({ index: i, result }));
+            }
+          }
+          observer.next(
+            of(detectFaces()).pipe(
+              delay(2000),
+              map(action => action)
             )
           );
-      }),
-      delay(1000),
-      concatMap(() => detectFaces())
+          observer.complete();
+        })
+      )
     ),
   (action$: Observable<RootActions>, state$: StateObservable<RootState>) =>
     action$.pipe(
       filter(isOfType(FETCH_MP4URL)),
-      mergeMap(({ payload: youtubeUrl }) =>
+      switchMap(({ payload: youtubeUrl }) =>
         from(fetch(`${YOUTUBE_API}${youtubeUrl}`)).pipe(
-          mergeMap(result => result.json()),
+          switchMap(result => result.json()),
           map(result => result.filter(r => /^video\/mp4;/.test(r.type))),
           filter(result => !!result.length),
           map(result =>
