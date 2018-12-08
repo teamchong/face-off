@@ -157,11 +157,14 @@ export const rootEpic = combineEpics(
           const imageFiles = [];
           const videoFiles = [];
           for (let i = 0, iL = items.length; i < iL; i++) {
-            const file = items[i];
+            const file = items[i].getAsFile();
 
+            if (!file) {
+              continue;
+            }
             if (file.type === 'video/mp4') {
               videoFiles.push(createObjectURL(file));
-            } else {
+            } else if (/^image\/.+$/i.test(file.type)) {
               imageFiles.push(await readAsImage(file));
             }
           }
@@ -247,7 +250,7 @@ export const rootEpic = combineEpics(
               }
             }
           } catch (ex) {}
-          await timer(100).toPromise();
+          await timer(33).toPromise();
         }
       }),
       mapTo(detectFaces())
@@ -336,9 +339,9 @@ export const rootEpic = combineEpics(
               image.height
             );
             observer.next(detectedImageFaces({ image, result }));
-            await timer(100).toPromise();
+            await timer(33).toPromise();
           }
-          await timer(100).toPromise();
+          await timer(33).toPromise();
           observer.next(detectFaces());
           observer.complete();
         })

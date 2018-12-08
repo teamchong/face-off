@@ -151,6 +151,13 @@ const VideoComponent = ({
   };
   const videoUrlTrimmed = (videoUrl || '').replace(/^\s+|\s+$/g, '');
   const loadedDataHandler = () => loadedVideo();
+  const keyDownHandler = (ev: KeyboardEvent) => {
+    switch (ev.charCode) {
+      case 13:
+        playHandler();
+        break;
+    }
+  };
   return (
     <div className={classes!.container}>
       <div>
@@ -163,6 +170,7 @@ const VideoComponent = ({
           variant="outlined"
           InputLabelProps={{ shrink: true }}
           InputProps={{
+            onKeyPress: keyDownHandler,
             endAdornment: (
               <InputAdornment position="end">
                 {!!mp4Url && (
