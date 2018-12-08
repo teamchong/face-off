@@ -4,13 +4,14 @@ import {
   StyledComponentProps,
   withStyles,
 } from '@material-ui/core/styles';
+import { canvasToBlob, createObjectURL, revokeObjectURL } from 'blob-util';
 import { Collections } from '@material-ui/icons';
 import * as React from 'react';
 import { Fragment, ReactElement, ReactType } from 'react';
 import * as DropzoneType from 'react-dropzone';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
-import { addImages, showMessage } from '../actions/FaceOffActions';
+import { addImages, showMessage,fetchMp4Url } from '../actions/FaceOffActions';
 import { FaceOffModel } from '../models';
 import { RootState } from '../reducers';
 
@@ -141,6 +142,7 @@ Open system file upload dialog.
 type Actions = {
   addImages: typeof addImages;
   showMessage: typeof showMessage;
+  fetchMp4Url: typeof fetchMp4Url;
 };
 type DropzoneComponentProps = StyledComponentProps &
   Actions &
@@ -149,14 +151,10 @@ const DropzoneComponent = ({
   classes,
   addImages,
   showMessage,
+  fetchMp4Url,
 }: DropzoneComponentProps) => {
-  const readAsDataURL = async (file: File): Promise<HTMLImageElement> => {
-    const dataUrl = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = error => reject(error);
-      reader.readAsDataURL(file);
-    });
+  const readAsImage = async (file: File): Promise<HTMLImageElement> => {
+    const dataUrl = createObjectURL(file);
     const img = await new Promise<HTMLImageElement>((resolve, reject) => {
       const imgEl = new Image();
       imgEl.title = file.name;
@@ -172,12 +170,16 @@ const DropzoneComponent = ({
       const ctx = canvas.getContext('2d');
       if (ctx !== null) {
         ctx.drawImage(img, 0, 0, MAX_WIDTH, newHeight);
+        const src = createObjectURL(
+          await canvasToBlob(ctx.canvas, 'image/png')
+        );
         return await new Promise<HTMLImageElement>((resolve, reject) => {
           const imgEl = new Image();
           imgEl.title = file.name;
           imgEl.onload = () => resolve(imgEl);
           imgEl.onerror = error => reject(error);
-          imgEl.src = ctx.canvas.toDataURL();
+          imgEl.src = src;
+          revokeObjectURL(dataUrl);
         });
       }
     }
@@ -194,9 +196,24 @@ const DropzoneComponent = ({
     __proto__: File
     */
     if (!!(acceptedFiles || []).length) {
-      addImages(
-        await Promise.all(acceptedFiles.map(image => readAsDataURL(image)))
-      );
+      const imageFiles = [];
+      const videoFiles = [];
+      for (let i = 0, iL = acceptedFiles.length; i < iL; i++) {
+        const file = acceptedFiles[i];
+        if (file.type === 'video/mp4') {
+          videoFiles.push(file);
+        } else {
+          imageFiles.push(file);
+        }
+      }
+      if (imageFiles.length) {
+        addImages(
+          await Promise.all(imageFiles.map(image => readAsImage(image)))
+        );
+      }
+      if (videoFiles.length) {
+        fetchMp4Url
+      }
     }
     const rejectedMessage = (rejectedFiles || [])
       .map(file => file.name)
@@ -208,7 +225,7 @@ ${rejectedMessage}`);
   };
   return (
     <Dropzone
-      accept="image/jpeg, image/png"
+      accept="image/jpeg, image/png, video/mp4"
       onDrop={dropHandler}
       className="color-bg"
       style={{
@@ -250,6 +267,7 @@ const mapStateToProps = ({ faceOffPanel }: RootState) =>
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   addImages: (images: HTMLImageElement[]) => dispatch(addImages(images)),
   showMessage: (message: string) => dispatch(showMessage(message)),
+  fetchMp4Url: (youtubeUrl: string) => dispatch(fetchMp4Url(youtubeUrl));
 });
 
 export default connect(

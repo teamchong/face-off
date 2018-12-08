@@ -6,6 +6,7 @@ import {
 } from '@material-ui/core/styles';
 import { Theme } from '@material-ui/core/styles/createMuiTheme';
 import { CameraFront, CameraRear, PhotoCamera } from '@material-ui/icons';
+import { base64StringToBlob, createObjectURL } from 'blob-util';
 import * as React from 'react';
 import { createRef, Fragment } from 'react';
 import { connect } from 'react-redux';
@@ -103,6 +104,9 @@ const WebcamComponent = ({
 }: WebcamComponentProps) => {
   const screenshotHandler = async () => {
     if (webcamRef.current) {
+      var src = createObjectURL(
+        base64StringToBlob(webcamRef.current.getScreenshot(), 'image/png')
+      );
       addImages([
         await new Promise<HTMLImageElement>((resolve, reject) => {
           const imgEl = new Image();
@@ -112,7 +116,7 @@ const WebcamComponent = ({
             .replace(/[,]/g, '')}.jpg`;
           imgEl.onload = () => resolve(imgEl);
           imgEl.onerror = error => reject(error);
-          imgEl.src = webcamRef.current.getScreenshot() || '';
+          imgEl.src = src;
         }),
       ]);
     }
@@ -164,14 +168,14 @@ const WebcamComponent = ({
         width={WIDTH}
         height={HEIGHT}
         audio={false}
-        screenshotFormat="image/jpeg"
+        screenshotFormat="image/png"
         onUserMedia={userMediaHandler}
         style={{
           borderWidth: 5,
           borderStyle: 'solid',
           borderColor: '#ccc',
         }}
-        {...{ videoConstraints: facingMode }}
+        {...{ videoConstraints: { facingMode } }}
       />
     </div>
   );

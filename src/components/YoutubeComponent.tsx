@@ -16,6 +16,7 @@ import {
   PhotoCamera,
   PlayCircleFilled,
 } from '@material-ui/icons';
+import { createObjectURL } from 'blob-util';
 import * as React from 'react';
 import { createRef, ChangeEvent, Fragment } from 'react';
 import { connect } from 'react-redux';
@@ -101,21 +102,22 @@ const YoutubeComponent = ({
   loadedVideo,
   addImages,
 }: YoutubeComponentProps) => {
-  const readAsDataURL = async () => {
-    let { videoWidth, videoHeight } = videoRef.current as any;
-    if (videoWidth > WIDTH) {
-      videoHeight = ~~((WIDTH * videoHeight) / videoWidth);
-      videoWidth = WIDTH;
-    }
-    const canvas = document.createElement('canvas');
-    canvas.width = videoWidth;
-    canvas.height = videoHeight;
-    const ctx = canvas.getContext('2d');
-    if (ctx !== null) {
-      ctx.drawImage(videoRef.current as any, 0, 0, videoWidth, videoHeight);
-      return ctx.canvas.toDataURL();
-    }
-  };
+  const readAsDataURL = () =>
+    new Promise<string>(resolve => {
+      let { videoWidth, videoHeight } = videoRef.current as any;
+      if (videoWidth > WIDTH) {
+        videoHeight = ~~((WIDTH * videoHeight) / videoWidth);
+        videoWidth = WIDTH;
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = videoWidth;
+      canvas.height = videoHeight;
+      const ctx = canvas.getContext('2d');
+      if (ctx !== null) {
+        ctx.drawImage(videoRef.current as any, 0, 0, videoWidth, videoHeight);
+        ctx.canvas.toBlob(blob => resolve(createObjectURL(blob)));
+      }
+    });
   const textFieldHandler = ({ target }: ChangeEvent<HTMLInputElement>) =>
     changeYoutubeUrl(target!.value);
   const playHandler = () => fetchMp4Url(youtubeUrl);

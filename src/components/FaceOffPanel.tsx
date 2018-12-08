@@ -137,8 +137,8 @@ const FaceOffPanel = ({
         <AppBar position="static">
           <Tabs value={tab} onChange={switchTabHandler} fullWidth={true}>
             <Tab value="one" icon={<VideoLibrary />} />
-            <Tab value="two" icon={<AddPhotoAlternate />} />
-            <Tab value="three" icon={<Videocam />} />
+            <Tab value="two" icon={<Videocam />} />
+            <Tab value="three" icon={<AddPhotoAlternate />} />
           </Tabs>
         </AppBar>
         <TabContainer>
@@ -231,9 +231,9 @@ const withActiveTab = (Container: ReactType) => (
   props: ContainerProps
 ): ReactElement<ContainerProps & ActiveTypeProps> =>
   props.tab === 'three' ? (
-    <Container {...props} ActiveTab={WebcamComponent} />
-  ) : props.tab === 'two' ? (
     <Container {...props} ActiveTab={DropzoneComponent} />
+  ) : props.tab === 'two' ? (
+    <Container {...props} ActiveTab={WebcamComponent} />
   ) : (
     <Container {...props} ActiveTab={YoutubeComponent} />
   );
