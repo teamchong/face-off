@@ -1,4 +1,5 @@
 import { createRef } from 'react';
+import * as Webcam from 'react-webcam';
 import { combineReducers } from 'redux';
 import { combineEpics, StateObservable } from 'redux-observable';
 import {
@@ -9,6 +10,7 @@ import {
   interval,
   of,
   Observable,
+  timer,
 } from 'rxjs';
 import {
   catchError,
@@ -146,7 +148,7 @@ export const rootEpic = combineEpics(
               observer.next(detectedFaces({ index: i, result }));
             }
           }
-          await new Promise(resolve => setTimeout(resolve, 500));
+          await timer(500).toPromise();
           observer.next(detectFaces());
           observer.complete();
         })
@@ -186,6 +188,7 @@ export const rootReducer = combineReducers<RootState, RootActions>({
       youtubeUrlLoaded: '',
       mp4Url: '',
       videoRef: createRef<HTMLVideoElement>(),
+      webcamRef: createRef<Webcam>(),
       isModelsLoaded: false,
       isVideoLoaded: false,
       isWebcamLoaded: false,

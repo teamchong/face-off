@@ -76,8 +76,6 @@ const styles = ({ spacing }: Theme) =>
     },
   });
 
-const cameraRef = createRef<Webcam>();
-
 type Actions = {
   showMessage: typeof showMessage;
   switchFacingMode: typeof switchFacingMode;
@@ -88,15 +86,16 @@ type WebcamComponentProps = StyledComponentProps &
   Partial<FaceOffModel>;
 const WebcamComponent = ({
   classes,
-  isCameraEnabled,
+  isWebcamLoaded,
+  webcamRef,
   facingMode,
   showMessage,
   switchFacingMode,
   addImages,
-  enabledCamera,
+  loadedWebcam,
 }: WebcamComponentProps) => {
   const screenshotHandler = async () => {
-    if (cameraRef.current) {
+    if (webcamRef.current) {
       addImages([
         await new Promise<HTMLImageElement>((resolve, reject) => {
           const imgEl = new Image();
@@ -106,18 +105,18 @@ const WebcamComponent = ({
             .replace(/[,]/g, '')}.jpg`;
           imgEl.onload = () => resolve(imgEl);
           imgEl.onerror = error => reject(error);
-          imgEl.src = cameraRef.current.getScreenshot() || '';
+          imgEl.src = webcamRef.current.getScreenshot() || '';
         }),
       ]);
     }
   };
-  const userMediaHandler = () => enabledCamera();
+  const userMediaHandler = () => loadedWebcam();
   const switchRear = () => switchFacingMode(FACINGMODE_REAR);
   const switchFront = () => switchFacingMode(FACINGMODE_FRONT);
   return (
     <div className={classes!.container}>
       <div className={classes!.rearFacing}>
-        {!isCameraEnabled && (
+        {!isWebcamLoaded && (
           <CircularProgress className={classes!.loading} size={68} />
         )}
         <Fab color="primary" aria-label="Use rear camera" onClick={switchRear}>
@@ -125,7 +124,7 @@ const WebcamComponent = ({
         </Fab>
       </div>
       <div className={classes!.frontFacing}>
-        {!isCameraEnabled && (
+        {!isWebcamLoaded && (
           <CircularProgress className={classes!.loading} size={68} />
         )}
         <Fab
@@ -137,7 +136,7 @@ const WebcamComponent = ({
         </Fab>
       </div>
       <div className={classes!.screenshot}>
-        {!!isCameraEnabled && (
+        {!!isWebcamLoaded && (
           <Fab
             color="primary"
             aria-label="Take screenshot"
@@ -148,7 +147,7 @@ const WebcamComponent = ({
         )}
       </div>
       <Webcam
-        ref={cameraRef}
+        ref={webcamRef}
         width={WIDTH}
         height={HEIGHT}
         videoConstraints={{ facingMode }}
@@ -165,23 +164,25 @@ const WebcamComponent = ({
   );
 };
 
-const cameraPanelSelector = ({
+const faceOffPanelSelector = ({
   facingMode,
-  isCameraEnabled,
+  isWebcamLoaded,
+  webcamRef,
 }: FaceOffModel) => ({
   facingMode,
-  isCameraEnabled,
+  isWebcamLoaded,
+  webcamRef,
 });
 
-const mapStateToProps = ({ cameraPanel }: RootState) =>
-  cameraPanelSelector(cameraPanel);
+const mapStateToProps = ({ faceOffPanel }: RootState) =>
+  faceOffPanelSelector(faceOffPanel);
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   showMessage: (message: string) => dispatch(showMessage(message)),
   addImages: (images: HTMLImageElement[]) => dispatch(addImages(images)),
   switchFacingMode: (facingMode: string) =>
     dispatch(switchFacingMode(facingMode)),
-  enabledCamera: () => dispatch(enabledCamera()),
+  loadedWebcam: () => dispatch(loadedWebcam()),
 });
 
 export default connect(
