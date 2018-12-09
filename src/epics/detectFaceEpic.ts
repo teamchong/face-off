@@ -96,7 +96,12 @@ export default (
               observer.next(detectedVideoFaces(result));
 
               const { width, height } = videoCtx.canvas;
-              await drawDetections(result, videoOverlay, width, height);
+              await drawDetections(
+                result.detection,
+                videoOverlay,
+                width,
+                height
+              );
             }
           } else if (tab === 'two' && webcam) {
             video = (webcam as any).video;
@@ -109,7 +114,12 @@ export default (
                 observer.next(detectedWebcamFaces(result));
 
                 const { width, height } = videoCtx.canvas;
-                await drawDetections(result, webcamOverlay, width, height);
+                await drawDetections(
+                  result.detection,
+                  webcamOverlay,
+                  width,
+                  height
+                );
               }
             }
           }
@@ -132,7 +142,7 @@ export default (
 
               if (overlay && overlay.id != canvasId) {
                 await drawDetections(
-                  result,
+                  result.detection,
                   overlay,
                   overlay.width,
                   overlay.height
