@@ -134,9 +134,11 @@ export default (
               await timer(100).toPromise();
             }
 
-            if (overlay && overlay.id != `${image.id}x`) {
+            const canvasId = `${image.id}x`;
+
+            if (overlay && overlay.id != canvasId) {
               drawDetections(result, overlay, overlay.width, overlay.height);
-              overlay.id = `${image.id}x`;
+              overlay.id = canvasId;
             }
           }
           // console.log(`${new Date().toLocaleTimeString('enGb')} end`);
