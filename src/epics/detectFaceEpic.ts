@@ -44,7 +44,7 @@ export default (
       Observable.create(async observer => {
         let state = state$.value.faceOffPanel;
         while (state.isAppRunning) {
-          console.log(`${new Date().toLocaleTimeString('enGb')} 1`);
+          // console.log(`${new Date().toLocaleTimeString('enGb')} 1`);
           let {
             tab,
             videoRef: { current: video },
@@ -124,15 +124,17 @@ export default (
             const overlay = imagesOverlay[image.id];
             const result = await from(
               detectAllFaces(image, FaceDetectOptions({ inputSize: 608 }))
-            ).pipe(
-              timeout(2000),
-              catchError(() => of([]))
-            );
+            )
+              .pipe(
+                timeout(2000),
+                catchError(() => of([]))
+              )
+              .toPromise();
             observer.next(detectedImageFaces({ image, result }));
             drawDetections(results, overlay, overlay.width, overlay.height);
-            console.log(`${new Date().toLocaleTimeString('enGb')} end`);
             await timer(100).toPromise();
           }
+          // console.log(`${new Date().toLocaleTimeString('enGb')} end`);
         }
       })
     )
