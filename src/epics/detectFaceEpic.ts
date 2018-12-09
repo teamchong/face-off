@@ -1,11 +1,12 @@
 import { StateObservable } from 'redux-observable';
-import { concat, empty, from, ignoreElements, Observable, of } from 'rxjs';
+import { concat, empty, from, Observable, of } from 'rxjs';
 import {
   catchError,
   delay,
   expand,
   filter,
   first,
+  ignoreElements,
   map,
   switchMap,
   takeWhile,
@@ -111,7 +112,7 @@ export default (
             }
             return of(null).pipe(
               delay(100),
-              ignoreElements()
+              switchMap(empty())
             );
           })
         ),
