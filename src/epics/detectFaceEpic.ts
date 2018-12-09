@@ -17,7 +17,6 @@ import {
   detectedImageFaces,
   detectedVideoFaces,
   detectedWebcamFaces,
-  detectFaces,
   RootActions,
 } from '../actions';
 import { drawDetections } from '../classes/drawing';
@@ -42,7 +41,6 @@ export default (
     expand(action =>
       concat(
         of(state$.value.faceOffPanel).pipe(
-          tap(() => console.log('detectFaces')),
           map(({ tab, videoCtx, videoOverlayRef, videoRef }) => ({
             overlay: videoOverlayRef.current,
             tab,
