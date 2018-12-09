@@ -12,7 +12,7 @@ export const drawDetections = (
   srcWidth: number,
   srcHeight: number
 ) => {
-  if (canvas) {
+  if (canvas && canvas.width) {
     const { width, height } = canvas;
     const ctx = canvas.getContext('2d');
     //console.log({ width, height, videoWidth, videoHeight });

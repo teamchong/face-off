@@ -55,9 +55,9 @@ export default (
             images,
             imagesOverlay,
             imagesDetectResults,
-          } = state$.value;
+          } = state$.value.faceOffPanel;
 
-          if (tab == 'one' && video) {
+          if (tab == 'one' && video && video.videoWidth) {
             const { videoWidth, videoHeight } = video;
             videoCtx.canvas.width = videoWidth;
             videoCtx.canvas.height = videoHeight;
@@ -83,7 +83,7 @@ export default (
             );
 
             await timer(100).toPromise();
-          } else if (tab === 'two' && webcam) {
+          } else if (tab === 'two' && webcam && webcam.video.videoWidth) {
             const { videoWidth, videoHeight } = webcam.video;
             videoCtx.canvas.width = videoWidth;
             videoCtx.canvas.height = videoHeight;
