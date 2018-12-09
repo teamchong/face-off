@@ -1,47 +1,10 @@
-import { createObjectURL, revokeObjectURL } from 'blob-util';
+import { revokeObjectURL } from 'blob-util';
 import { createRef } from 'react';
 import * as Webcam from 'react-webcam';
 import { combineReducers } from 'redux';
-import { combineEpics, StateObservable } from 'redux-observable';
-import {
-  combineLatest,
-  concat,
-  empty,
-  from,
-  interval,
-  of,
-  Observable,
-  timer,
-} from 'rxjs';
-import {
-  catchError,
-  concatAll,
-  combineAll,
-  concatMap,
-  defaultIfEmpty,
-  delay,
-  filter,
-  ignoreElements,
-  mapTo,
-  mergeMap,
-  last,
-  delayWhen,
-  switchMap,
-  timeout,
-  tap,
-} from 'rxjs/operators';
-import { isOfType } from 'typesafe-actions';
+import { combineEpics } from 'redux-observable';
 import { RootState } from './models';
-import {
-  addImages,
-  fetchMp4Url,
-  fetchedMp4Url,
-  detectFaces,
-  detectedVideoFaces,
-  detectedWebcamFaces,
-  detectedImageFaces,
-  RootActions,
-} from './actions';
+import { RootActions } from './actions';
 import {
   SWITCH_TAB,
   SHOW_MESSAGE,
@@ -62,7 +25,6 @@ import {
   DETECTED_WEBCAMFACES,
   DETECTED_IMAGEFACES,
   FACINGMODE_REAR,
-  VIDEO_API,
   DEFAULT_VIDEO_URL,
 } from './constants';
 import { drawDetections } from './classes/drawing';

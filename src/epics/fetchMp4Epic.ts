@@ -1,3 +1,11 @@
+import { StateObservable } from 'redux-observable';
+import { from, Observable } from 'rxjs';
+import { filter, map, switchMap, tap } from 'rxjs/operators';
+import { isOfType } from 'typesafe-actions';
+import { fetchedMp4Url, RootActions } from '../actions';
+import { FETCH_MP4URL, VIDEO_API } from '../constants';
+import { RootState } from '../models';
+
 export default (
   action$: Observable<RootActions>,
   state$: StateObservable<RootState>
