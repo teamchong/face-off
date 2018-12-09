@@ -2,16 +2,15 @@ import { StateObservable } from 'redux-observable';
 import { concat, from, Observable, of } from 'rxjs';
 import {
   catchError,
-  concat,
   delay,
   expand,
   filter,
   first,
   map,
   switchMap,
+  takeWhile,
   tap,
   timeout,
-  timer,
 } from 'rxjs/operators';
 import { isOfType } from 'typesafe-actions';
 import {
@@ -68,7 +67,7 @@ export default (
               map(result => detectedVideoFaces(result)),
               timeout(2000),
               catchError(() => detectedVideoFaces([])),
-              concat(results => {
+              tap(({ payload: results }) => {
                 if (overlay) {
                   drawDetections(
                     results,
@@ -106,7 +105,7 @@ export default (
               map(result => detectedWebcamFaces(result)),
               timeout(2000),
               catchError(() => detectedWebcamFaces([])),
-              concat(results => {
+              tap(({ payload: results }) => {
                 if (overlay) {
                   drawDetections(
                     results,
@@ -121,28 +120,41 @@ export default (
           })
         ),
         of(state$.value.faceOffPanel).pipe(
-          switchMap(({ images, imagesDetectResults }) =>
+          switchMap(({ images, imagesDetectResults, imagesOverlay }) =>
             of(
               images.map((image, i) => ({
                 id: image.id,
                 image,
                 i,
+                overlay: imagesOverlay[image.id],
                 results: imagesDetectResults[image.id],
               }))
             )
           ),
           filter(({ results }) => !!results),
-          switchMap(({ id, image, i, results }) =>
+          switchMap(({ id, image, i, overlay, results }) =>
             from(
               detectAllFaces(image, FaceDetectOptions({ inputSize: 608 }))
             ).pipe(
               map(result => detectedImageFaces({ image, result })),
               timeout(2000),
               catchError(() => detectedImageFaces({ image, result: [] })),
+              tap(({ payload: results }) => {
+                if (overlay) {
+                  drawDetections(
+                    results,
+                    overlay,
+                    overlay.width,
+                    overlay.height
+                  );
+                }
+              }),
               delay(100)
             )
           )
         )
       )
-    )
+    ),
+    delay(1000 * 10),
+    takeWhile(() => state$.value.faceOffPanel.isAppRunning)
   );

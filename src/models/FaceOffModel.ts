@@ -18,7 +18,7 @@ export interface FaceOffModel {
   readonly images: HTMLImageElement[];
   readonly videoOverlayRef: RefObject<HTMLCanvasElement>;
   readonly webcamOverlayRef: RefObject<HTMLCanvasElement>;
-  readonly imagesOverlayRef: { [id: string]: RefObject<HTMLCanvasElement> };
+  readonly imagesOverlay: { [id: string]: HTMLCanvasElement };
   readonly imagesDetectResults: { [id: string]: any[] };
   readonly videoDetectResults: any[];
   readonly webcamDetectResults: any[];
