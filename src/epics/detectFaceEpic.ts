@@ -2,6 +2,7 @@ import { StateObservable } from 'redux-observable';
 import { concat, from, Observable, of } from 'rxjs';
 import {
   catchError,
+  concat,
   delay,
   expand,
   filter,
@@ -19,6 +20,7 @@ import {
   detectFaces,
   RootActions,
 } from '../actions';
+import { drawDetections } from '../classes/drawing';
 import { DETECT_FACES } from '../constants';
 import { RootState } from '../models';
 
@@ -40,7 +42,8 @@ export default (
     expand(action =>
       concat(
         of(state$.value.faceOffPanel).pipe(
-          map(({ tab, videoCtx, videoRef }) => ({
+          map(({ tab, videoCtx, videoOverlayRef, videoRef }) => ({
+            overlay: videoOverlayRef.current,
             tab,
             videoCtx,
             video: videoRef.videoRef,
@@ -48,7 +51,7 @@ export default (
           filter(
             ({ tab, video }) => tab === 'one' && video && video.videoWidth
           ),
-          switchMap(({ videoCtx, video }) => {
+          switchMap(({ overlay, videoCtx, video }) => {
             const { videoWidth, videoHeight } = video;
             videoCtx.canvas.width = videoWidth;
             videoCtx.canvas.height = videoHeight;
@@ -62,12 +65,23 @@ export default (
               map(result => detectedVideoFaces(result)),
               timeout(2000),
               catchError(() => detectedVideoFaces([])),
+              concat(results => {
+                if (overlay) {
+                  drawDetections(
+                    results,
+                    overlay,
+                    videoCtx.canvas.width,
+                    videoCtx.canvas.height
+                  );
+                }
+              }),
               delay(100)
             );
           })
         ),
         of(state$.value.faceOffPanel).pipe(
-          map(({ tab, videoCtx, webcamRef }) => ({
+          map(({ tab, videoCtx, webcamOverlayRef, webcamRef }) => ({
+            overlay: webcamOverlayRef.current,
             tab,
             videoCtx,
             video: (webcamRef.current || ({} as any)).video,
@@ -75,7 +89,7 @@ export default (
           filter(
             ({ tab, video }) => tab === 'two' && video && video.videoWidth
           ),
-          switchMap(({ videoCtx, video }) => {
+          switchMap(({ overlay, videoCtx, video }) => {
             const { videoWidth, videoHeight } = video;
             videoCtx.canvas.width = videoWidth;
             videoCtx.canvas.height = videoHeight;
@@ -89,6 +103,16 @@ export default (
               map(result => detectedWebcamFaces(result)),
               timeout(2000),
               catchError(() => detectedWebcamFaces([])),
+              concat(results => {
+                if (overlay) {
+                  drawDetections(
+                    results,
+                    overlay,
+                    videoCtx.canvas.width,
+                    videoCtx.canvas.height
+                  );
+                }
+              }),
               delay(100)
             );
           })
@@ -116,6 +140,7 @@ export default (
             )
           )
         ),
+        delay(0),
         of(detectFaces())
       )
     )

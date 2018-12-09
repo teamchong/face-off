@@ -31,7 +31,6 @@ import { drawDetections } from './classes/drawing';
 import pasteHandlerEpic from './epics/pasteHandlerEpic';
 import screenshotEpic from './epics/screenshotEpic';
 import startAppEpic from './epics/startAppEpic';
-import loadedModelsEpic from './epics/loadedModelsEpic';
 import detectFaceEpic from './epics/detectFaceEpic';
 import fetchMp4Epic from './epics/fetchMp4Epic';
 
@@ -39,7 +38,6 @@ export const rootEpic = combineEpics(
   pasteHandlerEpic,
   screenshotEpic,
   startAppEpic,
-  loadedModelsEpic,
   detectFaceEpic,
   fetchMp4Epic
 );
