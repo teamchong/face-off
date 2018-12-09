@@ -46,8 +46,7 @@ import {
   hideMessage,
   removeImages,
 } from '../actions/FaceOffActions';
-import { FaceOffModel } from '../models';
-import { RootState } from '../reducers';
+import { FaceOffModel, RootState } from '../models';
 
 const styles = ({ palette, spacing }: Theme) =>
   createStyles({

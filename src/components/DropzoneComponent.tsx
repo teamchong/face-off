@@ -19,8 +19,8 @@ import {
   switchTab,
 } from '../actions/FaceOffActions';
 import { MAX_WIDTH, MAX_HEIGHT } from '../constants';
-import { FaceOffModel } from '../models';
-import { readAsImage, RootState } from '../reducers';
+import { FaceOffModel, RootState } from '../models';
+import { readAsImage } from '../classes/fileConvert';
 
 const Dropzone: ReactType = DropzoneType as any;
 

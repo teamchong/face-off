@@ -35,8 +35,7 @@ import {
   screenshotVideo,
 } from '../actions/FaceOffActions';
 import { MAX_WIDTH, MAX_HEIGHT } from '../constants';
-import { FaceOffModel } from '../models';
-import { RootState } from '../reducers';
+import { FaceOffModel, RootState } from '../models';
 
 const styles = ({ spacing }: Theme) =>
   createStyles({
