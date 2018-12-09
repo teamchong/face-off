@@ -43,16 +43,18 @@ export default (
     expand(action =>
       concat(
         of(state$.value.faceOffPanel).pipe(
+          tap(() => console.log('detectFaces')),
           map(({ tab, videoCtx, videoOverlayRef, videoRef }) => ({
             overlay: videoOverlayRef.current,
             tab,
             videoCtx,
-            video: videoRef.videoRef,
+            video: videoRef.current,
           })),
           filter(
             ({ tab, video }) => tab === 'one' && video && video.videoWidth
           ),
           switchMap(({ overlay, videoCtx, video }) => {
+            console.log('test');
             const { videoWidth, videoHeight } = video;
             videoCtx.canvas.width = videoWidth;
             videoCtx.canvas.height = videoHeight;
@@ -140,8 +142,7 @@ export default (
               delay(100)
             )
           )
-        ),
-        tap(() => console.log('detectFaces'))
+        )
       )
     )
   );
