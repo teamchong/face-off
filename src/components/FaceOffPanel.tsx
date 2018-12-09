@@ -34,6 +34,8 @@ import {
 import { Theme } from '@material-ui/core/styles/createMuiTheme';
 import * as React from 'react';
 import { Fragment } from 'react';
+import { createPortal } from 'react-dom';
+import { createSelector } from 'reselect';
 import { Props, ReactElement, ReactNode, ReactType } from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
@@ -53,6 +55,9 @@ const styles = ({ palette, spacing }: Theme) =>
     root: {
       flexGrow: 1,
       backgroundColor: palette.background.paper,
+    },
+    overlay: {
+      position: 'absolute',
     },
     imagesContainer: {
       display: 'flex',
@@ -96,16 +101,29 @@ const faceOffPanelSelector = ({
   tab,
   message,
   images,
+  imagesOverlay,
   isModelsLoaded,
 }: FaceOffModel) => ({
   tab,
   message,
   images,
+  imagesOverlay,
   isModelsLoaded,
 });
 
+const activeTabSelector = createSelector(faceOffPanelSelector, props => {
+  switch (props.tab) {
+    case 'three':
+      return { ...props, ActiveTab: DropzoneComponent };
+    case 'two':
+      return { ...props, ActiveTab: WebcamComponent };
+    default:
+      return { ...props, ActiveTab: VideoComponent };
+  }
+});
+
 const mapStateToProps = ({ faceOffPanel }: RootState) =>
-  faceOffPanelSelector(faceOffPanel);
+  activeTabSelector(faceOffPanel);
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   switchTab(tab: string) {
@@ -132,34 +150,21 @@ const TabContainer = ({ children }: Props<ReactNode>): ReactElement<any> => (
   </Typography>
 );
 
-type ContainerProps = StyledComponentProps &
-  ReturnType<typeof mapStateToProps> &
-  ReturnType<typeof mapDispatchToProps>;
-type ActiveTypeProps = { ActiveTab: ReactType };
-
-const withActiveTab = (Container: ReactType) => (
-  props: ContainerProps
-): ReactElement<ContainerProps & ActiveTypeProps> =>
-  props.tab === 'three' ? (
-    <Container {...props} ActiveTab={DropzoneComponent} />
-  ) : props.tab === 'two' ? (
-    <Container {...props} ActiveTab={WebcamComponent} />
-  ) : (
-    <Container {...props} ActiveTab={VideoComponent} />
-  );
-
 const FaceOffPanel = ({
   classes,
   ActiveTab,
   message,
   tab,
   isModelsLoaded,
+  images,
+  imagesOverlay,
   switchTab,
   hideMessage,
   showMessage,
   removeImages,
-  images,
-}: ContainerProps & ActiveTypeProps): ReactElement<any> => {
+}: StyledComponentProps &
+  ReturnType<typeof mapStateToProps> &
+  ReturnType<typeof mapDispatchToProps>): ReactElement<any> => {
   const removeAllHandler = () => removeImages(images.map((image, i) => i));
   const switchTabHandler = (_: any, value: string) => switchTab(value);
   return (
@@ -221,7 +226,7 @@ const FaceOffPanel = ({
           </Button>
           <div className={classes!.br} />
           <div className={classes!.imagesContainer}>
-            {images.map(({ title, width, height, src }, i) => {
+            {images.map(({ id, title, width, height, src }, i) => {
               const removeImageHandler = () => removeImages([i]);
               return (
                 <Card
@@ -231,6 +236,11 @@ const FaceOffPanel = ({
                 >
                   <CardActionArea>
                     <CardContent className={classes!.title}>{name}</CardContent>
+                    {!!imagesOverlay[id] && (
+                      <div className={classes!.overlay}>
+                        createPortal(null, imagesOverlay[id])
+                      </div>
+                    )}
                     <img
                       src={src}
                       title={title}
@@ -261,4 +271,4 @@ const FaceOffPanel = ({
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(withStyles(styles)(withActiveTab(FaceOffPanel)));
+)(withStyles(styles)(FaceOffPanel));

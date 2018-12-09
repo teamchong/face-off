@@ -51,7 +51,6 @@ export default (
             ({ tab, video }) => tab === 'one' && video && video.videoWidth
           ),
           switchMap(({ overlay, videoCtx, video }) => {
-            console.log('test');
             const { videoWidth, videoHeight } = video;
             videoCtx.canvas.width = videoWidth;
             videoCtx.canvas.height = videoHeight;
@@ -153,6 +152,5 @@ export default (
         )
       )
     ),
-    delay(1000 * 10),
     takeWhile(() => state$.value.faceOffPanel.isAppRunning)
   );
