@@ -1,5 +1,5 @@
-import { concat, from, merge, Observable, of } from 'rxjs';
-import { filter, mapTo, switchMap } from 'rxjs/operators';
+import { from, Observable, of } from 'rxjs';
+import { concat, filter, mapTo, merge, switchMap } from 'rxjs/operators';
 import { isOfType } from 'typesafe-actions';
 import {
   detectFaces,
@@ -17,15 +17,16 @@ export default (action$: Observable<RootActions>) =>
   action$.pipe(
     filter(isOfType(START_APP)),
     switchMap(() =>
-      merge(
-        of(fetchMp4Url(DEFAULT_VIDEO_URL)),
-        concat(
+      of(fetchMp4Url(DEFAULT_VIDEO_URL)).pipe(
+        merge(
           from(
             FaceDetectModel(
               'https://justadudewhohacks.github.io/face-api.js/models/'
             )
-          ).pipe(mapTo(loadedModels())),
-          of(detectFaces())
+          ).pipe(
+            mapTo(loadedModels()),
+            concat(of(detectFaces()))
+          )
         )
       )
     )

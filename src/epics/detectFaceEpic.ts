@@ -1,13 +1,14 @@
 import { StateObservable } from 'redux-observable';
-import { concat, empty, from, Observable, of } from 'rxjs';
+import { from, Observable, of, timer } from 'rxjs';
 import {
   catchError,
+  concat,
   delay,
   expand,
   filter,
   first,
-  ignoreElements,
   map,
+  mapTo,
   switchMap,
   takeWhile,
   tap,
@@ -39,118 +40,100 @@ export default (
   action$.pipe(
     filter(isOfType(DETECT_FACES)),
     filter(() => state$.value.faceOffPanel.isAppRunning),
-    expand(action =>
-      concat(
-        of(state$.value.faceOffPanel).pipe(
-          switchMap(action => {
-            let {
-              tab,
-              videoRef: { current: video },
-              webcamRef: { current: webcamRef },
-            } = action;
+    switchMap(action =>
+      Observable.create(async observer => {
+        let state = state$.value.faceOffPanel;
+        while (state.isAppRunning) {
+          console.log(`${new Date().toLocaleTimeString('enGb')} 1`);
+          let {
+            tab,
+            videoRef: { current: video },
+            videoOverlayRef: { current: videoOverlay },
+            webcamRef: { current: webcam },
+            webcamOverlayRef: { current: webcamOverlay },
+            videoCtx,
+            images,
+            imagesOverlay,
+            imagesDetectResults,
+          } = state$.value;
 
-            if (tab == 'one' && video) {
-              const { videoWidth, videoHeight } = video;
-              return of({ ...action, videoWidth, videoHeight }).pipe(
-                switchMap(({ overlay, videoCtx, videoWidth, videoHeight }) => {
-                  videoCtx.canvas.width = videoWidth;
-                  videoCtx.canvas.height = videoHeight;
-                  videoCtx.drawImage(video, 0, 0, videoWidth, videoHeight);
-                  return from(
-                    detectAllFaces(
-                      videoCtx.canvas,
-                      FaceDetectOptions({ inputSize: 320 })
-                    )
-                  ).pipe(
-                    map(result => detectedVideoFaces(result)),
-                    timeout(2000),
-                    catchError(() => detectedVideoFaces([])),
-                    tap(({ payload: results }) => {
-                      if (overlay) {
-                        drawDetections(
-                          results,
-                          overlay,
-                          videoCtx.canvas.width,
-                          videoCtx.canvas.height
-                        );
-                      }
-                    }),
-                    delay(100)
-                  );
-                })
-              );
-            } else if (tab === 'two' && webcamRef) {
-              const { videoWidth, videoHeight } = webcamRef.video;
-              return of({ ...action, videoWidth, videoHeight }).pipe(
-                switchMap(({ overlay, videoCtx, video }) => {
-                  videoCtx.canvas.width = videoWidth;
-                  videoCtx.canvas.height = videoHeight;
-                  videoCtx.drawImage(video, 0, 0, videoWidth, videoHeight);
-                  return from(
-                    detectAllFaces(
-                      videoCtx.canvas,
-                      FaceDetectOptions({ inputSize: 320 })
-                    )
-                  ).pipe(
-                    map(result => detectedWebcamFaces(result)),
-                    timeout(2000),
-                    catchError(() => detectedWebcamFaces([])),
-                    tap(({ payload: results }) => {
-                      if (overlay) {
-                        drawDetections(
-                          results,
-                          overlay,
-                          videoCtx.canvas.width,
-                          videoCtx.canvas.height
-                        );
-                      }
-                    }),
-                    delay(100)
-                  );
-                })
-              );
-            }
-            return of(null).pipe(
-              delay(100),
-              ignoreElements(),
-            );
-          })
-        ),
-        of(state$.value.faceOffPanel).pipe(
-          switchMap(({ images, imagesDetectResults, imagesOverlay }) =>
-            of(
-              images.map((image, i) => ({
-                id: image.id,
-                image,
-                i,
-                overlay: imagesOverlay[image.id],
-                results: imagesDetectResults[image.id],
-              }))
+          if (tab == 'one' && video) {
+            const { videoWidth, videoHeight } = video;
+            videoCtx.canvas.width = videoWidth;
+            videoCtx.canvas.height = videoHeight;
+            videoCtx.drawImage(video, 0, 0, videoWidth, videoHeight);
+            const results = await from(
+              detectAllFaces(
+                videoCtx.canvas,
+                FaceDetectOptions({ inputSize: 320 })
+              )
             )
-          ),
-          filter(({ results }) => !!results),
-          switchMap(({ id, image, i, overlay, results }) =>
-            from(
+              .pipe(
+                timeout(2000),
+                catchError(() => of([]))
+              )
+              .toPromise();
+            observer.next(detectedVideoFaces(results));
+
+            drawDetections(
+              results,
+              videoOverlay,
+              videoCtx.canvas.width,
+              videoCtx.canvas.height
+            );
+
+            await timer(100).toPromise();
+          } else if (tab === 'two' && webcam) {
+            const { videoWidth, videoHeight } = webcam.video;
+            videoCtx.canvas.width = videoWidth;
+            videoCtx.canvas.height = videoHeight;
+            videoCtx.drawImage(video, 0, 0, videoWidth, videoHeight);
+            const results = await from(
+              detectAllFaces(
+                videoCtx.canvas,
+                FaceDetectOptions({ inputSize: 320 })
+              )
+            )
+              .pipe(
+                map(result => result),
+                timeout(2000),
+                catchError(() => of([]))
+              )
+              .toPromise();
+            observer.next(detectedWebcamFaces(results));
+
+            drawDetections(
+              results,
+              webcamOverlay,
+              videoCtx.canvas.width,
+              videoCtx.canvas.height
+            );
+
+            await timer(100).toPromise();
+          } else {
+            await timer(100).toPromise();
+          }
+          for (let i = 0, iL = images.length; i < iL; i++) {
+            const image = images[i];
+            const results = imagesDetectResults[image.id];
+
+            if (!!results) {
+              continue;
+            }
+
+            const overlay = imagesOverlay[image.id];
+            const result = await from(
               detectAllFaces(image, FaceDetectOptions({ inputSize: 608 }))
             ).pipe(
-              map(result => detectedImageFaces({ image, result })),
               timeout(2000),
-              catchError(() => detectedImageFaces({ image, result: [] })),
-              tap(({ payload: results }) => {
-                if (overlay) {
-                  drawDetections(
-                    results,
-                    overlay,
-                    overlay.width,
-                    overlay.height
-                  );
-                }
-              }),
-              delay(100)
-            )
-          )
-        )
-      )
-    ),
-    takeWhile(() => state$.value.faceOffPanel.isAppRunning)
+              catchError(() => of([]))
+            );
+            observer.next(detectedImageFaces({ image, result }));
+            drawDetections(results, overlay, overlay.width, overlay.height);
+            console.log(`${new Date().toLocaleTimeString('enGb')} end`);
+            await timer(100).toPromise();
+          }
+        }
+      })
+    )
   );
