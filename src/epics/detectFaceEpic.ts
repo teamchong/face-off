@@ -44,7 +44,7 @@ const drawVideo = async (
   videoCtx.canvas.width = videoWidth;
   videoCtx.canvas.height = videoHeight;
   videoCtx.drawImage(video, 0, 0, videoWidth, videoHeight);
-  await timer(0).toPromise();
+  await timer(100).toPromise();
 };
 const detectFaces = async (
   canvas: HTMLCanvasElement | HTMLImageElement,
