@@ -58,6 +58,8 @@ const styles = ({ palette, spacing }: Theme) =>
     },
     overlay: {
       position: 'absolute',
+      pointerEvents: 'none',
+      zIndex: 1,
     },
     imagesContainer: {
       display: 'flex',
@@ -238,7 +240,7 @@ const FaceOffPanel = ({
                     <CardContent className={classes!.title}>{name}</CardContent>
                     {!!imagesOverlay[id] && (
                       <div className={classes!.overlay}>
-                        createPortal(null, imagesOverlay[id])
+                        {createPortal(null, imagesOverlay[id])}
                       </div>
                     )}
                     <img
