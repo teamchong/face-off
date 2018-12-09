@@ -9,6 +9,7 @@ import {
   first,
   map,
   switchMap,
+  tap,
   timeout,
   timer,
 } from 'rxjs/operators';
@@ -140,8 +141,7 @@ export default (
             )
           )
         ),
-        delay(0),
-        of(detectFaces())
+        tap(() => console.log('detectFaces'))
       )
     )
   );
