@@ -239,6 +239,8 @@ const FaceOffPanel = ({
                     <CardContent className={classes!.title}>{name}</CardContent>
                     <canvas
                       ref={imagesOverlayRef[id]}
+                      width={width}
+                      height={height}
                       className={classes!.overlay}
                     />
                     <img
