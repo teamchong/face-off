@@ -62,7 +62,7 @@ export default (
             videoCtx.canvas.width = videoWidth;
             videoCtx.canvas.height = videoHeight;
             videoCtx.drawImage(video, 0, 0, videoWidth, videoHeight);
-            const results = await from(
+            const result = await from(
               detectAllFaces(
                 videoCtx.canvas,
                 FaceDetectOptions({ inputSize: 320 })
@@ -73,10 +73,10 @@ export default (
                 catchError(() => of([]))
               )
               .toPromise();
-            observer.next(detectedVideoFaces(results));
+            observer.next(detectedVideoFaces(result));
 
             drawDetections(
-              results,
+              result,
               videoOverlay,
               videoCtx.canvas.width,
               videoCtx.canvas.height
@@ -88,22 +88,21 @@ export default (
             videoCtx.canvas.width = videoWidth;
             videoCtx.canvas.height = videoHeight;
             videoCtx.drawImage(video, 0, 0, videoWidth, videoHeight);
-            const results = await from(
+            const result = await from(
               detectAllFaces(
                 videoCtx.canvas,
                 FaceDetectOptions({ inputSize: 320 })
               )
             )
               .pipe(
-                map(result => result),
                 timeout(2000),
                 catchError(() => of([]))
               )
               .toPromise();
-            observer.next(detectedWebcamFaces(results));
+            observer.next(detectedWebcamFaces(result));
 
             drawDetections(
-              results,
+              result,
               webcamOverlay,
               videoCtx.canvas.width,
               videoCtx.canvas.height
@@ -115,9 +114,9 @@ export default (
           }
           for (let i = 0, iL = images.length; i < iL; i++) {
             const image = images[i];
-            const results = imagesDetectResults[image.id];
+            let previousResult = imagesDetectResults[image.id];
 
-            if (!!results) {
+            if (!!previousResult) {
               continue;
             }
 
@@ -131,7 +130,7 @@ export default (
               )
               .toPromise();
             observer.next(detectedImageFaces({ image, result }));
-            drawDetections(results, overlay, overlay.width, overlay.height);
+            drawDetections(result, overlay, overlay.width, overlay.height);
             await timer(100).toPromise();
           }
           // console.log(`${new Date().toLocaleTimeString('enGb')} end`);
