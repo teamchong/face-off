@@ -36,7 +36,7 @@ import {
 const FaceDetectOptions = (opts?: any) =>
   new (TinyFaceDetectorOptions as any)(opts);
 
-const drawVideo = async (
+const drawVideo = (
   video: HTMLVideoElement,
   videoCtx: CanvasRenderingContext2D
 ) => {
@@ -44,7 +44,6 @@ const drawVideo = async (
   videoCtx.canvas.width = videoWidth;
   videoCtx.canvas.height = videoHeight;
   videoCtx.drawImage(video, 0, 0, videoWidth, videoHeight);
-  await timer(100).toPromise();
 };
 const detectFaces = async (
   canvas: HTMLCanvasElement | HTMLImageElement,
@@ -56,7 +55,7 @@ const detectFaces = async (
       .withFaceDescriptors()
   )
     .pipe(
-      timeout(2000),
+      timeout(500),
       catchError(() => of([]))
     )
     .toPromise();
@@ -89,7 +88,7 @@ export default (
           } = state$.value.faceOffPanel;
 
           if (tab == 'one' && video && video.videoWidth) {
-            await drawVideo(video, videoCtx);
+            drawVideo(video, videoCtx);
 
             if (isModelsLoaded) {
               const result = await detectFaces(videoCtx.canvas, 224);
@@ -107,7 +106,7 @@ export default (
             video = (webcam as any).video;
 
             if (video && video.videoWidth) {
-              await drawVideo(video, videoCtx);
+              drawVideo(video, videoCtx);
 
               if (isModelsLoaded) {
                 const result = await detectFaces(videoCtx.canvas, 224);
