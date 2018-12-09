@@ -1,6 +1,6 @@
 import { StateObservable } from 'redux-observable';
 import { from, Observable } from 'rxjs';
-import { filter, map, switchMap, tap } from 'rxjs/operators';
+import { concat, filter, map, switchMap, tap } from 'rxjs/operators';
 import { isOfType } from 'typesafe-actions';
 import { fetchedMp4Url, RootActions } from '../actions';
 import { FETCH_MP4URL, VIDEO_API } from '../constants';
@@ -12,22 +12,21 @@ export default (
 ) =>
   action$.pipe(
     filter(isOfType(FETCH_MP4URL)),
-    switchMap(({ payload: videoUrl }) =>
-      from(fetch(`${VIDEO_API}${videoUrl}`)).pipe(
-        switchMap(result => result.json()),
-        tap(result => console.log(result)),
-        map(result => result.filter(r => /^video\/(?:mp4|webm);/.test(r.type))),
-        map(result =>
-          !result.length
-            ? fetchedMp4Url({
-                videoUrlLoaded: videoUrl,
-                mp4Url: videoUrl,
-              })
-            : fetchedMp4Url({
-                videoUrlLoaded: videoUrl,
-                mp4Url: result[result.length - 1].url,
-              })
-        )
-      )
-    )
+    switchMap(async ({ payload: videoUrl }) => {
+      const result = await fetch(`${VIDEO_API}${videoUrl}`);
+      const json = await result.json();
+      console.log(json);
+      const mp4List = json.filter(r => /^video\/(?:mp4|webm);/.test(r.type));
+      if (!mp4List.length) {
+        return fetchedMp4Url({
+          videoUrlLoaded: videoUrl,
+          mp4Url: videoUrl,
+        });
+      } else {
+        return fetchedMp4Url({
+          videoUrlLoaded: videoUrl,
+          mp4Url: mp4List[mp4List.length - 1].url,
+        });
+      }
+    })
   );
