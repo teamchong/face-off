@@ -22,13 +22,40 @@ import { drawDetections } from '../classes/drawing';
 import { DETECT_FACES } from '../constants';
 import { RootState } from '../models';
 
-// import { detectAllFaces, SsdMobilenetv1Options } from 'face-api.js';
-//const FaceDetectModel = loadSsdMobilenetv1Model;
-//const FaceDetectOptions = (opts?: any) =>
-// new (SsdMobilenetv1Options as any)(opts);
-import { detectAllFaces, TinyFaceDetectorOptions } from 'face-api.js';
+// import {
+//   detectAllFaces,
+//   extractFaces,
+//   SsdMobilenetv1Options,
+// } from 'face-api.js';
+// const FaceDetectOptions = (opts?: any) =>
+//   new (SsdMobilenetv1Options as any)(opts);
+import {
+  detectAllFaces,
+  extractFaces,
+  TinyFaceDetectorOptions,
+} from 'face-api.js';
 const FaceDetectOptions = (opts?: any) =>
   new (TinyFaceDetectorOptions as any)(opts);
+
+const drawAndDetectVideo = async (
+  video: HTMLVideoElement,
+  videoCtx: CanvasRenderingContext2D
+) => {
+  const { videoWidth, videoHeight } = video;
+  videoCtx.canvas.width = videoWidth;
+  videoCtx.canvas.height = videoHeight;
+  videoCtx.drawImage(video, 0, 0, videoWidth, videoHeight);
+  return await from(
+    detectAllFaces(videoCtx.canvas, FaceDetectOptions({ inputSize: 320 }))
+      .withFaceLandmarks()
+      .withFaceDescriptors()
+  )
+    .pipe(
+      timeout(2000),
+      catchError(() => of([]))
+    )
+    .toPromise();
+};
 
 export default (
   action$: Observable<RootActions>,
@@ -55,21 +82,7 @@ export default (
           } = state$.value.faceOffPanel;
 
           if (tab == 'one' && video && video.videoWidth) {
-            const { videoWidth, videoHeight } = video;
-            videoCtx.canvas.width = videoWidth;
-            videoCtx.canvas.height = videoHeight;
-            videoCtx.drawImage(video, 0, 0, videoWidth, videoHeight);
-            const result = await from(
-              detectAllFaces(
-                videoCtx.canvas,
-                FaceDetectOptions({ inputSize: 320 })
-              )
-            )
-              .pipe(
-                timeout(2000),
-                catchError(() => of([]))
-              )
-              .toPromise();
+            const result = await drawAndDetectVideo(video, videoCtx);
             observer.next(detectedVideoFaces(result));
 
             drawDetections(
@@ -85,21 +98,7 @@ export default (
             webcam &&
             (webcam as any).video.videoWidth
           ) {
-            const { videoWidth, videoHeight } = (webcam as any).video;
-            videoCtx.canvas.width = videoWidth;
-            videoCtx.canvas.height = videoHeight;
-            videoCtx.drawImage(video, 0, 0, videoWidth, videoHeight);
-            const result = await from(
-              detectAllFaces(
-                videoCtx.canvas,
-                FaceDetectOptions({ inputSize: 320 })
-              )
-            )
-              .pipe(
-                timeout(2000),
-                catchError(() => of([]))
-              )
-              .toPromise();
+            const result = await drawAndDetectVideo(video, videoCtx);
             observer.next(detectedWebcamFaces(result));
 
             drawDetections(
