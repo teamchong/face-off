@@ -73,6 +73,7 @@ export default (
                 catchError(() => of([]))
               )
               .toPromise();
+            observer.next(detectedVideoFaces(result));
 
             drawDetections(
               result,
@@ -80,7 +81,6 @@ export default (
               videoCtx.canvas.width,
               videoCtx.canvas.height
             );
-            observer.next(detectedVideoFaces(result));
 
             await timer(100).toPromise();
           } else if (
@@ -103,6 +103,7 @@ export default (
                 catchError(() => of([]))
               )
               .toPromise();
+            observer.next(detectedWebcamFaces(result));
 
             drawDetections(
               result,
@@ -110,7 +111,6 @@ export default (
               videoCtx.canvas.width,
               videoCtx.canvas.height
             );
-            observer.next(detectedWebcamFaces(result));
 
             await timer(100).toPromise();
           } else {
@@ -118,26 +118,26 @@ export default (
           }
           for (let i = 0, iL = images.length; i < iL; i++) {
             const image = images[i];
-            let previousResult = imagesDetectResults[image.id];
-
-            if (!!previousResult) {
-              continue;
-            }
-
+            let result = imagesDetectResults[image.id];
             const overlay = imagesOverlayRef[image.id].current;
-            const result = await from(
-              detectAllFaces(image, FaceDetectOptions({ inputSize: 608 }))
-            )
-              .pipe(
-                timeout(2000),
-                catchError(() => of([]))
+
+            if (!result) {
+              result = await from(
+                detectAllFaces(image, FaceDetectOptions({ inputSize: 608 }))
               )
-              .toPromise();
-            if (overlay) {
-              drawDetections(result, overlay, overlay.width, overlay.height);
+                .pipe(
+                  timeout(2000),
+                  catchError(() => of([]))
+                )
+                .toPromise();
               observer.next(detectedImageFaces({ image, result }));
+              await timer(100).toPromise();
             }
-            await timer(100).toPromise();
+
+            if (overlay && overlay.id != `${image.id}x`) {
+              drawDetections(result, overlay, overlay.width, overlay.height);
+              overlay.id = `${image.id}x`;
+            }
           }
           // console.log(`${new Date().toLocaleTimeString('enGb')} end`);
         }
