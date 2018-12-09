@@ -112,7 +112,7 @@ export default (
             }
             return of(null).pipe(
               delay(100),
-              switchMap(empty())
+              ignoreElements(),
             );
           })
         ),
