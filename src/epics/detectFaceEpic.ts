@@ -83,8 +83,12 @@ export default (
             );
 
             await timer(100).toPromise();
-          } else if (tab === 'two' && webcam && webcam.video.videoWidth) {
-            const { videoWidth, videoHeight } = webcam.video;
+          } else if (
+            tab === 'two' &&
+            webcam &&
+            (webcam as any).video.videoWidth
+          ) {
+            const { videoWidth, videoHeight } = (webcam as any).video;
             videoCtx.canvas.width = videoWidth;
             videoCtx.canvas.height = videoHeight;
             videoCtx.drawImage(video, 0, 0, videoWidth, videoHeight);
