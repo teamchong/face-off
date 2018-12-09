@@ -95,7 +95,7 @@ export default (
               observer.next(detectedVideoFaces(result));
 
               const { width, height } = videoCtx.canvas;
-              await drawDetections(
+              drawDetections(
                 result.map(r => r.detection),
                 videoOverlay,
                 width,
@@ -113,7 +113,7 @@ export default (
                 observer.next(detectedWebcamFaces(result));
 
                 const { width, height } = videoCtx.canvas;
-                await drawDetections(
+                drawDetections(
                   result.map(r => r.detection),
                   webcamOverlay,
                   width,
@@ -140,7 +140,7 @@ export default (
               const canvasId = `${image.id}x`;
 
               if (overlay && overlay.id != canvasId) {
-                await drawDetections(
+                drawDetections(
                   result.map(r => r.detection),
                   overlay,
                   overlay.width,

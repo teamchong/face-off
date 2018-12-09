@@ -7,7 +7,7 @@ import { timer } from 'rxjs';
 //   new (SsdMobilenetv1Options as any)(opts);
 import { drawDetection } from 'face-api.js';
 
-export const drawDetections = async (
+export const drawDetections = (
   detection: any[],
   canvas: HTMLCanvasElement,
   srcWidth: number,
@@ -25,6 +25,5 @@ export const drawDetections = async (
       //console.log({ video: payload });
     }
     //observer.next(detectedVideoFaces(result));
-    await timer(0).toPromise();
   }
 };
