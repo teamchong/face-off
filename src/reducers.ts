@@ -71,7 +71,7 @@ export const rootReducer = combineReducers<RootState, RootActions>({
       images: [],
       videoOverlayRef: createRef<HTMLCanvasElement>(),
       webcamOverlayRef: createRef<HTMLCanvasElement>(),
-      imagesOverlay: {},
+      imagesOverlayRef: {},
       imagesDetectResults: {},
       videoDetectResults: [],
       webcamDetectResults: [],
@@ -103,13 +103,10 @@ export const rootReducer = combineReducers<RootState, RootActions>({
               return result;
             }, {}),
           },
-          imagesOverlay: {
-            ...state.imagesOverlay,
+          imagesOverlayRef: {
+            ...state.imagesOverlayRef,
             ...images.reduce((result, image) => {
-              const ctx = document.createElement('canvas').getContext('2d');
-              ctx.canvas.width = image.width;
-              ctx.canvas.height = image.height;
-              result[image.id] = ctx.canvas;
+              result[image.id] = createRef<HTMLCanvasElement>();
               return result;
             }, {}),
           },
@@ -130,8 +127,8 @@ export const rootReducer = combineReducers<RootState, RootActions>({
             result[imageId] = state.imagesDetectResults[imageId];
             return result;
           }, {}),
-          imagesOverlay: imageIds.reduce((result, imageId) => {
-            result[imageId] = state.imagesOverlay[imageId];
+          imagesOverlayRef: imageIds.reduce((result, imageId) => {
+            result[imageId] = state.imagesOverlayRef[imageId];
             return result;
           }, {}),
         };

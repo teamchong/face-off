@@ -34,7 +34,6 @@ import {
 import { Theme } from '@material-ui/core/styles/createMuiTheme';
 import * as React from 'react';
 import { Fragment } from 'react';
-import { createPortal } from 'react-dom';
 import { createSelector } from 'reselect';
 import { Props, ReactElement, ReactNode, ReactType } from 'react';
 import { connect } from 'react-redux';
@@ -103,13 +102,13 @@ const faceOffPanelSelector = ({
   tab,
   message,
   images,
-  imagesOverlay,
+  imagesOverlayRef,
   isModelsLoaded,
 }: FaceOffModel) => ({
   tab,
   message,
   images,
-  imagesOverlay,
+  imagesOverlayRef,
   isModelsLoaded,
 });
 
@@ -159,7 +158,7 @@ const FaceOffPanel = ({
   tab,
   isModelsLoaded,
   images,
-  imagesOverlay,
+  imagesOverlayRef,
   switchTab,
   hideMessage,
   showMessage,
@@ -238,11 +237,10 @@ const FaceOffPanel = ({
                 >
                   <CardActionArea>
                     <CardContent className={classes!.title}>{name}</CardContent>
-                    {!!imagesOverlay[id] && (
-                      <div className={classes!.overlay}>
-                        {createPortal(null, imagesOverlay[id])}
-                      </div>
-                    )}
+                    <canvas
+                      ref={imagesOverlayRef[id]}
+                      className={classes!.overlay}
+                    />
                     <img
                       src={src}
                       title={title}
