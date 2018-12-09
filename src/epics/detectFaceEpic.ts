@@ -91,7 +91,7 @@ export default (
             drawVideo(video, videoCtx);
 
             if (isModelsLoaded) {
-              const result = await detectFaces(videoCtx.canvas, 224);
+              const result = await detectFaces(videoCtx.canvas, 416);
               observer.next(detectedVideoFaces(result));
 
               const { width, height } = videoCtx.canvas;
@@ -109,7 +109,7 @@ export default (
               drawVideo(video, videoCtx);
 
               if (isModelsLoaded) {
-                const result = await detectFaces(videoCtx.canvas, 224);
+                const result = await detectFaces(videoCtx.canvas, 416);
                 observer.next(detectedWebcamFaces(result));
 
                 const { width, height } = videoCtx.canvas;
