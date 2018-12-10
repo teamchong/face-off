@@ -31,8 +31,8 @@ export const compareFaces = (descriptor1: any, descriptor2: any): boolean => {
     return false;
   }
   const faceMatcher = new FaceMatcher(descriptor1);
-  const distance = faceMatcher.computeMeanDistance(descriptor1, descriptor2);
-  console.log(distance);
+  const distance = faceMatcher.computeMeanDistance(descriptor1, [descriptor2]);
+  debugger;
   return distance >= 0.6;
 };
 
@@ -72,7 +72,7 @@ export const startDetectFaces = async (
       .withFaceDescriptors()
   )
     .pipe(
-      timeout(500),
+      timeout(1000),
       catchError(() => of([]))
     )
     .toPromise();
