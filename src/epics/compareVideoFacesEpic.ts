@@ -26,7 +26,7 @@ export default (
   action$.pipe(
     filter(isActionOf(detectedVideoFaces)),
     filter(() => state$.value.faceOffPanel.isAppRunning),
-    switchMap(({ playload: { url, time, results } }) =>
+    switchMap(({ payload: { url, time, results } }) =>
       Observable.create(async observer => {
         const state = state$.value.faceOffPanel;
         const { faces, videoCtx } = state;
@@ -72,6 +72,7 @@ export default (
           })
         );
         observer.next(refreshFaces(newFaces));
+        observer.complete();
       })
     )
   );
