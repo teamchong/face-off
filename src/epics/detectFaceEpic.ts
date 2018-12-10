@@ -94,7 +94,12 @@ export default (
 
               if (!results) {
                 results = await startDetectFaces(image, 608);
-                observer.next(detectedImageFaces({ image, results }));
+                observer.next(
+                  detectedImageFaces({
+                    image,
+                    results: await results,
+                  })
+                );
                 await timer(100).toPromise();
               }
 

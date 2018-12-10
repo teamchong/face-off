@@ -64,7 +64,7 @@ export const generatePreview = async (
 export const startDetectFaces = async (
   canvas: HTMLCanvasElement | HTMLImageElement,
   inputSize: number
-) => {
+): any[] => {
   return await from(detectAllFaces(canvas, FaceDetectOptions({ inputSize }))
     .withFaceLandmarks()
     .withFaceDescriptors() as any)

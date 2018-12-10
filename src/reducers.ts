@@ -111,10 +111,7 @@ export const rootReducer = combineReducers<RootState, RootActions>({
         }
         const imageIds = state.images
           .filter((image, i) => imageIndexes.indexOf(i) < 0)
-          .map(image => image.id);
-        for (const id in state.faces) {
-          revokeIfNeed(state.faces[id].preview);
-        }
+          .map(({ id }) => id);
         return {
           ...state,
           images: state.images.filter((img, i) => imageIndexes.indexOf(i) < 0),
@@ -160,11 +157,14 @@ export const rootReducer = combineReducers<RootState, RootActions>({
       case STOP_APP: {
         state.images.forEach(image => revokeIfNeed(image.src));
         revokeIfNeed(state.mp4Url);
+        for (const id in state.faces) {
+          revokeIfNeed(state.faces[id].preview);
+        }
         return {
           ...state,
           mp4Url: '',
           images: [],
-          imagesDetectResults: [],
+          imagesDetectResults: {},
           isAppRunning: false,
         };
       }
@@ -184,7 +184,7 @@ export const rootReducer = combineReducers<RootState, RootActions>({
       }
       case REFRESH_FACES: {
         const { payload: faces } = action;
-        // console.log(faces);
+        console.log(faces);
         return { ...state, faces };
       }
       case LOADED_VIDEO: {

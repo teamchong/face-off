@@ -60,6 +60,13 @@ const styles = ({ palette, spacing }: Theme) =>
       pointerEvents: 'none',
       zIndex: 1,
     },
+    facesContainer: {
+      display: 'flex',
+      flexFlow: 'row wrap',
+      justifyContent: 'flex-start',
+      alignItems: 'flex-start',
+      alignContent: 'flex-start',
+    },
     imagesContainer: {
       display: 'flex',
       flexFlow: 'row wrap',
@@ -104,24 +111,79 @@ const faceOffPanelSelector = ({
   images,
   imagesOverlayRef,
   isModelsLoaded,
+  faces,
 }: FaceOffModel) => ({
   tab,
   message,
   images,
   imagesOverlayRef,
   isModelsLoaded,
+  faces,
 });
 
-const activeTabSelector = createSelector(faceOffPanelSelector, props => {
-  switch (props.tab) {
-    case 'three':
-      return { ...props, ActiveTab: DropzoneComponent };
-    case 'two':
-      return { ...props, ActiveTab: WebcamComponent };
-    default:
-      return { ...props, ActiveTab: VideoComponent };
+const activeTabSelector = createSelector(
+  faceOffPanelSelector,
+  ({ tab, message, images, imagesOverlayRef, isModelsLoaded, faces }) => {
+    const imageLookup = {};
+    for (let i = 0, iL = images.length; i < iL; i++) {
+      imageLookup[images[i].id] = images[i];
+    }
+    const faceGroup = [];
+    for (const id in faces) {
+      const face = faces[id];
+
+      const imgList = [];
+      for (const imageId in face.images) {
+        const image = imageLookup[imageId];
+        if (image) {
+          imgList.push(image);
+          delete imageLookup[imageId];
+        }
+      }
+
+      faceGroup.push({
+        id: id,
+        preview: face.preview,
+        video: face.video,
+        webcam: face.webcam,
+        imgList: imgList,
+      });
+    }
+    images = Object.keys(imageLookup).map(imageId => imageLookup[imageId]);
+    switch (tab) {
+      case 'three':
+        return {
+          tab,
+          message,
+          images,
+          imagesOverlayRef,
+          isModelsLoaded,
+          faceGroup,
+          ActiveTab: DropzoneComponent,
+        };
+      case 'two':
+        return {
+          tab,
+          message,
+          images,
+          imagesOverlayRef,
+          isModelsLoaded,
+          faceGroup,
+          ActiveTab: WebcamComponent,
+        };
+      default:
+        return {
+          tab,
+          message,
+          images,
+          imagesOverlayRef,
+          isModelsLoaded,
+          faceGroup,
+          ActiveTab: VideoComponent,
+        };
+    }
   }
-});
+);
 
 const mapStateToProps = ({ faceOffPanel }: RootState) =>
   activeTabSelector(faceOffPanel);
@@ -154,8 +216,9 @@ const TabContainer = ({ children }: Props<ReactNode>): ReactElement<any> => (
 const FaceOffPanel = ({
   classes,
   ActiveTab,
-  message,
+  faceGroup,
   tab,
+  message,
   isModelsLoaded,
   images,
   imagesOverlayRef,
@@ -226,6 +289,31 @@ const FaceOffPanel = ({
             <DeleteSweep /> Remove all
           </Button>
           <div className={classes!.br} />
+          <div className={classes!.facesContainer}>
+            {faceGroup.map(({ id, name, preview }) => (
+              <Card className={classes!.card} key={id || null}>
+                <CardActionArea>
+                  {!!name && (
+                    <CardContent className={classes!.title}>
+                      {name || `Unknown ${id || ''}`}
+                    </CardContent>
+                  )}
+                  <img
+                    src={preview}
+                    title={name || `Unknown ${id || ''}`}
+                    width={100}
+                    height={100}
+                    className={classes!.card}
+                  />
+                </CardActionArea>
+                <CardActions className={classes!.cardActions}>
+                  <Button size="small" color="primary">
+                    Detail
+                  </Button>
+                </CardActions>
+              </Card>
+            ))}
+          </div>
           <div className={classes!.imagesContainer}>
             {images.map(({ id, title, width, height, src }, i) => {
               const removeImageHandler = () => removeImages([i]);

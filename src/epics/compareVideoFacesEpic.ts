@@ -36,7 +36,6 @@ export default (
             let foundId = '';
 
             for (const id in faces) {
-              debugger;
               const face = newFaces[id];
 
               if (compareFaces(face.descriptor, result.descriptor)) {
