@@ -58,7 +58,6 @@ const initState = {
   videoUrl: DEFAULT_VIDEO_URL,
   videoUrlLoaded: '',
   mp4Url: '',
-  videoCtx: document.createElement('canvas').getContext('2d'),
   videoRef: createRef<HTMLVideoElement>(),
   webcamRef: createRef<Webcam>(),
   images: [],

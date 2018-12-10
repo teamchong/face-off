@@ -68,8 +68,9 @@ export const fetchedMp4Url = createAction(
 export const startApp = createAction(START_APP, resolve => () => resolve());
 export const stopApp = createAction(STOP_APP, resolve => () => resolve());
 
-export const screenshotVideo = createAction(SCREENSHOT_VIDEO, resolve => () =>
-  resolve()
+export const screenshotVideo = createAction(
+  SCREENSHOT_VIDEO,
+  resolve => (payload: HTMLVideoElement) => resolve()
 );
 
 export const loadedModels = createAction(LOADED_MODELS, resolve => () =>

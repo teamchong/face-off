@@ -6,6 +6,7 @@ import {
   CardActionArea,
   CardActions,
   CardContent,
+  CardHeader,
   CardMedia,
   CircularProgress,
   Dialog,
@@ -16,6 +17,7 @@ import {
   Slide,
   Tabs,
   Tab,
+  TextField,
   Typography,
 } from '@material-ui/core';
 import {
@@ -47,7 +49,6 @@ import DropzoneComponent from './DropzoneComponent';
 import WebcamComponent from './WebcamComponent';
 import {
   switchTab,
-  showMessage,
   hideMessage,
   openImageDetails,
   removeImages,
@@ -58,19 +59,24 @@ const styles = ({ palette, spacing }: Theme) =>
   createStyles({
     root: {
       flexGrow: 1,
+      display: 'flex',
+      flexFlow: 'row wrap',
+      justifyContent: 'flex-start',
+      alignItems: 'flex-start',
+      alignContent: 'flex-start',
       backgroundColor: palette.background.paper,
+    },
+    container: {
+      display: 'inline-block',
+      width: '700px',
     },
     overlay: {
       position: 'absolute',
       pointerEvents: 'none',
       zIndex: 1,
     },
-    facesContainer: {
-      display: 'flex',
-      flexFlow: 'row wrap',
-      justifyContent: 'flex-start',
-      alignItems: 'flex-start',
-      alignContent: 'flex-start',
+    faceName: {
+      fontSize: '10px',
     },
     imagesContainer: {
       display: 'flex',
@@ -87,8 +93,17 @@ const styles = ({ palette, spacing }: Theme) =>
       color: '#fff',
       textShadow: '1px 1px #000',
     },
+    badge: {
+      marginRight: '10px',
+    },
+    fold: {
+      marginLeft: 'auto',
+    },
     br: {
       width: '100%',
+    },
+    faceThumb: {
+      height: '120px',
     },
     removeAll: {
       width: '100%',
@@ -134,7 +149,7 @@ const faceOffPanelSelector = ({
   openImageId,
 });
 
-const activeTabSelector = createSelector(
+const componentSelector = createSelector(
   faceOffPanelSelector,
   ({
     tab,
@@ -168,6 +183,8 @@ const activeTabSelector = createSelector(
       faceGroup.push({
         id: id,
         name: face.name || `Unknown${id || ''}`,
+        gender: face.gender,
+        age: face.age,
         preview: face.preview,
         videoCount: Object.keys(face.video).length,
         webcamCount: face.webcam.length,
@@ -229,16 +246,23 @@ const activeTabSelector = createSelector(
 );
 
 const mapStateToProps = ({ faceOffPanel }: RootState) =>
-  activeTabSelector(faceOffPanel);
+  componentSelector(faceOffPanel);
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  switchTab: (tab: string) => dispatch(switchTab(tab)),
-  showMessage: (message: string) => dispatch(showMessage(message)),
+  switchTabHandler: (_: any, value: string) => dispatch(switchTab(value)),
   hideMessage: () => dispatch(hideMessage()),
   removeImages: (imageIndexes: number[]) =>
     dispatch(removeImages(imageIndexes)),
   openImageDetails: (openImageId: string) =>
     dispatch(openImageDetails(openImageId)),
+});
+
+const mergeProps = (stateProps, dispatchProps, ownProps) => ({
+  ...ownProps,
+  ...stateProps,
+  ...dispatchProps,
+  removeAllHandler: () =>
+    dispatchProps.removeImages(stateProps.images.map((image, i) => i)),
 });
 
 const Transition = (props: Props<ReactNode>) => (
@@ -263,18 +287,14 @@ const FaceOffPanel = ({
   images,
   imagesOverlayRef,
   imageDetails,
-  switchTab,
   hideMessage,
-  showMessage,
   removeImages,
   openImageDetails,
-}: StyledComponentProps &
-  ReturnType<typeof mapStateToProps> &
-  ReturnType<typeof mapDispatchToProps>): ReactElement<any> => {
-  const removeAllHandler = () => removeImages(images.map((image, i) => i));
-  const switchTabHandler = (_: any, value: string) => switchTab(value);
-  return (
-    <div className={classes!.root}>
+  removeAllHandler,
+  switchTabHandler,
+}: StyledComponentProps & ReturnType<typeof mergeProps>): ReactElement<any> => (
+  <div className={classes!.root}>
+    <div className={classes!.container}>
       <AppBar position="static">
         <Tabs value={tab} onChange={switchTabHandler} fullWidth={true}>
           <Tab value="one" icon={<VideoLibrary />} />
@@ -285,150 +305,212 @@ const FaceOffPanel = ({
       <TabContainer>
         <ActiveTab />
       </TabContainer>
-      <div className={classes!.br} />
-      <div className={classes!.facesContainer}>
-        {faceGroup.map(
-          ({ id, name, preview, videoCount, webcamCount, imageCount }) => {
-            const isOpen = imageDetails && imageDetails.id === id;
-            const clickHandler = () => openImageDetails(isOpen ? '' : id);
+    </div>
+    {faceGroup.map(
+      ({
+        id,
+        name,
+        gender,
+        age,
+        preview,
+        videoCount,
+        webcamCount,
+        imageCount,
+      }) => {
+        const isOpen = !!imageDetails && imageDetails.id === id;
+        const clickHandler = () => openImageDetails(isOpen ? '' : id);
+        const nameChangeHandler = () => {};
+        return (
+          <Card className={classes!.card} key={id} onClick={clickHandler}>
+            <CardHeader title={name} className={classes!.faceName} />
+            <CardMedia
+              component={'image' as any}
+              image={preview}
+              title={name}
+              className={classes!.faceThumb}
+            />
+            <CardActions className={classes!.cardActions}>
+              <Badge
+                className={classes!.badge}
+                color="secondary"
+                badgeContent={videoCount}
+                invisible={!videoCount}
+              >
+                <VideoLibrary />
+              </Badge>
+              <Badge
+                className={classes!.badge}
+                color="secondary"
+                badgeContent={webcamCount}
+                invisible={!webcamCount}
+              >
+                <Videocam />
+              </Badge>
+              <Badge
+                className={classes!.badge}
+                color="secondary"
+                badgeContent={imageCount}
+                invisible={!imageCount}
+              >
+                <Photo />
+              </Badge>
+              {isOpen ? (
+                <UnfoldLess className={classes!.fold} />
+              ) : (
+                <UnfoldMore className={classes!.fold} />
+              )}
+            </CardActions>
+            {isOpen && (
+              <CardContent>
+                <TextField
+                  label="Name"
+                  value={name}
+                  onChange={nameChangeHandler}
+                  fullWidth
+                  margin="normal"
+                  variant="outlined"
+                />
+                {gender ? (
+                  <TextField
+                    label="Gender"
+                    value={gender}
+                    onChange={nameChangeHandler}
+                    fullWidth
+                    margin="normal"
+                    variant="outlined"
+                    InputProps={{
+                      readOnly: true,
+                    }}
+                  />
+                ) : (
+                  <div>
+                    <CircularProgress
+                      size={12}
+                      className={classes!.alignCenter}
+                    />{' '}
+                    Gender
+                  </div>
+                )}
+                {age ? (
+                  <TextField
+                    label="Age"
+                    value={age}
+                    onChange={nameChangeHandler}
+                    fullWidth
+                    margin="normal"
+                    variant="outlined"
+                    InputProps={{
+                      readOnly: true,
+                    }}
+                  />
+                ) : (
+                  <div>
+                    <CircularProgress
+                      size={12}
+                      className={classes!.alignCenter}
+                    />{' '}
+                    Age
+                  </div>
+                )}
+              </CardContent>
+            )}
+          </Card>
+        );
+      }
+    )}
+    <div className={classes!.br} />
+    {!!images.length && (
+      <div>
+        <Button
+          variant="contained"
+          color="primary"
+          className={classes!.removeAll}
+          onClick={removeAllHandler}
+        >
+          <DeleteSweep /> Remove all
+        </Button>
+        <div className={classes!.br} />
+        <div className={classes!.imagesContainer}>
+          {images.map(({ id, title, width, height, src }, i) => {
+            const removeImageHandler = () => removeImages([i]);
             return (
               <Card
                 className={classes!.card}
-                key={id || null}
-                onClick={clickHandler}
+                key={i}
+                style={{ order: images.length - i }}
               >
                 <CardActionArea>
-                  {!!name && (
-                    <CardContent className={classes!.title}>{name}</CardContent>
-                  )}
+                  <CardContent className={classes!.title}>{name}</CardContent>
+                  <canvas
+                    ref={imagesOverlayRef[id]}
+                    width={width}
+                    height={height}
+                    className={classes!.overlay}
+                  />
                   <img
-                    src={preview}
-                    title={name}
-                    height={200}
+                    src={src}
+                    title={title}
+                    width={width}
+                    height={height}
                     className={classes!.card}
                   />
                 </CardActionArea>
                 <CardActions className={classes!.cardActions}>
-                  <Badge
-                    color="secondary"
-                    badgeContent={videoCount}
-                    invisible={!videoCount}
+                  <Button
+                    size="small"
+                    color="primary"
+                    onClick={removeImageHandler}
                   >
-                    <VideoLibrary />
-                  </Badge>{' '}
-                  <Badge
-                    color="secondary"
-                    badgeContent={webcamCount}
-                    invisible={!webcamCount}
-                  >
-                    <Videocam />
-                  </Badge>{' '}
-                  <Badge
-                    color="secondary"
-                    badgeContent={imageCount}
-                    invisible={!imageCount}
-                  >
-                    <Photo />
-                  </Badge>{' '}
-                {isOpen ? <UnfoldLess> : <UnfoldMore/>}
+                    <Delete /> Remove
+                  </Button>
                 </CardActions>
               </Card>
             );
-          }
-        )}
+          })}
+        </div>
       </div>
-      {!!images.length && (
-        <div>
-          <Button
-            variant="contained"
-            color="primary"
-            className={classes!.removeAll}
-            onClick={removeAllHandler}
-          >
-            <DeleteSweep /> Remove all
-          </Button>
-          <div className={classes!.br} />
-          <div className={classes!.imagesContainer}>
-            {images.map(({ id, title, width, height, src }, i) => {
-              const removeImageHandler = () => removeImages([i]);
-              return (
-                <Card
-                  className={classes!.card}
-                  key={i}
-                  style={{ order: images.length - i }}
-                >
-                  <CardActionArea>
-                    <CardContent className={classes!.title}>{name}</CardContent>
-                    <canvas
-                      ref={imagesOverlayRef[id]}
-                      width={width}
-                      height={height}
-                      className={classes!.overlay}
-                    />
-                    <img
-                      src={src}
-                      title={title}
-                      width={width}
-                      height={height}
-                      className={classes!.card}
-                    />
-                  </CardActionArea>
-                  <CardActions className={classes!.cardActions}>
-                    <Button
-                      size="small"
-                      color="primary"
-                      onClick={removeImageHandler}
-                    >
-                      <Delete /> Remove
-                    </Button>
-                  </CardActions>
-                </Card>
-              );
-            })}
-          </div>
-        </div>
-      )}
-      {!isModelsLoaded &&
-      ((tab == 'one' && isVideoLoaded) ||
-        (tab === 'two' && isWebcamLoaded) ||
-        tab === 'three') ? (
-        <div>
-          <CircularProgress size={12} className={classes!.alignCenter} /> Please
-          wait while loading face detection models.
-        </div>
-      ) : (
-        <div>
-          <Info size={12} className={classes!.alignCenter} /> Face detection is
-          on.
-        </div>
-      )}
-      <Dialog
-        open={!!message}
-        TransitionComponent={Transition}
-        keepMounted={true}
-        onClose={hideMessage}
-        aria-labelledby="alert-dialog-slide-title"
-        aria-describedby="alert-dialog-slide-description"
-      >
-        <DialogTitle id="alert-dialog-slide-title">
-          <Info size={12} className={classes!.alignCenter} />
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-slide-description">
-            {message}
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={hideMessage} color="primary">
-            <Done />
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </div>
-  );
-};
+    )}
+    {!isModelsLoaded &&
+    ((tab == 'one' && isVideoLoaded) ||
+      (tab === 'two' && isWebcamLoaded) ||
+      tab === 'three') ? (
+      <div>
+        <CircularProgress size={12} className={classes!.alignCenter} /> Please
+        wait while loading face detection models.
+      </div>
+    ) : (
+      <div>
+        <Info size={12} className={classes!.alignCenter} /> Face detection is
+        on.
+      </div>
+    )}
+    <Dialog
+      open={!!message}
+      TransitionComponent={Transition}
+      keepMounted={true}
+      onClose={hideMessage}
+      aria-labelledby="alert-dialog-slide-title"
+      aria-describedby="alert-dialog-slide-description"
+    >
+      <DialogTitle id="alert-dialog-slide-title">
+        <Info size={12} className={classes!.alignCenter} />
+      </DialogTitle>
+      <DialogContent>
+        <DialogContentText id="alert-dialog-slide-description">
+          {message}
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={hideMessage} color="primary">
+          <Done />
+        </Button>
+      </DialogActions>
+    </Dialog>
+  </div>
+);
 
 export default connect(
   mapStateToProps,
-  mapDispatchToProps
+  mapDispatchToProps,
+  mergeProps
 )(withStyles(styles)(FaceOffPanel));

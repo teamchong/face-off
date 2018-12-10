@@ -85,14 +85,12 @@ const faceOffPanelSelector = ({
   isWebcamLoaded,
   webcamRef,
   webcamOverlayRef,
-  videoCtx,
   tab,
 }: FaceOffModel) => ({
   facingMode,
   isWebcamLoaded,
   webcamRef,
   webcamOverlayRef,
-  videoCtx,
   tab,
 });
 
@@ -102,10 +100,23 @@ const mapStateToProps = ({ faceOffPanel }: RootState) =>
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   showMessage: (message: string) => dispatch(showMessage(message)),
   addImages: (images: HTMLImageElement[]) => dispatch(addImages(images)),
-  switchFacingMode: (facingMode: string) =>
-    dispatch(switchFacingMode(facingMode)),
+  switchRear: () => dispatch(switchFacingMode(FACINGMODE_REAR)),
+  switchFront: () => dispatch(switchFacingMode(FACINGMODE_FRONT)),
   loadedWebcam: () => dispatch(loadedWebcam()),
-  screenshotVideo: () => dispatch(screenshotVideo()),
+  screenshotVideo: (video: HTMLVideoElement) =>
+    dispatch(screenshotVideo(video)),
+});
+
+const mergeProps = (stateProps, dispatchProps, ownProps) => ({
+  ...ownProps,
+  ...stateProps,
+  ...dispatchProps,
+  screenshotHandler: () =>
+    dispatchProps.screenshotVideo(
+      stateProps.webcamRef.current
+        ? (stateProps.webcamRef.current as any).video
+        : null
+    ),
 });
 
 const WebcamComponent = ({
@@ -114,76 +125,67 @@ const WebcamComponent = ({
   webcamRef,
   webcamOverlayRef,
   facingMode,
-  videoCtx,
   showMessage,
-  switchFacingMode,
+  switchRear,
+  switchFront,
   screenshotVideo,
   addImages,
   loadedWebcam,
-}: StyledComponentProps &
-  ReturnType<typeof mapStateToProps> &
-  ReturnType<typeof mapDispatchToProps>) => {
-  const userMediaHandler = () => loadedWebcam();
-  const switchRear = () => switchFacingMode(FACINGMODE_REAR);
-  const switchFront = () => switchFacingMode(FACINGMODE_FRONT);
-  return (
-    <div className={classes!.container}>
-      <div className={classes!.rearFacing}>
-        {!isWebcamLoaded && (
-          <CircularProgress className={classes!.loading} size={68} />
-        )}
-        <Fab color="primary" aria-label="Use rear camera" onClick={switchRear}>
-          <CameraRear />
-        </Fab>
-      </div>
-      <div className={classes!.frontFacing}>
-        {!isWebcamLoaded && (
-          <CircularProgress className={classes!.loading} size={68} />
-        )}
+  screenshotHandler,
+}: StyledComponentProps & ReturnType<typeof mergeProps>) => (
+  <div className={classes!.container}>
+    <div className={classes!.rearFacing}>
+      {!isWebcamLoaded && (
+        <CircularProgress className={classes!.loading} size={68} />
+      )}
+      <Fab color="primary" aria-label="Use rear camera" onClick={switchRear}>
+        <CameraRear />
+      </Fab>
+    </div>
+    <div className={classes!.frontFacing}>
+      {!isWebcamLoaded && (
+        <CircularProgress className={classes!.loading} size={68} />
+      )}
+      <Fab color="primary" aria-label="Use front camera" onClick={switchFront}>
+        <CameraFront />
+      </Fab>
+    </div>
+    <div className={classes!.screenshot}>
+      {!!isWebcamLoaded && (
         <Fab
           color="primary"
-          aria-label="Use front camera"
-          onClick={switchFront}
+          aria-label="Take screenshot"
+          onClick={screenshotHandler}
         >
-          <CameraFront />
+          <PhotoCamera />
         </Fab>
-      </div>
-      <div className={classes!.screenshot}>
-        {!!isWebcamLoaded && (
-          <Fab
-            color="primary"
-            aria-label="Take screenshot"
-            onClick={screenshotVideo}
-          >
-            <PhotoCamera />
-          </Fab>
-        )}
-      </div>
-      <canvas
-        className={classes!.overlay}
-        width={MAX_WIDTH}
-        height={MAX_HEIGHT}
-        ref={webcamOverlayRef}
-      />
-      <Webcam
-        ref={webcamRef}
-        audio={false}
-        width={MAX_WIDTH}
-        height={MAX_HEIGHT}
-        screenshotFormat="image/png"
-        onUserMedia={userMediaHandler}
-        style={{
-          borderWidth: 5,
-          borderStyle: 'solid',
-          borderColor: '#ccc',
-        }}
-        {...{ videoConstraints: { facingMode } }}
-      />
+      )}
     </div>
-  );
-};
+    <canvas
+      className={classes!.overlay}
+      width={MAX_WIDTH}
+      height={MAX_HEIGHT}
+      ref={webcamOverlayRef}
+    />
+    <Webcam
+      ref={webcamRef}
+      audio={false}
+      width={MAX_WIDTH}
+      height={MAX_HEIGHT}
+      screenshotFormat="image/png"
+      onUserMedia={loadedWebcam}
+      style={{
+        borderWidth: 5,
+        borderStyle: 'solid',
+        borderColor: '#ccc',
+      }}
+      {...{ videoConstraints: { facingMode } }}
+    />
+  </div>
+);
 
 export default connect(
   mapStateToProps,
-  mapDispatchToProps
+  mapDispatchToProps,
+  mergeProps
 )(withStyles(styles)(WebcamComponent));

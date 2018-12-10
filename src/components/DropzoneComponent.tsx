@@ -50,10 +50,49 @@ const mapStateToProps = ({ faceOffPanel }: RootState) =>
   faceOffPanelSelector(faceOffPanel);
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  addImages: (images: HTMLImageElement[]) => dispatch(addImages(images)),
-  showMessage: (message: string) => dispatch(showMessage(message)),
-  fetchMp4Url: (videoUrl: string) => dispatch(fetchMp4Url(videoUrl)),
-  switchTab: (tab: string) => dispatch(switchTab(tab)),
+  dropHandler: async (acceptedFiles: File[], rejectedFiles: File[]) => {
+    /*
+    lastModified: 1541910129972
+    lastModifiedDate: Sun Nov 11 2018 12:22:09 GMT+0800 (香港標準時間) {}
+    name: "Stuart.jpg"
+    size: 173149
+    type: "image/jpeg"
+    webkitRelativePath: ""
+    __proto__: File
+    */
+    if (!!(acceptedFiles || []).length) {
+      const imageFiles = [];
+      const videoFiles = [];
+      for (let i = 0, iL = acceptedFiles.length; i < iL; i++) {
+        const file = acceptedFiles[i];
+
+        if (!file) {
+          continue;
+        }
+        if (/^video\/(?:mp4|webm)$/i.test(file.type)) {
+          videoFiles.push(createObjectURL(file));
+        } else if (/^image\/.+$/i.test(file.type)) {
+          imageFiles.push(await readAsImage(file));
+        }
+      }
+      if (imageFiles.length) {
+        dispatch(addImages(imageFiles));
+      }
+      if (videoFiles.length) {
+        dispatch(fetchMp4Url(videoFiles[videoFiles.length - 1]));
+        dispatch(switchTab('one'));
+      }
+    }
+    const rejectedMessage = (rejectedFiles || [])
+      .map(file => file.name)
+      .join('\n');
+    if (!!rejectedMessage) {
+      dispatch(
+        showMessage(`The following files are not images
+${rejectedMessage}`)
+      );
+    }
+  },
 });
 
 /*
@@ -161,87 +200,41 @@ Open system file upload dialog.
 */
 const DropzoneComponent = ({
   classes,
-  addImages,
-  showMessage,
-  fetchMp4Url,
-  switchTab,
+  dropHandler,
 }: StyledComponentProps &
   ReturnType<typeof mapStateToProps> &
-  ReturnType<typeof mapDispatchToProps>) => {
-  const dropHandler = async (acceptedFiles: File[], rejectedFiles: File[]) => {
-    /*
-    lastModified: 1541910129972
-    lastModifiedDate: Sun Nov 11 2018 12:22:09 GMT+0800 (香港標準時間) {}
-    name: "Stuart.jpg"
-    size: 173149
-    type: "image/jpeg"
-    webkitRelativePath: ""
-    __proto__: File
-    */
-    if (!!(acceptedFiles || []).length) {
-      const imageFiles = [];
-      const videoFiles = [];
-      for (let i = 0, iL = acceptedFiles.length; i < iL; i++) {
-        const file = acceptedFiles[i];
-
-        if (!file) {
-          continue;
-        }
-        if (/^video\/(?:mp4|webm)$/i.test(file.type)) {
-          videoFiles.push(createObjectURL(file));
-        } else if (/^image\/.+$/i.test(file.type)) {
-          imageFiles.push(await readAsImage(file));
-        }
-      }
-      if (imageFiles.length) {
-        addImages(imageFiles);
-      }
-      if (videoFiles.length) {
-        fetchMp4Url(videoFiles[videoFiles.length - 1]);
-        switchTab('one');
-      }
-    }
-    const rejectedMessage = (rejectedFiles || [])
-      .map(file => file.name)
-      .join('\n');
-    if (!!rejectedMessage) {
-      showMessage(`The following files are not images
-${rejectedMessage}`);
-    }
-  };
-  return (
-    <Dropzone
-      accept="image/*, video/mp4, video/webm"
-      onDrop={dropHandler}
-      className="color-bg"
-      style={{
-        borderWidth: 5,
-        borderStyle: 'dashed',
-        borderColor: 'rgba(0,0,0,0.2)',
-        borderRadius: 5,
-        width: MAX_WIDTH,
-        height: MAX_HEIGHT,
-        alignContent: 'center',
-        justifyContent: 'center',
-        flexFlow: 'row wrap',
-        display: 'flex',
-      }}
+  ReturnType<typeof mapDispatchToProps>) => (
+  <Dropzone
+    accept="image/*, video/mp4, video/webm"
+    onDrop={dropHandler}
+    className="color-bg"
+    style={{
+      borderWidth: 5,
+      borderStyle: 'dashed',
+      borderColor: 'rgba(0,0,0,0.2)',
+      borderRadius: 5,
+      width: MAX_WIDTH,
+      height: MAX_HEIGHT,
+      alignContent: 'center',
+      justifyContent: 'center',
+      flexFlow: 'row wrap',
+      display: 'flex',
+    }}
+  >
+    <Typography
+      variant="h4"
+      gutterBottom={true}
+      className={classes!.typography}
     >
-      <Typography
-        variant="h4"
-        gutterBottom={true}
-        className={classes!.typography}
-      >
-        Drop your images/video here...
-      </Typography>
-      <div className={classes!.br} />
-      <Button variant="contained" color="secondary" className={classes!.button}>
-        Browse...
-        <Collections />
-      </Button>
-    </Dropzone>
-  );
-};
+      Drop your images/video here...
+    </Typography>
+    <div className={classes!.br} />
+    <Button variant="contained" color="secondary" className={classes!.button}>
+      Browse...
+      <Collections />
+    </Button>
+  </Dropzone>
+);
 
 export default connect(
   mapStateToProps,

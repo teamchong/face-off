@@ -13,24 +13,31 @@ export default (
 ) =>
   action$.pipe(
     filter(isActionOf(screenshotVideo)),
-    switchMap(async () => {
-      const {
-        faceOffPanel: { videoCtx },
-      } = state$.value;
-      const src = createObjectURL(
-        await canvasToBlob(videoCtx.canvas, 'image/png')
-      );
-      return addImages([
-        await new Promise<HTMLImageElement>((resolve, reject) => {
-          const imgEl = new Image();
-          imgEl.title = `WebCam-${new Date()
-            .toLocaleString('en-GB')
-            .replace('/', '-')
-            .replace(/[,]/g, '')}.jpg`;
-          imgEl.onload = () => resolve(imgEl);
-          imgEl.onerror = error => reject(error);
-          imgEl.src = src;
-        }),
-      ]);
+    switchMap(async ({ payload: video }) => {
+      if (video) {
+        const ctx = document.createElement('canvas').getContext('2d');
+        ctx.canvas.width = video.videoWidth;
+        ctx.canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0);
+        const src = createObjectURL(
+          await canvasToBlob(video.canvas, 'image/png')
+        );
+      if (videoWidth > MAX_WIDTH) {
+        videoHeight = ~~((MAX_WIDTH * videoHeight) / videoWidth);
+        videoWidth = MAX_WIDTH;
+      }
+        return addImages([
+          await new Promise<HTMLImageElement>((resolve, reject) => {
+            const imgEl = new Image();
+            imgEl.title = `faceoff-${new Date()
+              .toLocaleString('en-GB')
+              .replace('/', '-')
+              .replace(/[,]/g, '')}.jpg`;
+            imgEl.onload = () => resolve(imgEl);
+            imgEl.onerror = error => reject(error);
+            imgEl.src = src;
+          }),
+        ]);
+      }
     })
   );
