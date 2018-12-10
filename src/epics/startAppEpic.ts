@@ -8,7 +8,7 @@ import {
   RootActions,
   startApp,
 } from '../actions';
-import { initializeModles } from '../classes/faceApi';
+import { initializeModels } from '../classes/faceApi';
 import { DEFAULT_VIDEO_URL } from '../constants';
 
 export default (action$: Observable<RootActions>) =>
@@ -17,7 +17,7 @@ export default (action$: Observable<RootActions>) =>
     switchMap(() =>
       Observable.create(async observer => {
         observer.next(fetchMp4Url(DEFAULT_VIDEO_URL));
-        await initializeModles();
+        await initializeModels();
         observer.next(loadedModels());
         observer.next(detectFaces());
         observer.complete();
