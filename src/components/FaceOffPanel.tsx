@@ -12,7 +12,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Popper,
+  Popover,
   Slide,
   Tabs,
   Tab,
@@ -382,25 +382,19 @@ const FaceOffPanel = ({
                 >
                   Detail
                 </Button>
-                <Popper
-                  className={classes!.popper}
+                <Popover
                   open={openImageId === id}
-                  placement="top"
-                  modifiers={{
-                    flip: {
-                      enabled: true,
-                    },
-                    preventOverflow: {
-                      enabled: true,
-                      boundariesElement: 'scrollParent',
-                    },
-                    arrow: {
-                      enabled: true,
-                    },
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left',
+                  }}
+                  transformOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left',
                   }}
                 >
                   {JSON.stringify({ video, webcam, imgList })}
-                </Popper>
+                </Popover>
               </CardActions>
             </Card>
           );

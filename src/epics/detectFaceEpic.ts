@@ -41,9 +41,11 @@ export default (
             imagesOverlayRef,
             imagesDetectResults,
             isModelsLoaded,
+            isVideoLoaded,
+            isWebcamLoaded,
           } = state$.value.faceOffPanel;
 
-          if (tab == 'one' && video && video.videoWidth) {
+          if (tab == 'one' && video && video.videoWidth && isVideoLoaded) {
             drawVideo(video, videoCtx);
             const time = ~~video.currentTime;
 
@@ -61,7 +63,7 @@ export default (
                 height
               );
             }
-          } else if (tab === 'two' && webcam) {
+          } else if (tab === 'two' && webcam && isWebcamLoaded) {
             video = (webcam as any).video;
 
             if (video && video.videoWidth) {

@@ -22,6 +22,25 @@ import {
 } from 'face-api.js';
 import { from, of } from 'rxjs';
 import { catchError, timeout } from 'rxjs/operators';
+import { MODEL_URL } from '../constants';
+
+// import { loadSsdMobilenetv1Model } from 'face-api.js';
+// const FaceDetectModel = loadSsdMobilenetv1Model;
+import {
+  loadTinyFaceDetectorModel,
+  loadFaceLandmarkModel,
+  // loadFaceLandmarkTinyModel,
+  loadFaceRecognitionModel,
+} from 'face-api.js';
+const FaceDetectModel = loadTinyFaceDetectorModel;
+
+const initializeModels = async () => {
+  await FaceDetectModel(MODEL_URL);
+  await loadFaceLandmarkModel(MODEL_URL);
+  // await loadFaceLandmarkTinyModel(MODEL_URL);
+  await loadFaceRecognitionModel(MODEL_URL);
+  await startDetectFaces(new Image(100, 100), 32);
+};
 
 const FaceDetectOptions = (opts?: any) =>
   new (TinyFaceDetectorOptions as any)(opts);

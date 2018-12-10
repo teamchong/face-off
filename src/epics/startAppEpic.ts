@@ -8,17 +8,8 @@ import {
   RootActions,
   startApp,
 } from '../actions';
-import { DEFAULT_VIDEO_URL, MODEL_URL, START_APP } from '../constants';
-
-// import { loadSsdMobilenetv1Model } from 'face-api.js';
-// const FaceDetectModel = loadSsdMobilenetv1Model;
-import {
-  loadTinyFaceDetectorModel,
-  loadFaceLandmarkModel,
-  // loadFaceLandmarkTinyModel,
-  loadFaceRecognitionModel,
-} from 'face-api.js';
-const FaceDetectModel = loadTinyFaceDetectorModel;
+import { initializeModles } from '../classes/faceApi'
+import { DEFAULT_VIDEO_URL } from '../constants';
 
 export default (action$: Observable<RootActions>) =>
   action$.pipe(
@@ -26,10 +17,7 @@ export default (action$: Observable<RootActions>) =>
     switchMap(() =>
       Observable.create(async observer => {
         observer.next(fetchMp4Url(DEFAULT_VIDEO_URL));
-        await FaceDetectModel(MODEL_URL);
-        await loadFaceLandmarkModel(MODEL_URL);
-        // await loadFaceLandmarkTinyModel(MODEL_URL);
-        await loadFaceRecognitionModel(MODEL_URL);
+        await initializeModles());
         observer.next(loadedModels());
         observer.next(detectFaces());
         observer.complete();
