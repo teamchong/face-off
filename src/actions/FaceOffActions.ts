@@ -20,6 +20,7 @@ import {
   DETECTED_IMAGEFACES,
   LOADED_VIDEO,
   LOADED_WEBCAM,
+  REFRESH_FACES,
 } from '../constants';
 
 export const switchTab = createAction(SWITCH_TAB, resolve => (tab: string) =>
