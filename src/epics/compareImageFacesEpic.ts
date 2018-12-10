@@ -2,7 +2,7 @@ import { StateObservable } from 'redux-observable';
 import { Observable, timer } from 'rxjs';
 import { concat, filter, switchMap, timeout } from 'rxjs/operators';
 import { isActionOf } from 'typesafe-actions';
-import { detectedVideoFaces, refreshFaces, RootActions } from '../actions';
+import { detectedImageFaces, refreshFaces, RootActions } from '../actions';
 import { compareFaces, generatePreview, uniqueId } from '../classes/faceApi';
 import { FaceDetectResults, RootState } from '../models';
 
@@ -11,9 +11,9 @@ export default (
   state$: StateObservable<RootState>
 ) =>
   action$.pipe(
-    filter(isActionOf(detectedVideoFaces)),
+    filter(isActionOf(detectedImageFaces)),
     filter(() => state$.value.faceOffPanel.isAppRunning),
-    switchMap(({ payload: { url, time, canvas, results } }) =>
+    switchMap(({ payload: { image, results } }) =>
       Observable.create(async observer => {
         const state = state$.value.faceOffPanel;
         const { faces } = state;
@@ -30,15 +30,10 @@ export default (
                 preview: face.preview,
                 video: face.video,
                 webcam: face.webcam,
-                imageIds: face.imageIds,
+                imageIds: face.imageIds.add(image.id),
                 descriptor: face.descriptor,
               };
 
-              if (!newFace.video[url]) {
-                newFace.video[url] = new Set<number>([time]);
-              } else {
-                newFace.video[url].add(time);
-              }
               newFaces[id] = newFace;
               foundId = id;
               break;
@@ -48,10 +43,10 @@ export default (
 
           if (!foundId) {
             newFaces[uniqueId()] = {
-              preview: await generatePreview(canvas, result.detection),
-              video: { [url]: new Set<number>([time]) },
+              preview: await generatePreview(image, result.detection),
+              video: {},
               webcam: new Set<number>(),
-              imageIds: new Set<string>(),
+              imageIds: new Set<string>([image.id]),
               descriptor: result.descriptor,
             };
           }

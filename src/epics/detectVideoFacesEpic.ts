@@ -3,7 +3,7 @@ import { Observable, timer } from 'rxjs';
 import { concat, filter, switchMap, timeout } from 'rxjs/operators';
 import { isActionOf } from 'typesafe-actions';
 import {
-  detectFaces,
+  detectVideoFaces,
   detectedImageFaces,
   detectedVideoFaces,
   detectedWebcamFaces,
@@ -21,7 +21,7 @@ export default (
   state$: StateObservable<RootState>
 ) =>
   action$.pipe(
-    filter(isActionOf(detectFaces)),
+    filter(isActionOf(detectVideoFaces)),
     filter(() => state$.value.faceOffPanel.isAppRunning),
     switchMap(() =>
       Observable.create(async observer => {
@@ -36,9 +36,6 @@ export default (
             webcamRef: { current: webcam },
             webcamOverlayRef: { current: webcamOverlay },
             videoUrlLoaded,
-            images,
-            imagesOverlayRef,
-            imagesDetectResults,
             isModelsLoaded,
             isVideoLoaded,
             isWebcamLoaded,
@@ -95,37 +92,6 @@ export default (
           }
 
           await timer(100).toPromise();
-
-          if (isModelsLoaded) {
-            for (let i = 0, iL = images.length; i < iL; i++) {
-              const image = images[i];
-              let results = imagesDetectResults[image.id];
-              const overlay = imagesOverlayRef[image.id].current;
-
-              if (!results) {
-                results = await startDetectFaces(image, 608);
-                observer.next(
-                  detectedImageFaces({
-                    image,
-                    results: await results,
-                  })
-                );
-                await timer(100).toPromise();
-              }
-
-              const canvasId = `${image.id}x`;
-
-              if (overlay && overlay.id != canvasId) {
-                drawDetections(
-                  results.map(r => r.detection),
-                  overlay,
-                  overlay.width,
-                  overlay.height
-                );
-                overlay.id = canvasId;
-              }
-            }
-          }
         }
       })
     )

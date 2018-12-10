@@ -22,10 +22,10 @@ export default (
         const src = createObjectURL(
           await canvasToBlob(video.canvas, 'image/png')
         );
-      if (videoWidth > MAX_WIDTH) {
-        videoHeight = ~~((MAX_WIDTH * videoHeight) / videoWidth);
-        videoWidth = MAX_WIDTH;
-      }
+        if (videoWidth > MAX_WIDTH) {
+          videoHeight = ~~((MAX_WIDTH * videoHeight) / videoWidth);
+          videoWidth = MAX_WIDTH;
+        }
         return addImages([
           await new Promise<HTMLImageElement>((resolve, reject) => {
             const imgEl = new Image();

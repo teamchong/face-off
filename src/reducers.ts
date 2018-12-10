@@ -1,4 +1,3 @@
-import { revokeObjectURL } from 'blob-util';
 import { createRef } from 'react';
 import * as Webcam from 'react-webcam';
 import { combineReducers } from 'redux';
@@ -34,17 +33,21 @@ import { revokeIfNeed } from './classes/fileApi';
 import pasteHandlerEpic from './epics/pasteHandlerEpic';
 import screenshotEpic from './epics/screenshotEpic';
 import startAppEpic from './epics/startAppEpic';
-import detectFaceEpic from './epics/detectFaceEpic';
+import detectVideoFacesEpic from './epics/detectVideoFacesEpic';
+import addImagesEpic from './epics/addImagesEpic';
 import fetchMp4Epic from './epics/fetchMp4Epic';
 import compareVideoFacesEpic from './epics/compareVideoFacesEpic';
+import compareWebcamFacesEpic from './epics/compareWebcamFacesEpic';
 
 export const rootEpic = combineEpics(
   pasteHandlerEpic,
   screenshotEpic,
   startAppEpic,
-  detectFaceEpic,
+  detectVideoFacesEpic,
+  addImagesEpic,
   fetchMp4Epic,
-  compareVideoFacesEpic
+  compareVideoFacesEpic,
+  compareWebcamFacesEpic
 );
 
 const initState = {
@@ -63,7 +66,7 @@ const initState = {
   images: [],
   videoOverlayRef: createRef<HTMLCanvasElement>(),
   webcamOverlayRef: createRef<HTMLCanvasElement>(),
-  imagesOverlayRef: {},
+  imagesOverlaies: {},
   imagesDetectResults: {},
   faces: {},
   openImageId: '',
@@ -96,10 +99,10 @@ export const rootReducer = combineReducers<RootState, RootActions>({
               return result;
             }, {}),
           },
-          imagesOverlayRef: {
-            ...state.imagesOverlayRef,
+          imagesOverlaies: {
+            ...state.imagesOverlaies,
             ...images.reduce((result, image) => {
-              result[image.id] = createRef<HTMLCanvasElement>();
+              result[image.id] = '';
               return result;
             }, {}),
           },
@@ -107,39 +110,53 @@ export const rootReducer = combineReducers<RootState, RootActions>({
       }
       case REMOVE_IMAGES: {
         const { payload: imageIndexes } = action;
-        for (const imageIndex of imageIndexes) {
-          revokeIfNeed(state.images[imageIndex].src);
-        }
-        const imageIds = state.images
-          .filter((image, i) => imageIndexes.indexOf(i) < 0)
-          .map(({ id }) => id);
+        const removeIds = new Set<string>();
 
-        const newFaces = {};
+        for (const imageIndex of imageIndexes) {
+          const image = state.images[imageIndex];
+          if (image) {
+            removeIds.add(image.id);
+            revokeIfNeed(image.src);
+          }
+        }
+
+        const faces = {};
         for (const id in state.faces) {
-          const imageIds = Object.keys(state.faces[id].images);
-          const newImageIds = imageIds.filter(
-            imageId => imageIds.indexOf(imageId) < 0
+          const imageIds = Array.from(state.faces[id].imageIds).filter(
+            imageId => !removeIds.has(imageId)
           );
-          if (newImageIds.length != imageIds.length) {
-            const newFaceImages = {};
-            for (const imageId in newImageIds) {
-              newFaceImages[imageId] = state.faces[id].images[imageId];
-            }
-            newFaces[id] = { ...state.faces[id], images: newFaceImages };
+
+          if (imageIds.length !== state.faces[id].imageIds.size) {
+            faces[id] = { ...state.faces[id], imageIds: new Set(imageIds) };
+          } else {
+            faces[id] = state.faces[id];
           }
         }
 
         return {
           ...state,
+          faces,
           images: state.images.filter((img, i) => imageIndexes.indexOf(i) < 0),
-          imagesDetectResults: imageIds.reduce((result, imageId) => {
-            result[imageId] = state.imagesDetectResults[imageId];
-            return result;
-          }, {}),
-          imagesOverlayRef: imageIds.reduce((result, imageId) => {
-            result[imageId] = state.imagesOverlayRef[imageId];
-            return result;
-          }, {}),
+          imagesDetectResults: Object.keys(state.imagesDetectResults).reduce(
+            (result, imageId) => {
+              if (!removeIds.has(imageId)) {
+                result[imageId] = state.imagesDetectResults[imageId];
+              }
+              return result;
+            },
+            {}
+          ),
+          imagesOverlaies: Object.keys(state.imagesOverlaies).reduce(
+            (result, imageId) => {
+              if (!removeIds.has(imageId)) {
+                result[imageId] = state.imagesOverlaies[imageId];
+              } else {
+                revokeIfNeed(state.imagesOverlaies[imageId]);
+              }
+              return result;
+            },
+            {}
+          ),
         };
       }
       case SWITCH_FACINGMODE: {
@@ -177,11 +194,15 @@ export const rootReducer = combineReducers<RootState, RootActions>({
         for (const id in state.faces) {
           revokeIfNeed(state.faces[id].preview);
         }
+        for (const id in state.imagesOverlaies) {
+          revokeIfNeed(state.imagesOverlaies[id]);
+        }
         return {
           ...state,
           mp4Url: '',
           images: [],
           imagesDetectResults: {},
+          imagesOverlaies: {},
           isAppRunning: false,
         };
       }

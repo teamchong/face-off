@@ -2,7 +2,7 @@ import { StateObservable } from 'redux-observable';
 import { Observable, timer } from 'rxjs';
 import { concat, filter, switchMap, timeout } from 'rxjs/operators';
 import { isActionOf } from 'typesafe-actions';
-import { detectedVideoFaces, refreshFaces, RootActions } from '../actions';
+import { detectedWebcamFaces, refreshFaces, RootActions } from '../actions';
 import { compareFaces, generatePreview, uniqueId } from '../classes/faceApi';
 import { FaceDetectResults, RootState } from '../models';
 
@@ -11,9 +11,9 @@ export default (
   state$: StateObservable<RootState>
 ) =>
   action$.pipe(
-    filter(isActionOf(detectedVideoFaces)),
+    filter(isActionOf(detectedWebcamFaces)),
     filter(() => state$.value.faceOffPanel.isAppRunning),
-    switchMap(({ payload: { url, time, canvas, results } }) =>
+    switchMap(({ payload: { time, canvas, results } }) =>
       Observable.create(async observer => {
         const state = state$.value.faceOffPanel;
         const { faces } = state;
@@ -29,16 +29,10 @@ export default (
               const newFace = {
                 preview: face.preview,
                 video: face.video,
-                webcam: face.webcam,
+                webcam: new Set<number>(face.webcam).add(time),
                 imageIds: face.imageIds,
                 descriptor: face.descriptor,
               };
-
-              if (!newFace.video[url]) {
-                newFace.video[url] = new Set<number>([time]);
-              } else {
-                newFace.video[url].add(time);
-              }
               newFaces[id] = newFace;
               foundId = id;
               break;
@@ -49,8 +43,8 @@ export default (
           if (!foundId) {
             newFaces[uniqueId()] = {
               preview: await generatePreview(canvas, result.detection),
-              video: { [url]: new Set<number>([time]) },
-              webcam: new Set<number>(),
+              video: {},
+              webcam: new Set<number>([time]),
               imageIds: new Set<string>(),
               descriptor: result.descriptor,
             };

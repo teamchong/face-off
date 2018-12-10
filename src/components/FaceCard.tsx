@@ -77,21 +77,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
   const { images, faces, openImageId } = stateProps;
   const { openImageDetails } = dispatchProps;
 
-  const imageLookup = {};
-  for (let i = 0, iL = images.length; i < iL; i++) {
-    imageLookup[images[i].id] = images[i];
-  }
-
   const face = faces[id];
-
-  const imgList = {};
-  for (const imageId in face.images) {
-    const image = imageLookup[imageId];
-    if (image) {
-      imgList[imageId] = image;
-      delete imageLookup[imageId];
-    }
-  }
 
   const isOpen = openImageId === id;
   return {
@@ -102,10 +88,12 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
     preview: face.preview,
     video: face.video,
     webcam: face.webcam,
-    imgList,
-    videoCount: Object.keys(face.video).length,
-    webcamCount: face.webcam.length,
-    imageCount: Object.keys(imgList).length,
+    videoCount: Object.keys(face.video).reduce(
+      (total, url) => total + face.video[url].length,
+      0
+    ),
+    webcamCount: face.webcam.size,
+    imageCount: face.imageIds.size,
     isOpen,
     clickHandler: () => openImageDetails(isOpen ? '' : id),
     nameChangeHandler: () => {},
@@ -120,7 +108,6 @@ const FaceCard = ({
   preview,
   video,
   webcam,
-  imgList,
   videoCount,
   webcamCount,
   imageCount,

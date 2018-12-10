@@ -44,9 +44,9 @@ const styles = ({ palette, spacing }: Theme) =>
     },
   });
 
-const faceOffPanelSelector = ({ images, imagesOverlayRef }: FaceOffModel) => ({
+const faceOffPanelSelector = ({ images, imagesOverlaies }: FaceOffModel) => ({
   images,
-  imagesOverlayRef,
+  imagesOverlaies,
 });
 
 const mapStateToProps = ({ faceOffPanel }: RootState) =>
@@ -59,11 +59,11 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
 
 const mergeProps = (stateProps, dispatchProps, ownProps: ImageCardProps) => {
   const { index } = ownProps;
-  const { images, imagesOverlayRef } = stateProps;
+  const { images, imagesOverlaies } = stateProps;
   const { removeImages } = dispatchProps;
   const image = images[index] || ({} as any);
   const { id, title, width, height, src } = image;
-  const imageOverlayRef = imagesOverlayRef[id];
+  const imagesOverlay = imagesOverlaies[id];
   const removeImageHandler = () => removeImages([index]);
   return {
     index,
@@ -73,7 +73,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps: ImageCardProps) => {
     height,
     src,
     images,
-    imageOverlayRef,
+    imagesOverlay,
     removeImageHandler,
   };
 };
@@ -87,14 +87,14 @@ const ImageCard = ({
   height,
   src,
   images,
-  imageOverlayRef,
+  imagesOverlay,
   removeImageHandler,
 }: StyledComponentProps & ReturnType<typeof mergeProps>): ReactElement<any> => (
   <Card className={classes!.card} style={{ order: images.length - index }}>
     <CardActionArea>
       <CardContent className={classes!.title}>{name}</CardContent>
-      <canvas
-        ref={imageOverlayRef}
+      <img
+        src={imagesOverlay}
         width={width}
         height={height}
         className={classes!.overlay}

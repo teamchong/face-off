@@ -77,7 +77,7 @@ export const loadedModels = createAction(LOADED_MODELS, resolve => () =>
   resolve()
 );
 
-export const detectFaces = createAction(DETECT_FACES, resolve => () =>
+export const detectVideoFaces = createAction(DETECT_VIDEOFACES, resolve => () =>
   resolve()
 );
 
@@ -102,8 +102,11 @@ export const detectedWebcamFaces = createAction(
 
 export const detectedImageFaces = createAction(
   DETECTED_IMAGEFACES,
-  resolve => (payload: { image: HTMLImageElement; results: any[] }) =>
-    resolve(payload)
+  resolve => (payload: {
+    image: HTMLImageElement;
+    overlay: string;
+    results: any[];
+  }) => resolve(payload)
 );
 
 export const refreshFaces = createAction(
