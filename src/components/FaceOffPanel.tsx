@@ -116,6 +116,8 @@ const faceOffPanelSelector = ({
   isModelsLoaded,
   faces,
   openImageId,
+  videoRef,
+  webcamRef,
 }: FaceOffModel) => ({
   tab,
   message,
@@ -124,6 +126,8 @@ const faceOffPanelSelector = ({
   isModelsLoaded,
   faces,
   openImageId,
+  videoRef,
+  webcamRef,
 });
 
 const activeTabSelector = createSelector(
@@ -136,6 +140,8 @@ const activeTabSelector = createSelector(
     isModelsLoaded,
     faces,
     openImageId,
+    videoRef,
+    webcamRef,
   }) => {
     const imageLookup = {};
     for (let i = 0, iL = images.length; i < iL; i++) {
@@ -157,6 +163,7 @@ const activeTabSelector = createSelector(
 
       faceGroup.push({
         id: id,
+        name: face.name || `Unknown${id || ''}`,
         preview: face.preview,
         videoCount: Object.keys(face.video).length,
         webcamCount: face.webcam.length,
@@ -183,6 +190,8 @@ const activeTabSelector = createSelector(
           isModelsLoaded,
           faceGroup,
           imageDetails,
+          videoRef,
+          webcamRef,
           ActiveTab: DropzoneComponent,
         };
       case 'two':
@@ -194,6 +203,8 @@ const activeTabSelector = createSelector(
           isModelsLoaded,
           faceGroup,
           imageDetails,
+          videoRef,
+          webcamRef,
           ActiveTab: WebcamComponent,
         };
       default:
@@ -205,6 +216,8 @@ const activeTabSelector = createSelector(
           isModelsLoaded,
           faceGroup,
           imageDetails,
+          videoRef,
+          webcamRef,
           ActiveTab: VideoComponent,
         };
     }
@@ -251,6 +264,8 @@ const FaceOffPanel = ({
   isModelsLoaded,
   images,
   imagesOverlayRef,
+  videoRef,
+  webcamRef,
   imageDetails,
   switchTab,
   hideMessage,
@@ -283,13 +298,11 @@ const FaceOffPanel = ({
               <Card className={classes!.card} key={id || null}>
                 <CardActionArea>
                   {!!name && (
-                    <CardContent className={classes!.title}>
-                      {name || `Unknown ${id || ''}`}
-                    </CardContent>
+                    <CardContent className={classes!.title}>{name}</CardContent>
                   )}
                   <img
                     src={preview}
-                    title={name || `Unknown ${id || ''}`}
+                    title={name}
                     height={120}
                     className={classes!.card}
                   />
@@ -306,14 +319,14 @@ const FaceOffPanel = ({
                       invisible={!videoCount}
                     >
                       <VideoLibrary />
-                    </Badge>
+                    </Badge>{' '}
                     <Badge
                       color="secondary"
                       badgeContent={webcamCount}
                       invisible={!webcamCount}
                     >
                       <Videocam />
-                    </Badge>
+                    </Badge>{' '}
                     <Badge
                       color="secondary"
                       badgeContent={imageCount}
@@ -345,13 +358,11 @@ const FaceOffPanel = ({
               <Card className={classes!.card} key={id || null}>
                 <CardActionArea>
                   {!!name && (
-                    <CardContent className={classes!.title}>
-                      {name || `Unknown ${id || ''}`}
-                    </CardContent>
+                    <CardContent className={classes!.title}>{name}</CardContent>
                   )}
                   <img
                     src={preview}
-                    title={name || `Unknown ${id || ''}`}
+                    title={name}
                     width={100}
                     height={100}
                     className={classes!.card}
@@ -405,7 +416,17 @@ const FaceOffPanel = ({
           </div>
         </div>
       )}
-      {!isModelsLoaded ? (
+      {!isModelsLoaded &&
+      ((tab == 'one' &&
+        videoRef.current &&
+        videoRef.current.videoWidth &&
+        isVideoLoaded) ||
+        (tab === 'two' &&
+          webcamRef.current &&
+          webcamRef.current.video &&
+          webcamRef.current.video.length &&
+          isWebcamLoaded) ||
+        tab === 'three') ? (
         <div>
           <CircularProgress size={12} className={classes!.alignCenter} /> Please
           wait while loading face detection models.
