@@ -44,6 +44,7 @@ export default (
                   video: face.video ? { ...face.video } : {},
                   webcam: face.webcam,
                   images: face.images,
+                  descriptor: result.descriptor,
                 };
 
                 if (!newFace.video[url]) {
@@ -67,6 +68,7 @@ export default (
                 video: { [url]: [time] },
                 webcam: [],
                 images: {},
+                descriptor: result.descriptor,
               };
             }
           })

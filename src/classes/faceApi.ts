@@ -26,25 +26,14 @@ import { catchError, timeout } from 'rxjs/operators';
 const FaceDetectOptions = (opts?: any) =>
   new (TinyFaceDetectorOptions as any)(opts);
 
-export const compareFaces = (
-  fullFaceDescription1: any,
-  fullFaceDescription2: any
-): boolean => {
-  if (
-    !fullFaceDescription1 ||
-    !fullFaceDescription1.descriptor ||
-    !fullFaceDescription2 ||
-    !fullFaceDescription2.descriptor
-  ) {
+export const compareFaces = (descriptor1: any, descriptor2: any): boolean => {
+  if (!descriptor1 || !descriptor2) {
     return false;
   }
-  const faceMatcher = new FaceMatcher(fullFaceDescription1.descriptor);
-  return (
-    faceMatcher.computeMeanDistance(
-      fullFaceDescription1.descriptor,
-      fullFaceDescription2.descriptor
-    ) >= 0.6
-  );
+  const faceMatcher = new FaceMatcher(descriptor1);
+  const distance = faceMatcher.computeMeanDistance(descriptor1, descriptor2);
+  console.log(distance);
+  return distance >= 0.6;
 };
 
 export const uniqueId = () =>

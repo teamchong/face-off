@@ -10,7 +10,6 @@ import {
   RootActions,
 } from '../actions';
 import {
-  compareFaces,
   startDetectFaces,
   drawDetections,
   drawVideo,
