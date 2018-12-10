@@ -114,20 +114,20 @@ const faceOffPanelSelector = ({
   images,
   imagesOverlayRef,
   isModelsLoaded,
+  isVideoLoaded,
+  isWebcamLoaded,
   faces,
   openImageId,
-  videoRef,
-  webcamRef,
 }: FaceOffModel) => ({
   tab,
   message,
   images,
   imagesOverlayRef,
   isModelsLoaded,
+  isVideoLoaded,
+  isWebcamLoaded,
   faces,
   openImageId,
-  videoRef,
-  webcamRef,
 });
 
 const activeTabSelector = createSelector(
@@ -138,10 +138,10 @@ const activeTabSelector = createSelector(
     images,
     imagesOverlayRef,
     isModelsLoaded,
+    isVideoLoaded,
+    isWebcamLoaded,
     faces,
     openImageId,
-    videoRef,
-    webcamRef,
   }) => {
     const imageLookup = {};
     for (let i = 0, iL = images.length; i < iL; i++) {
@@ -188,10 +188,10 @@ const activeTabSelector = createSelector(
           images,
           imagesOverlayRef,
           isModelsLoaded,
+          isVideoLoaded,
+          isWebcamLoaded,
           faceGroup,
           imageDetails,
-          videoRef,
-          webcamRef,
           ActiveTab: DropzoneComponent,
         };
       case 'two':
@@ -201,10 +201,10 @@ const activeTabSelector = createSelector(
           images,
           imagesOverlayRef,
           isModelsLoaded,
+          isVideoLoaded,
+          isWebcamLoaded,
           faceGroup,
           imageDetails,
-          videoRef,
-          webcamRef,
           ActiveTab: WebcamComponent,
         };
       default:
@@ -214,10 +214,10 @@ const activeTabSelector = createSelector(
           images,
           imagesOverlayRef,
           isModelsLoaded,
+          isVideoLoaded,
+          isWebcamLoaded,
           faceGroup,
           imageDetails,
-          videoRef,
-          webcamRef,
           ActiveTab: VideoComponent,
         };
     }
@@ -262,6 +262,8 @@ const FaceOffPanel = ({
   tab,
   message,
   isModelsLoaded,
+  isVideoLoaded,
+  isWebcamLoaded,
   images,
   imagesOverlayRef,
   videoRef,
@@ -417,15 +419,8 @@ const FaceOffPanel = ({
         </div>
       )}
       {!isModelsLoaded &&
-      ((tab == 'one' &&
-        videoRef.current &&
-        videoRef.current.videoWidth &&
-        isVideoLoaded) ||
-        (tab === 'two' &&
-          webcamRef.current &&
-          webcamRef.current.video &&
-          webcamRef.current.video.length &&
-          isWebcamLoaded) ||
+      ((tab == 'one' && isVideoLoaded) ||
+        (tab === 'two' && isWebcamLoaded) ||
         tab === 'three') ? (
         <div>
           <CircularProgress size={12} className={classes!.alignCenter} /> Please
