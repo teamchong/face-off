@@ -42,7 +42,7 @@ export const initializeModels = async () => {
   await loadFaceLandmarkModel(MODEL_URL);
   // await loadFaceLandmarkTinyModel(MODEL_URL);
   await loadFaceRecognitionModel(MODEL_URL);
-  await startDetectFaces(new Image(100, 100), 32);
+  // await startDetectFaces(new Image(100, 100), 32);
 };
 
 export const compareFaces = (descriptor1: any, descriptor2: any): boolean => {
