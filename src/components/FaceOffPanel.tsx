@@ -267,17 +267,33 @@ const FaceOffPanel = ({
           </DialogActions>
         </Dialog>
       </div>
-      {!isModelsLoaded ? (
-        <div>
-          <CircularProgress size={12} className={classes!.alignCenter} /> Please
-          wait while loading face detection models.
-        </div>
-      ) : (
-        <div>
-          <Info size={12} className={classes!.alignCenter} /> Face detection is
-          on.
-        </div>
-      )}
+      <div className={classes!.br} />
+      <div className={classes!.facesContainer}>
+        {JSON.stringify(faceGroup)}
+        {faceGroup.map(({ id, name, preview }) => (
+          <Card className={classes!.card} key={id || null}>
+            <CardActionArea>
+              {!!name && (
+                <CardContent className={classes!.title}>
+                  {name || `Unknown ${id || ''}`}
+                </CardContent>
+              )}
+              <img
+                src={preview}
+                title={name || `Unknown ${id || ''}`}
+                width={100}
+                height={100}
+                className={classes!.card}
+              />
+            </CardActionArea>
+            <CardActions className={classes!.cardActions}>
+              <Button size="small" color="primary">
+                Detail
+                  </Button>
+            </CardActions>
+          </Card>
+        ))}
+      </div>
       {!!images.length && (
         <div>
           <Button
@@ -290,6 +306,7 @@ const FaceOffPanel = ({
           </Button>
           <div className={classes!.br} />
           <div className={classes!.facesContainer}>
+            {JSON.stringify(faceGroup)}
             {faceGroup.map(({ id, name, preview }) => (
               <Card className={classes!.card} key={id || null}>
                 <CardActionArea>
@@ -354,6 +371,17 @@ const FaceOffPanel = ({
           </div>
         </div>
       )}
+      {!isModelsLoaded ? (
+        <div>
+          <CircularProgress size={12} className={classes!.alignCenter} /> Please
+          wait while loading face detection models.
+        </div>
+      ) : (
+        <div>
+          <Info size={12} className={classes!.alignCenter} /> Face detection is
+          on.
+        </div>
+        )}
     </Fragment>
   );
 };

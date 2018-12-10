@@ -112,6 +112,22 @@ export const rootReducer = combineReducers<RootState, RootActions>({
         const imageIds = state.images
           .filter((image, i) => imageIndexes.indexOf(i) < 0)
           .map(({ id }) => id);
+
+        const newFaces = {};
+        for (const id in state.faces) {
+          const imageIds = Object.keys(state.faces[id].images);
+          const newImageIds = imageIds.filter(
+            imageId => imageIds.indexOf(imageId) < 0
+          );
+          if (newImageIds.length != imageIds.length) {
+            const newFaceImages = {};
+            for (const imageId in newImageIds) {
+              newFaceImages[imageId] = state.faces[id].images[imageId];
+            }
+            newFaces[id] = { ...state.faces[id], images: newFaceImages };
+          }
+        }
+
         return {
           ...state,
           images: state.images.filter((img, i) => imageIndexes.indexOf(i) < 0),
@@ -184,7 +200,7 @@ export const rootReducer = combineReducers<RootState, RootActions>({
       }
       case REFRESH_FACES: {
         const { payload: faces } = action;
-        console.log(faces);
+        // console.log(faces);
         return { ...state, faces };
       }
       case LOADED_VIDEO: {
