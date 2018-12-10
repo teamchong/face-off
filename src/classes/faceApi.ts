@@ -59,14 +59,13 @@ export const uniqueId = () =>
     .toString(36)
     .substr(2, 9)}`;
 
-export const drawVideo = (
-  video: HTMLVideoElement,
-  videoCtx: CanvasRenderingContext2D
-) => {
+export const drawVideo = (video: HTMLVideoElement) => {
   const { videoWidth, videoHeight } = video;
-  videoCtx.canvas.width = videoWidth;
-  videoCtx.canvas.height = videoHeight;
-  videoCtx.drawImage(video, 0, 0, videoWidth, videoHeight);
+  const canvas = document.createElement('canvas');
+  canvas.width = videoWidth;
+  canvas.height = videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0, videoWidth, videoHeight);
+  return canvas;
 };
 
 export const generatePreview = async (

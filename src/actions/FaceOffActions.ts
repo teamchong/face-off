@@ -83,13 +83,21 @@ export const detectFaces = createAction(DETECT_FACES, resolve => () =>
 
 export const detectedVideoFaces = createAction(
   DETECTED_VIDEOFACES,
-  resolve => (payload: { url: string; time: number; results: any[] }) =>
-    resolve(payload)
+  resolve => (payload: {
+    url: string;
+    time: number;
+    canvas: HTMLCanvasElement;
+    results: any[];
+  }) => resolve(payload)
 );
 
 export const detectedWebcamFaces = createAction(
   DETECTED_WEBCAMFACES,
-  resolve => (payload: { time: number; results: any[] }) => resolve(payload)
+  resolve => (payload: {
+    time: number;
+    canvas: HTMLCanvasElement;
+    results: any[];
+  }) => resolve(payload)
 );
 
 export const detectedImageFaces = createAction(

@@ -107,17 +107,19 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
     dispatch(screenshotVideo(video)),
 });
 
-const mergeProps = (stateProps, dispatchProps, ownProps) => ({
-  ...ownProps,
-  ...stateProps,
-  ...dispatchProps,
-  screenshotHandler: () =>
-    dispatchProps.screenshotVideo(
-      stateProps.webcamRef.current
-        ? (stateProps.webcamRef.current as any).video
-        : null
-    ),
-});
+const mergeProps = (stateProps, dispatchProps, ownProps) => {
+  const { screenshotVideo } = dispatchProps;
+  const { webcamRef } = stateProps;
+  return {
+    ...ownProps,
+    ...stateProps,
+    ...dispatchProps,
+    screenshotHandler: () =>
+      screenshotVideo(
+        webcamRef.current ? (webcamRef.current as any).video : null
+      ),
+  };
+};
 
 const WebcamComponent = ({
   classes,

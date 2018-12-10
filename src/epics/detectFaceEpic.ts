@@ -36,7 +36,6 @@ export default (
             webcamRef: { current: webcam },
             webcamOverlayRef: { current: webcamOverlay },
             videoUrlLoaded,
-            videoCtx,
             images,
             imagesOverlayRef,
             imagesDetectResults,
@@ -46,16 +45,21 @@ export default (
           } = state$.value.faceOffPanel;
 
           if (tab == 'one' && video && video.videoWidth && isVideoLoaded) {
-            drawVideo(video, videoCtx);
+            const canvas = drawVideo(video);
             const time = ~~video.currentTime;
 
             if (isModelsLoaded) {
-              const results = await startDetectFaces(videoCtx.canvas, 320);
+              const results = await startDetectFaces(canvas, 320);
               observer.next(
-                detectedVideoFaces({ url: videoUrlLoaded, time, results })
+                detectedVideoFaces({
+                  url: videoUrlLoaded,
+                  time,
+                  canvas,
+                  results,
+                })
               );
 
-              const { width, height } = videoCtx.canvas;
+              const { width, height } = canvas;
               drawDetections(
                 results.map(r => r.detection),
                 videoOverlay,
@@ -67,15 +71,19 @@ export default (
             video = (webcam as any).video;
 
             if (video && video.videoWidth) {
-              drawVideo(video, videoCtx);
+              const canvas = drawVideo(video);
 
               if (isModelsLoaded) {
-                const results = await startDetectFaces(videoCtx.canvas, 320);
+                const results = await startDetectFaces(canvas, 320);
                 observer.next(
-                  detectedWebcamFaces({ time: new Date().getTime(), results })
+                  detectedWebcamFaces({
+                    time: new Date().getTime(),
+                    canvas,
+                    results,
+                  })
                 );
 
-                const { width, height } = videoCtx.canvas;
+                const { width, height } = canvas;
                 drawDetections(
                   results.map(r => r.detection),
                   webcamOverlay,

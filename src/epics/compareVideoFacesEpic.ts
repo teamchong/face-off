@@ -26,15 +26,10 @@ export default (
   action$.pipe(
     filter(isActionOf(detectedVideoFaces)),
     filter(() => state$.value.faceOffPanel.isAppRunning),
-    switchMap(({ payload: { url, time, results } }) =>
+    switchMap(({ payload: { url, time, canvas, results } }) =>
       Observable.create(async observer => {
         const state = state$.value.faceOffPanel;
         const { faces, videoCtx } = state;
-
-        const canvas = document.createElement('canvas');
-        canvas.width = videoCtx.canvas.width;
-        canvas.height = videoCtx.canvas.height;
-        canvas.getContext('2d').drawImage(videoCtx.canvas, 0, 0);
 
         for (const result of results) {
           const newFaces = { ...faces };

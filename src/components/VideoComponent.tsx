@@ -107,21 +107,24 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
     dispatch(screenshotVideo(video)),
 });
 
-const mergeProps = (stateProps, dispatchProps, ownProps) => ({
-  ...ownProps,
-  ...stateProps,
-  ...dispatchProps,
-  loadMp4Handler: () => dispatchProps.fetchMp4Url(stateProps.videoUrl),
-  screenshotHandler: () =>
-    dispatchProps.screenshotVideo(stateProps.videoRef.current),
-  keyDownHandler: (ev: KeyboardEvent<HTMLElement>) => {
-    switch (ev.charCode) {
-      case 13:
-        dispatchProps.fetchMp4Url(stateProps.videoUrl);
-        break;
-    }
-  },
-});
+const mergeProps = (stateProps, dispatchProps, ownProps) => {
+  const { fetchMp4Url, screenshotVideo } = dispatchProps;
+  const { videoRef, videoUrl } = stateProps;
+  return {
+    ...ownProps,
+    ...stateProps,
+    ...dispatchProps,
+    loadMp4Handler: () => fetchMp4Url(videoUrl),
+    screenshotHandler: () => screenshotVideo(videoRef.current),
+    keyDownHandler: (ev: KeyboardEvent<HTMLElement>) => {
+      switch (ev.charCode) {
+        case 13:
+          fetchMp4Url(videoUrl);
+          break;
+      }
+    },
+  };
+};
 
 const VideoComponent = ({
   classes,
