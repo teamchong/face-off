@@ -1,6 +1,7 @@
 import {
   AppBar,
   Button,
+  Badge,
   Card,
   CardActionArea,
   CardActions,
@@ -12,7 +13,6 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Popover,
   Slide,
   Tabs,
   Tab,
@@ -24,6 +24,7 @@ import {
   DeleteSweep,
   Done,
   Info,
+  Photo,
   Videocam,
   VideoLibrary,
 } from '@material-ui/icons';
@@ -105,73 +106,6 @@ const styles = ({ palette, spacing }: Theme) =>
     cardActions: {
       backgroundColor: 'rgba(0,0,0,0.1)',
     },
-    popper: {
-      zIndex: 1,
-      '&[x-placement*="bottom"] $arrow': {
-        top: 0,
-        left: 0,
-        marginTop: '-0.9em',
-        width: '3em',
-        height: '1em',
-        '&::before': {
-          borderWidth: '0 1em 1em 1em',
-          borderColor: `transparent transparent ${
-            palette.common.white
-          } transparent`,
-        },
-      },
-      '&[x-placement*="top"] $arrow': {
-        bottom: 0,
-        left: 0,
-        marginBottom: '-0.9em',
-        width: '3em',
-        height: '1em',
-        '&::before': {
-          borderWidth: '1em 1em 0 1em',
-          borderColor: `${
-            palette.common.white
-          } transparent transparent transparent`,
-        },
-      },
-      '&[x-placement*="right"] $arrow': {
-        left: 0,
-        marginLeft: '-0.9em',
-        height: '3em',
-        width: '1em',
-        '&::before': {
-          borderWidth: '1em 1em 1em 0',
-          borderColor: `transparent ${
-            palette.common.white
-          } transparent transparent`,
-        },
-      },
-      '&[x-placement*="left"] $arrow': {
-        right: 0,
-        marginRight: '-0.9em',
-        height: '3em',
-        width: '1em',
-        '&::before': {
-          borderWidth: '1em 0 1em 1em',
-          borderColor: `transparent transparent transparent ${
-            palette.common.white
-          }`,
-        },
-      },
-    },
-    arrow: {
-      position: 'absolute',
-      fontSize: 7,
-      width: '3em',
-      height: '3em',
-      '&::before': {
-        content: '""',
-        margin: 'auto',
-        display: 'block',
-        width: 0,
-        height: 0,
-        borderStyle: 'solid',
-      },
-    },
   });
 
 const faceOffPanelSelector = ({
@@ -207,6 +141,7 @@ const activeTabSelector = createSelector(
     for (let i = 0, iL = images.length; i < iL; i++) {
       imageLookup[images[i].id] = images[i];
     }
+    let imageDetails = null;
     const faceGroup = [];
     for (const id in faces) {
       const face = faces[id];
@@ -223,10 +158,19 @@ const activeTabSelector = createSelector(
       faceGroup.push({
         id: id,
         preview: face.preview,
-        video: face.video,
-        webcam: face.webcam,
-        imgList: imgList,
+        videoCount: Object.keys(face.video).length,
+        webcamCount: face.webcam.length,
+        imageCount: Object.keys(imgList).length,
       });
+      if (openImageId === id) {
+        imageDetails = {
+          id,
+          preview: face.preview,
+          video: face.video,
+          webcam: face.webcam,
+          images: imgList,
+        };
+      }
     }
     images = Object.keys(imageLookup).map(imageId => imageLookup[imageId]);
     switch (tab) {
@@ -238,7 +182,7 @@ const activeTabSelector = createSelector(
           imagesOverlayRef,
           isModelsLoaded,
           faceGroup,
-          openImageId,
+          imageDetails,
           ActiveTab: DropzoneComponent,
         };
       case 'two':
@@ -249,7 +193,7 @@ const activeTabSelector = createSelector(
           imagesOverlayRef,
           isModelsLoaded,
           faceGroup,
-          openImageId,
+          imageDetails,
           ActiveTab: WebcamComponent,
         };
       default:
@@ -260,7 +204,7 @@ const activeTabSelector = createSelector(
           imagesOverlayRef,
           isModelsLoaded,
           faceGroup,
-          openImageId,
+          imageDetails,
           ActiveTab: VideoComponent,
         };
     }
@@ -307,7 +251,7 @@ const FaceOffPanel = ({
   isModelsLoaded,
   images,
   imagesOverlayRef,
-  openImageId,
+  imageDetails,
   switchTab,
   hideMessage,
   showMessage,
@@ -319,86 +263,71 @@ const FaceOffPanel = ({
   const removeAllHandler = () => removeImages(images.map((image, i) => i));
   const switchTabHandler = (_: any, value: string) => switchTab(value);
   return (
-    <Fragment>
-      <div className={classes!.root}>
-        <AppBar position="static">
-          <Tabs value={tab} onChange={switchTabHandler} fullWidth={true}>
-            <Tab value="one" icon={<VideoLibrary />} />
-            <Tab value="two" icon={<Videocam />} />
-            <Tab value="three" icon={<AddPhotoAlternate />} />
-          </Tabs>
-        </AppBar>
-        <TabContainer>
-          <ActiveTab />
-        </TabContainer>
-        <Dialog
-          open={!!message}
-          TransitionComponent={Transition}
-          keepMounted={true}
-          onClose={hideMessage}
-          aria-labelledby="alert-dialog-slide-title"
-          aria-describedby="alert-dialog-slide-description"
-        >
-          <DialogTitle id="alert-dialog-slide-title">
-            {"Use Google's location service?"}
-          </DialogTitle>
-          <DialogContent>
-            <DialogContentText id="alert-dialog-slide-description">
-              {message}
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={hideMessage} color="primary">
-              <Done />
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </div>
+    <div className={classes!.root}>
+      <AppBar position="static">
+        <Tabs value={tab} onChange={switchTabHandler} fullWidth={true}>
+          <Tab value="one" icon={<VideoLibrary />} />
+          <Tab value="two" icon={<Videocam />} />
+          <Tab value="three" icon={<AddPhotoAlternate />} />
+        </Tabs>
+      </AppBar>
+      <TabContainer>
+        <ActiveTab />
+      </TabContainer>
       <div className={classes!.br} />
       <div className={classes!.facesContainer}>
-        {openImageId}
-        {faceGroup.map(({ id, name, preview, video, webcam, imgList }) => {
-          const popperClickHandler = () => openImageDetails(id);
-          return (
-            <Card className={classes!.card} key={id || null}>
-              <CardActionArea>
-                {!!name && (
-                  <CardContent className={classes!.title}>
-                    {name || `Unknown ${id || ''}`}
-                  </CardContent>
-                )}
-                <img
-                  src={preview}
-                  title={name || `Unknown ${id || ''}`}
-                  height={120}
-                  className={classes!.card}
-                />
-              </CardActionArea>
-              <CardActions className={classes!.cardActions}>
-                <Button
-                  size="small"
-                  color="primary"
-                  onClick={popperClickHandler}
-                >
-                  Detail
-                </Button>
-                <Popover
-                  open={openImageId === id}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left',
-                  }}
-                  transformOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left',
-                  }}
-                >
-                  {JSON.stringify({ video, webcam, imgList })}
-                </Popover>
-              </CardActions>
-            </Card>
-          );
-        })}
+        {faceGroup.map(
+          ({ id, name, preview, videoCount, webcamCount, imageCount }) => {
+            const popperClickHandler = () => openImageDetails(id);
+            return (
+              <Card className={classes!.card} key={id || null}>
+                <CardActionArea>
+                  {!!name && (
+                    <CardContent className={classes!.title}>
+                      {name || `Unknown ${id || ''}`}
+                    </CardContent>
+                  )}
+                  <img
+                    src={preview}
+                    title={name || `Unknown ${id || ''}`}
+                    height={120}
+                    className={classes!.card}
+                  />
+                </CardActionArea>
+                <CardActions className={classes!.cardActions}>
+                  <Button
+                    size="small"
+                    color="primary"
+                    onClick={popperClickHandler}
+                  >
+                    <Badge
+                      color="secondary"
+                      badgeContent={videoCount}
+                      invisible={!videoCount}
+                    >
+                      <VideoLibrary />
+                    </Badge>
+                    <Badge
+                      color="secondary"
+                      badgeContent={webcamCount}
+                      invisible={!webcamCount}
+                    >
+                      <Videocam />
+                    </Badge>
+                    <Badge
+                      color="secondary"
+                      badgeContent={imageCount}
+                      invisible={!imageCount}
+                    >
+                      <Photo />
+                    </Badge>{' '}
+                    {name}
+                  </Button>
+                </CardActions>
+              </Card>
+            );
+          }
+        )}
       </div>
       {!!images.length && (
         <div>
@@ -487,7 +416,29 @@ const FaceOffPanel = ({
           on.
         </div>
       )}
-    </Fragment>
+      <Dialog
+        open={!!message || !!imageDetails}
+        TransitionComponent={Transition}
+        keepMounted={true}
+        onClose={hideMessage}
+        aria-labelledby="alert-dialog-slide-title"
+        aria-describedby="alert-dialog-slide-description"
+      >
+        <DialogTitle id="alert-dialog-slide-title">
+          {"Use Google's location service?"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-slide-description">
+            {!!message ? message : <div>{JSON.stringify(imageDetails)}</div>}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={hideMessage} color="primary">
+            <Done />
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </div>
   );
 };
 
