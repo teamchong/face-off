@@ -40,7 +40,10 @@ export default (
 
               if (compareFaces(face.descriptor, result.descriptor)) {
                 const newFace = {
-                  preview: generatePreview(videoCtx.canvas, result.detection),
+                  preview: await generatePreview(
+                    videoCtx.canvas,
+                    result.detection
+                  ),
                   video: face.video ? { ...face.video } : {},
                   webcam: face.webcam,
                   images: face.images,
