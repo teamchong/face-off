@@ -1,9 +1,9 @@
 import { canvasToBlob, createObjectURL } from 'blob-util';
-import { isOfType } from 'typesafe-actions';
+import { isActionOf } from 'typesafe-actions';
 import { StateObservable } from 'redux-observable';
 import { Observable } from 'rxjs';
 import { filter, switchMap } from 'rxjs/operators';
-import { addImages, RootActions } from '../actions';
+import { addImages, RootActions, screenshotVideo } from '../actions';
 import { SCREENSHOT_VIDEO } from '../constants';
 import { RootState } from '../models';
 
@@ -12,7 +12,7 @@ export default (
   state$: StateObservable<RootState>
 ) =>
   action$.pipe(
-    filter(isOfType(SCREENSHOT_VIDEO)),
+    filter(isActionOf(screenshotVideo)),
     switchMap(async () => {
       const {
         faceOffPanel: { videoCtx },

@@ -1,72 +1,28 @@
 import { StateObservable } from 'redux-observable';
-import { from, Observable, of, timer } from 'rxjs';
+import { Observable, timer } from 'rxjs';
+import { concat, filter, switchMap, timeout } from 'rxjs/operators';
+import { isActionOf } from 'typesafe-actions';
 import {
-  catchError,
-  concat,
-  delay,
-  filter,
-  first,
-  map,
-  switchMap,
-  timeout,
-} from 'rxjs/operators';
-import { isOfType } from 'typesafe-actions';
-import {
+  detectFaces
   detectedImageFaces,
   detectedVideoFaces,
   detectedWebcamFaces,
   RootActions,
 } from '../actions';
-import { drawDetections } from '../classes/drawing';
-import { DETECT_FACES } from '../constants';
-import { RootState } from '../models';
-
-// import {
-//   detectAllFaces,
-//   extractFaces,
-//   SsdMobilenetv1Options,
-// } from 'face-api.js';
-// const FaceDetectOptions = (opts?: any) =>
-//   new (SsdMobilenetv1Options as any)(opts);
 import {
-  detectAllFaces,
-  extractFaces,
-  TinyFaceDetectorOptions,
-} from 'face-api.js';
-const FaceDetectOptions = (opts?: any) =>
-  new (TinyFaceDetectorOptions as any)(opts);
-
-const drawVideo = (
-  video: HTMLVideoElement,
-  videoCtx: CanvasRenderingContext2D
-) => {
-  const { videoWidth, videoHeight } = video;
-  videoCtx.canvas.width = videoWidth;
-  videoCtx.canvas.height = videoHeight;
-  videoCtx.drawImage(video, 0, 0, videoWidth, videoHeight);
-};
-const detectFaces = async (
-  canvas: HTMLCanvasElement | HTMLImageElement,
-  inputSize: number
-) => {
-  return await from(
-    detectAllFaces(canvas, FaceDetectOptions({ inputSize }))
-      .withFaceLandmarks()
-      .withFaceDescriptors()
-  )
-    .pipe(
-      timeout(500),
-      catchError(() => of([]))
-    )
-    .toPromise();
-};
+  compareFaces,
+  startDetectFaces,
+  drawDetections,
+  drawVideo,
+} from '../classes/faceApi';
+import { RootState } from '../models';
 
 export default (
   action$: Observable<RootActions>,
   state$: StateObservable<RootState>
 ) =>
   action$.pipe(
-    filter(isOfType(DETECT_FACES)),
+    filter(isActionOf(detectFaces)),
     filter(() => state$.value.faceOffPanel.isAppRunning),
     switchMap(() =>
       Observable.create(async observer => {
@@ -91,7 +47,7 @@ export default (
             drawVideo(video, videoCtx);
 
             if (isModelsLoaded) {
-              const result = await detectFaces(videoCtx.canvas, 416);
+              const result = await startDetectFaces(videoCtx.canvas, 416);
               observer.next(detectedVideoFaces(result));
 
               const { width, height } = videoCtx.canvas;
@@ -109,7 +65,7 @@ export default (
               drawVideo(video, videoCtx);
 
               if (isModelsLoaded) {
-                const result = await detectFaces(videoCtx.canvas, 416);
+                const result = await startDetectFaces(videoCtx.canvas, 416);
                 observer.next(detectedWebcamFaces(result));
 
                 const { width, height } = videoCtx.canvas;
@@ -132,7 +88,7 @@ export default (
               const overlay = imagesOverlayRef[image.id].current;
 
               if (!result) {
-                result = await detectFaces(image, 608);
+                result = await startDetectFaces(image, 608);
                 observer.next(detectedImageFaces({ image, result }));
                 await timer(100).toPromise();
               }

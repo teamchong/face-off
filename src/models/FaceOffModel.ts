@@ -22,4 +22,5 @@ export interface FaceOffModel {
   readonly imagesDetectResults: { [id: string]: any[] };
   readonly videoDetectResults: any[];
   readonly webcamDetectResults: any[];
+  readonly faces: any;
 }

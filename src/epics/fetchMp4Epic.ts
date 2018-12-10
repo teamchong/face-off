@@ -1,9 +1,9 @@
 import { StateObservable } from 'redux-observable';
 import { from, Observable } from 'rxjs';
 import { concat, filter, map, switchMap, tap } from 'rxjs/operators';
-import { isOfType } from 'typesafe-actions';
-import { fetchedMp4Url, RootActions } from '../actions';
-import { FETCH_MP4URL, VIDEO_API } from '../constants';
+import { isActionOf } from 'typesafe-actions';
+import { fetchMp4Url, fetchedMp4Url, RootActions } from '../actions';
+import { VIDEO_API } from '../constants';
 import { RootState } from '../models';
 
 export default (
@@ -11,7 +11,7 @@ export default (
   state$: StateObservable<RootState>
 ) =>
   action$.pipe(
-    filter(isOfType(FETCH_MP4URL)),
+    filter(isActionOf(fetchMp4Url)),
     switchMap(async ({ payload: videoUrl }) => {
       const result = await fetch(`${VIDEO_API}${videoUrl}`);
       const json = await result.json();

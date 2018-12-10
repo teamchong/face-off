@@ -27,7 +27,7 @@ import {
   FACINGMODE_REAR,
   DEFAULT_VIDEO_URL,
 } from './constants';
-import { drawDetections } from './classes/drawing';
+import { drawDetections } from './classes/faceApi';
 import pasteHandlerEpic from './epics/pasteHandlerEpic';
 import screenshotEpic from './epics/screenshotEpic';
 import startAppEpic from './epics/startAppEpic';
@@ -75,6 +75,7 @@ export const rootReducer = combineReducers<RootState, RootActions>({
       imagesDetectResults: {},
       videoDetectResults: [],
       webcamDetectResults: [],
+      faces: {},
     },
     action: RootActions
   ) {

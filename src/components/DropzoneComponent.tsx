@@ -18,9 +18,9 @@ import {
   fetchMp4Url,
   switchTab,
 } from '../actions/FaceOffActions';
+import { readAsImage } from '../classes/fileApi';
 import { MAX_WIDTH, MAX_HEIGHT } from '../constants';
 import { FaceOffModel, RootState } from '../models';
-import { readAsImage } from '../classes/fileConvert';
 
 const Dropzone: ReactType = DropzoneType as any;
 

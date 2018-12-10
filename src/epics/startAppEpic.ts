@@ -1,11 +1,12 @@
 import { forkJoin, from, Observable, of } from 'rxjs';
 import { filter, switchMap } from 'rxjs/operators';
-import { isOfType } from 'typesafe-actions';
+import { isActionOf } from 'typesafe-actions';
 import {
   detectFaces,
   fetchMp4Url,
   loadedModels,
   RootActions,
+  startApp,
 } from '../actions';
 import { DEFAULT_VIDEO_URL, MODEL_URL, START_APP } from '../constants';
 
@@ -21,7 +22,7 @@ const FaceDetectModel = loadTinyFaceDetectorModel;
 
 export default (action$: Observable<RootActions>) =>
   action$.pipe(
-    filter(isOfType(START_APP)),
+    filter(isActionOf(startApp)),
     switchMap(() =>
       Observable.create(async observer => {
         observer.next(fetchMp4Url(DEFAULT_VIDEO_URL));
