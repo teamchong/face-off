@@ -83,7 +83,7 @@ const styles = ({ palette, spacing }: Theme) =>
     title: {
       position: 'absolute',
       color: '#fff',
-      textShadow: '2px 2px #ff0000',
+      textShadow: '1px 1px #000',
     },
     br: {
       width: '100%',
