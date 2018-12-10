@@ -26,6 +26,8 @@ export const DETECTED_VIDEOFACES = 'DETECTED_VIDEOFACES';
 export const DETECTED_WEBCAMFACES = 'DETECTED_WEBCAMFACES';
 export const DETECTED_IMAGEFACES = 'DETECTED_IMAGEFACES';
 
+export const REFRESH_FACES = 'REFRESH_FACES';
+
 /* constants */
 export const FACINGMODE_REAR = 'environment';
 export const FACINGMODE_FRONT = 'user';

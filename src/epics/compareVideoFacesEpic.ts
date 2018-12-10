@@ -6,13 +6,15 @@ import {
   detectedImageFaces,
   detectedVideoFaces,
   detectedWebcamFaces,
+  refreshFaces,
   RootActions,
 } from '../actions';
 import {
   compareFaces,
-  detectFaces,
+  startDetectFaces,
   drawDetections,
   drawVideo,
+  uniqueId,
 } from '../classes/faceApi';
 import { RootState } from '../models';
 
@@ -21,91 +23,50 @@ export default (
   state$: StateObservable<RootState>
 ) =>
   action$.pipe(
-    filter(isActionOf([detectedVideoFaces, detectedWebcamFaces])),
+    filter(isActionOf(detectedVideoFaces)),
     filter(() => state$.value.faceOffPanel.isAppRunning),
-    switchMap(() =>
+    switchMap(({ playload: { url, time, results } }) =>
       Observable.create(async observer => {
-        let state = state$.value.faceOffPanel;
-        while (state.isAppRunning) {
-          let {
-            videoRef: { current: video },
-          } = state$.value.faceOffPanel;
-          const {
-            tab,
-            videoOverlayRef: { current: videoOverlay },
-            webcamRef: { current: webcam },
-            webcamOverlayRef: { current: webcamOverlay },
-            videoCtx,
-            images,
-            imagesOverlayRef,
-            imagesDetectResults,
-            isModelsLoaded,
-          } = state$.value.faceOffPanel;
+        const state = state$.value.faceOffPanel;
+        const { faces } = state;
+        const newFaces = { ...faces };
+        for (const result of results) {
+          await new Promise(resolve => {
+            let foundId = '';
 
-          if (tab == 'one' && video && video.videoWidth) {
-            drawVideo(video, videoCtx);
+            for (const id in faces) {
+              const face = newFaces[id];
 
-            if (isModelsLoaded) {
-              const result = await detectFaces(videoCtx.canvas, 416);
-              observer.next(detectedVideoFaces(result));
+              if (compareFaces(face.descriptor, result.descriptor)) {
+                const newFace = {
+                  video: face.video ? { ...face.video } : {},
+                  webcam: face.webcam,
+                  images: face.images,
+                };
 
-              const { width, height } = videoCtx.canvas;
-              drawDetections(
-                result.map(r => r.detection),
-                videoOverlay,
-                width,
-                height
-              );
-            }
-          } else if (tab === 'two' && webcam) {
-            video = (webcam as any).video;
-
-            if (video && video.videoWidth) {
-              drawVideo(video, videoCtx);
-
-              if (isModelsLoaded) {
-                const result = await detectFaces(videoCtx.canvas, 416);
-                observer.next(detectedWebcamFaces(result));
-
-                const { width, height } = videoCtx.canvas;
-                drawDetections(
-                  result.map(r => r.detection),
-                  webcamOverlay,
-                  width,
-                  height
-                );
+                if (!newFace.video[url]) {
+                  newFace.video[url] = [time];
+                } else {
+                  newFace.video[url] = [...face.video[url], time];
+                }
+                newFaces[id] = newFace;
+                foundId = id;
+                break;
               }
+              if (foundId) break;
             }
-          }
 
-          await timer(100).toPromise();
-
-          if (isModelsLoaded) {
-            for (let i = 0, iL = images.length; i < iL; i++) {
-              const image = images[i];
-              let result = imagesDetectResults[image.id];
-              const overlay = imagesOverlayRef[image.id].current;
-
-              if (!result) {
-                result = await detectFaces(image, 608);
-                observer.next(detectedImageFaces({ image, result }));
-                await timer(100).toPromise();
-              }
-
-              const canvasId = `${image.id}x`;
-
-              if (overlay && overlay.id != canvasId) {
-                drawDetections(
-                  result.map(r => r.detection),
-                  overlay,
-                  overlay.width,
-                  overlay.height
-                );
-                overlay.id = canvasId;
-              }
+            if (!foundId) {
+              newFaces[uniqueId()] = {
+                video: { [url]: [time] },
+                webcam: [],
+                images: {},
+              };
             }
-          }
+          });
+          await timer(300).toPromise();
         }
+        observer.next(refreshFaces(newFaces));
       })
     )
   );

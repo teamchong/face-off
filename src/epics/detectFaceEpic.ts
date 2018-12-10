@@ -26,7 +26,7 @@ export default (
     filter(() => state$.value.faceOffPanel.isAppRunning),
     switchMap(() =>
       Observable.create(async observer => {
-        let state = state$.value.faceOffPanel;
+        const state = state$.value.faceOffPanel;
         while (state.isAppRunning) {
           let {
             videoRef: { current: video },
@@ -36,6 +36,7 @@ export default (
             videoOverlayRef: { current: videoOverlay },
             webcamRef: { current: webcam },
             webcamOverlayRef: { current: webcamOverlay },
+            videoUrlLoaded,
             videoCtx,
             images,
             imagesOverlayRef,
@@ -45,14 +46,15 @@ export default (
 
           if (tab == 'one' && video && video.videoWidth) {
             drawVideo(video, videoCtx);
+            const time = video.currentTime;
 
             if (isModelsLoaded) {
-              const result = await startDetectFaces(videoCtx.canvas, 416);
-              observer.next(detectedVideoFaces(result));
+              const results = await startDetectFaces(videoCtx.canvas, 416);
+              observer.next(detectedVideoFaces({ url: videoUrlLoaded, time, results }));
 
               const { width, height } = videoCtx.canvas;
               drawDetections(
-                result.map(r => r.detection),
+                results.map(r => r.detection),
                 videoOverlay,
                 width,
                 height
@@ -65,12 +67,12 @@ export default (
               drawVideo(video, videoCtx);
 
               if (isModelsLoaded) {
-                const result = await startDetectFaces(videoCtx.canvas, 416);
-                observer.next(detectedWebcamFaces(result));
+                const results = await startDetectFaces(videoCtx.canvas, 416);
+                observer.next(detectedWebcamFaces({ time: new Date().getTime(), results }));
 
                 const { width, height } = videoCtx.canvas;
                 drawDetections(
-                  result.map(r => r.detection),
+                  results.map(r => r.detection),
                   webcamOverlay,
                   width,
                   height
@@ -84,12 +86,12 @@ export default (
           if (isModelsLoaded) {
             for (let i = 0, iL = images.length; i < iL; i++) {
               const image = images[i];
-              let result = imagesDetectResults[image.id];
+              let results = imagesDetectResults[image.id];
               const overlay = imagesOverlayRef[image.id].current;
 
-              if (!result) {
-                result = await startDetectFaces(image, 608);
-                observer.next(detectedImageFaces({ image, result }));
+              if (!results) {
+                results = await startDetectFaces(image, 608);
+                observer.next(detectedImageFaces({ image, results }));
                 await timer(100).toPromise();
               }
 
@@ -97,7 +99,7 @@ export default (
 
               if (overlay && overlay.id != canvasId) {
                 drawDetections(
-                  result.map(r => r.detection),
+                  results.map(r => r.detection),
                   overlay,
                   overlay.width,
                   overlay.height

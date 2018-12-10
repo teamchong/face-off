@@ -1,6 +1,12 @@
 import { canvasToBlob, createObjectURL, revokeObjectURL } from 'blob-util';
 import { MAX_WIDTH, MAX_HEIGHT } from '../constants';
 
+export const revokeIfNeed = (url: string) => {
+  if (/^blob:/i.test(url)) {
+    revokeObjectURL(url);
+  }
+};
+
 export const readAsImage = async (file: File): Promise<HTMLImageElement> => {
   const dataUrl = createObjectURL(file);
   const img = await new Promise<HTMLImageElement>((resolve, reject) => {

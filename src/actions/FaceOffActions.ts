@@ -53,16 +53,23 @@ export const loadedModels = () => action(LOADED_MODELS);
 
 export const detectFaces = () => action(DETECT_FACES);
 
-export const detectedVideoFaces = (payload: any[]) =>
-  action(DETECTED_VIDEOFACES, payload);
+export const detectedVideoFaces = (payload: {
+  url: string;
+  time: number;
+  results: any[];
+}) => action(DETECTED_VIDEOFACES, payload);
 
-export const detectedWebcamFaces = (payload: any[]) =>
-  action(DETECTED_WEBCAMFACES, payload);
+export const detectedWebcamFaces = (payload: {
+  time: number;
+  results: any[];
+}) => action(DETECTED_WEBCAMFACES, payload);
 
 export const detectedImageFaces = (payload: {
   image: HTMLImageElement;
-  result: any[];
+  results: any[];
 }) => action(DETECTED_IMAGEFACES, payload);
+
+export const refreshFaces = (payload: any) => action(REFRESH_FACES, playload);
 
 export const loadedVideo = () => action(LOADED_VIDEO);
 

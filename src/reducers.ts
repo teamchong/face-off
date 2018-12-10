@@ -24,10 +24,12 @@ import {
   DETECTED_VIDEOFACES,
   DETECTED_WEBCAMFACES,
   DETECTED_IMAGEFACES,
+  REFRESH_FACES,
   FACINGMODE_REAR,
   DEFAULT_VIDEO_URL,
 } from './constants';
-import { drawDetections } from './classes/faceApi';
+import { drawDetections, uniqueId } from './classes/faceApi';
+import { revokeIfNeed } from './classes/fileApi';
 import pasteHandlerEpic from './epics/pasteHandlerEpic';
 import screenshotEpic from './epics/screenshotEpic';
 import startAppEpic from './epics/startAppEpic';
@@ -42,43 +44,30 @@ export const rootEpic = combineEpics(
   fetchMp4Epic
 );
 
-const revokeIfNeed = (url: string) => {
-  if (/^blob:/i.test(url)) {
-    revokeObjectURL(url);
-  }
+const initState = {
+  isAppRunning: false,
+  isModelsLoaded: false,
+  isVideoLoaded: false,
+  isWebcamLoaded: false,
+  tab: 'one',
+  message: '',
+  facingMode: FACINGMODE_REAR,
+  videoUrl: DEFAULT_VIDEO_URL,
+  videoUrlLoaded: '',
+  mp4Url: '',
+  videoCtx: document.createElement('canvas').getContext('2d'),
+  videoRef: createRef<HTMLVideoElement>(),
+  webcamRef: createRef<Webcam>(),
+  images: [],
+  videoOverlayRef: createRef<HTMLCanvasElement>(),
+  webcamOverlayRef: createRef<HTMLCanvasElement>(),
+  imagesOverlayRef: {},
+  imagesDetectResults: {},
+  faces: {},
 };
-const uniqueId = () =>
-  `_${Math.random()
-    .toString(36)
-    .substr(2, 9)}`;
 
 export const rootReducer = combineReducers<RootState, RootActions>({
-  faceOffPanel(
-    state = {
-      isAppRunning: false,
-      isModelsLoaded: false,
-      isVideoLoaded: false,
-      isWebcamLoaded: false,
-      tab: 'one',
-      message: '',
-      facingMode: FACINGMODE_REAR,
-      videoUrl: DEFAULT_VIDEO_URL,
-      videoUrlLoaded: '',
-      mp4Url: '',
-      videoCtx: document.createElement('canvas').getContext('2d'),
-      videoRef: createRef<HTMLVideoElement>(),
-      webcamRef: createRef<Webcam>(),
-      images: [],
-      videoOverlayRef: createRef<HTMLCanvasElement>(),
-      webcamOverlayRef: createRef<HTMLCanvasElement>(),
-      imagesOverlayRef: {},
-      imagesDetectResults: {},
-      videoDetectResults: [],
-      webcamDetectResults: [],
-      faces: {},
-    },
-    action: RootActions
-  ) {
+  faceOffPanel(state = initState, action: RootActions) {
     switch (action.type) {
       case SWITCH_TAB: {
         const { payload: tab } = action;
@@ -174,33 +163,23 @@ export const rootReducer = combineReducers<RootState, RootActions>({
           isAppRunning: false,
         };
       }
-      case DETECTED_VIDEOFACES: {
-        const { payload: videoDetectResults } = action;
-        return {
-          ...state,
-          videoDetectResults,
-        };
-      }
-      case DETECTED_WEBCAMFACES: {
-        const { payload: webcamDetectResults } = action;
-        return {
-          ...state,
-          webcamDetectResults,
-        };
-      }
       case DETECTED_IMAGEFACES: {
         const {
           payload: {
             image: { id },
-            result,
+            results,
           },
         } = action;
         return {
           ...state,
           imagesDetectResults: Object.assign({}, state.imagesDetectResults, {
-            [id]: result,
+            [id]: results,
           }),
         };
+      }
+      case REFRESH_FACES: {
+        const { payload: faces } = action;
+        return { ...state, faces };
       }
       case LOADED_VIDEO: {
         return { ...state, isVideoLoaded: true };
