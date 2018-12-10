@@ -1,7 +1,7 @@
 import { createObjectURL } from 'blob-util';
 import { fromEvent, Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
-import { readAsImage } from '../classes/fileConvert';
+import { readAsImage } from '../classes/fileApi';
 import { addImages, fetchMp4Url, switchTab } from '../actions';
 
 export default () =>
