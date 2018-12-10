@@ -111,6 +111,5 @@ export const drawDetections = (
       drawDetection(canvas, detection, { withScore: false });
       //console.log({ video: payload });
     }
-    //observer.next(detectedVideoFaces(result));
   }
 };
