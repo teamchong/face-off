@@ -12,6 +12,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Popper,
   Slide,
   Tabs,
   Tab,
@@ -45,6 +46,7 @@ import {
   switchTab,
   showMessage,
   hideMessage,
+  openImageDetails,
   removeImages,
 } from '../actions/FaceOffActions';
 import { FaceOffModel, RootState } from '../models';
@@ -103,6 +105,73 @@ const styles = ({ palette, spacing }: Theme) =>
     cardActions: {
       backgroundColor: 'rgba(0,0,0,0.1)',
     },
+    popper: {
+      zIndex: 1,
+      '&[x-placement*="bottom"] $arrow': {
+        top: 0,
+        left: 0,
+        marginTop: '-0.9em',
+        width: '3em',
+        height: '1em',
+        '&::before': {
+          borderWidth: '0 1em 1em 1em',
+          borderColor: `transparent transparent ${
+            palette.common.white
+          } transparent`,
+        },
+      },
+      '&[x-placement*="top"] $arrow': {
+        bottom: 0,
+        left: 0,
+        marginBottom: '-0.9em',
+        width: '3em',
+        height: '1em',
+        '&::before': {
+          borderWidth: '1em 1em 0 1em',
+          borderColor: `${
+            palette.common.white
+          } transparent transparent transparent`,
+        },
+      },
+      '&[x-placement*="right"] $arrow': {
+        left: 0,
+        marginLeft: '-0.9em',
+        height: '3em',
+        width: '1em',
+        '&::before': {
+          borderWidth: '1em 1em 1em 0',
+          borderColor: `transparent ${
+            palette.common.white
+          } transparent transparent`,
+        },
+      },
+      '&[x-placement*="left"] $arrow': {
+        right: 0,
+        marginRight: '-0.9em',
+        height: '3em',
+        width: '1em',
+        '&::before': {
+          borderWidth: '1em 0 1em 1em',
+          borderColor: `transparent transparent transparent ${
+            palette.common.white
+          }`,
+        },
+      },
+    },
+    arrow: {
+      position: 'absolute',
+      fontSize: 7,
+      width: '3em',
+      height: '3em',
+      '&::before': {
+        content: '""',
+        margin: 'auto',
+        display: 'block',
+        width: 0,
+        height: 0,
+        borderStyle: 'solid',
+      },
+    },
   });
 
 const faceOffPanelSelector = ({
@@ -112,6 +181,7 @@ const faceOffPanelSelector = ({
   imagesOverlayRef,
   isModelsLoaded,
   faces,
+  openImageId,
 }: FaceOffModel) => ({
   tab,
   message,
@@ -119,11 +189,20 @@ const faceOffPanelSelector = ({
   imagesOverlayRef,
   isModelsLoaded,
   faces,
+  openImageId,
 });
 
 const activeTabSelector = createSelector(
   faceOffPanelSelector,
-  ({ tab, message, images, imagesOverlayRef, isModelsLoaded, faces }) => {
+  ({
+    tab,
+    message,
+    images,
+    imagesOverlayRef,
+    isModelsLoaded,
+    faces,
+    openImageId,
+  }) => {
     const imageLookup = {};
     for (let i = 0, iL = images.length; i < iL; i++) {
       imageLookup[images[i].id] = images[i];
@@ -132,11 +211,11 @@ const activeTabSelector = createSelector(
     for (const id in faces) {
       const face = faces[id];
 
-      const imgList = [];
+      const imgList = {};
       for (const imageId in face.images) {
         const image = imageLookup[imageId];
         if (image) {
-          imgList.push(image);
+          imgList[imageId] = image;
           delete imageLookup[imageId];
         }
       }
@@ -159,6 +238,7 @@ const activeTabSelector = createSelector(
           imagesOverlayRef,
           isModelsLoaded,
           faceGroup,
+          openImageId,
           ActiveTab: DropzoneComponent,
         };
       case 'two':
@@ -169,6 +249,7 @@ const activeTabSelector = createSelector(
           imagesOverlayRef,
           isModelsLoaded,
           faceGroup,
+          openImageId,
           ActiveTab: WebcamComponent,
         };
       default:
@@ -179,6 +260,7 @@ const activeTabSelector = createSelector(
           imagesOverlayRef,
           isModelsLoaded,
           faceGroup,
+          openImageId,
           ActiveTab: VideoComponent,
         };
     }
@@ -201,6 +283,9 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   removeImages(imageIndexes: number[]) {
     dispatch(removeImages(imageIndexes));
   },
+  openImageDetails(openImageId: string) {
+    dispatch(openImageDetails(openImageId));
+  },
 });
 
 const Transition = (props: Props<ReactNode>) => (
@@ -222,10 +307,12 @@ const FaceOffPanel = ({
   isModelsLoaded,
   images,
   imagesOverlayRef,
+  openImageId,
   switchTab,
   hideMessage,
   showMessage,
   removeImages,
+  openImageDetails,
 }: StyledComponentProps &
   ReturnType<typeof mapStateToProps> &
   ReturnType<typeof mapDispatchToProps>): ReactElement<any> => {
@@ -269,30 +356,55 @@ const FaceOffPanel = ({
       </div>
       <div className={classes!.br} />
       <div className={classes!.facesContainer}>
-        {JSON.stringify(faceGroup)}
-        {faceGroup.map(({ id, name, preview }) => (
-          <Card className={classes!.card} key={id || null}>
-            <CardActionArea>
-              {!!name && (
-                <CardContent className={classes!.title}>
-                  {name || `Unknown ${id || ''}`}
-                </CardContent>
-              )}
-              <img
-                src={preview}
-                title={name || `Unknown ${id || ''}`}
-                width={100}
-                height={100}
-                className={classes!.card}
-              />
-            </CardActionArea>
-            <CardActions className={classes!.cardActions}>
-              <Button size="small" color="primary">
-                Detail
-                  </Button>
-            </CardActions>
-          </Card>
-        ))}
+        {openImageId}
+        {faceGroup.map(({ id, name, preview, video, webcam, imgList }) => {
+          const popperClickHandler = () => openImageDetails(id);
+          return (
+            <Card className={classes!.card} key={id || null}>
+              <CardActionArea>
+                {!!name && (
+                  <CardContent className={classes!.title}>
+                    {name || `Unknown ${id || ''}`}
+                  </CardContent>
+                )}
+                <img
+                  src={preview}
+                  title={name || `Unknown ${id || ''}`}
+                  height={120}
+                  className={classes!.card}
+                />
+              </CardActionArea>
+              <CardActions className={classes!.cardActions}>
+                <Button
+                  size="small"
+                  color="primary"
+                  onClick={popperClickHandler}
+                >
+                  Detail
+                </Button>
+                <Popper
+                  className={classes!.popper}
+                  open={openImageId === id}
+                  placement="top"
+                  modifiers={{
+                    flip: {
+                      enabled: true,
+                    },
+                    preventOverflow: {
+                      enabled: true,
+                      boundariesElement: 'scrollParent',
+                    },
+                    arrow: {
+                      enabled: true,
+                    },
+                  }}
+                >
+                  {JSON.stringify({ video, webcam, imgList })}
+                </Popper>
+              </CardActions>
+            </Card>
+          );
+        })}
       </div>
       {!!images.length && (
         <div>
@@ -306,7 +418,6 @@ const FaceOffPanel = ({
           </Button>
           <div className={classes!.br} />
           <div className={classes!.facesContainer}>
-            {JSON.stringify(faceGroup)}
             {faceGroup.map(({ id, name, preview }) => (
               <Card className={classes!.card} key={id || null}>
                 <CardActionArea>
@@ -381,7 +492,7 @@ const FaceOffPanel = ({
           <Info size={12} className={classes!.alignCenter} /> Face detection is
           on.
         </div>
-        )}
+      )}
     </Fragment>
   );
 };

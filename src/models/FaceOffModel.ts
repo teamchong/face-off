@@ -21,4 +21,5 @@ export interface FaceOffModel {
   readonly imagesOverlayRef: { [id: string]: RefObject<HTMLCanvasElement> };
   readonly imagesDetectResults: { [id: string]: any[] };
   readonly faces: any;
+  readonly openImageId: string;
 }

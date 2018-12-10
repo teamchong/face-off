@@ -45,7 +45,7 @@ export default (
 
           if (tab == 'one' && video && video.videoWidth) {
             drawVideo(video, videoCtx);
-            const time = video.currentTime;
+            const time = ~~video.currentTime;
 
             if (isModelsLoaded) {
               const results = await startDetectFaces(videoCtx.canvas, 320);

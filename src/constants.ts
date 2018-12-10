@@ -28,6 +28,8 @@ export const DETECTED_IMAGEFACES = 'DETECTED_IMAGEFACES';
 
 export const REFRESH_FACES = 'REFRESH_FACES';
 
+export const OPEN_IMAGEDETAILS = 'OPEN_IMAGEDETAILS';
+
 /* constants */
 export const FACINGMODE_REAR = 'environment';
 export const FACINGMODE_FRONT = 'user';

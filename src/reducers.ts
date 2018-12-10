@@ -25,6 +25,7 @@ import {
   DETECTED_WEBCAMFACES,
   DETECTED_IMAGEFACES,
   REFRESH_FACES,
+  OPEN_IMAGEDETAILS,
   FACINGMODE_REAR,
   DEFAULT_VIDEO_URL,
 } from './constants';
@@ -66,6 +67,7 @@ const initState = {
   imagesOverlayRef: {},
   imagesDetectResults: {},
   faces: {},
+  openImageId: '',
 };
 
 export const rootReducer = combineReducers<RootState, RootActions>({
@@ -202,6 +204,10 @@ export const rootReducer = combineReducers<RootState, RootActions>({
         const { payload: faces } = action;
         // console.log(faces);
         return { ...state, faces };
+      }
+      case OPEN_IMAGEDETAILS: {
+        const { payload: openImageId } = action;
+        return { ...state, openImageId };
       }
       case LOADED_VIDEO: {
         return { ...state, isVideoLoaded: true };

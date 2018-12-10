@@ -21,6 +21,7 @@ import {
   LOADED_VIDEO,
   LOADED_WEBCAM,
   REFRESH_FACES,
+  OPEN_IMAGEDETAILS,
 } from '../constants';
 
 export const switchTab = createAction(SWITCH_TAB, resolve => (tab: string) =>
@@ -107,4 +108,9 @@ export const loadedVideo = createAction(LOADED_VIDEO, resolve => () =>
 
 export const loadedWebcam = createAction(LOADED_WEBCAM, resolve => () =>
   resolve()
+);
+
+export const openImageDetails = createAction(
+  OPEN_IMAGEDETAILS,
+  resolve => (payload: string) => resolve(payload)
 );

@@ -40,21 +40,21 @@ export default (
 
               if (compareFaces(face.descriptor, result.descriptor)) {
                 const newFace = {
-                  preview: await generatePreview(
-                    videoCtx.canvas,
-                    result.detection
-                  ),
-                  video: face.video ? { ...face.video } : {},
+                  preview: face.preview,
+                  video: face.video,
                   webcam: face.webcam,
                   images: face.images,
-                  descriptor: result.descriptor,
+                  descriptor: face.descriptor,
                 };
 
                 if (!newFace.video[url]) {
                   newFace.video[url] = [time];
                 } else {
-                  newFace.video[url] = [...face.video[url], time];
+                  newFace.video[url].push(time);
                 }
+                newFace.video[url] = newFace.video[url]
+                  .sort()
+                  .filter((item, pos, ary) => !pos || item != ary[pos - 1]);
                 newFaces[id] = newFace;
                 foundId = id;
                 break;
