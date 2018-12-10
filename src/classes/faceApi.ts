@@ -32,7 +32,7 @@ export const compareFaces = (descriptor1: any, descriptor2: any): boolean => {
   }
   const faceMatcher = new FaceMatcher(descriptor1);
   const distance = faceMatcher.computeMeanDistance(descriptor1, [descriptor2]);
-  return distance >= 0.6;
+  return distance < 0.6;
 };
 
 export const uniqueId = () =>
@@ -65,11 +65,9 @@ export const startDetectFaces = async (
   canvas: HTMLCanvasElement | HTMLImageElement,
   inputSize: number
 ) => {
-  return await from(
-    detectAllFaces(canvas, FaceDetectOptions({ inputSize }))
-      .withFaceLandmarks()
-      .withFaceDescriptors()
-  )
+  return await from(detectAllFaces(canvas, FaceDetectOptions({ inputSize }))
+    .withFaceLandmarks()
+    .withFaceDescriptors() as any)
     .pipe(
       timeout(1000),
       catchError(() => of([]))

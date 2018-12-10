@@ -184,6 +184,7 @@ export const rootReducer = combineReducers<RootState, RootActions>({
       }
       case REFRESH_FACES: {
         const { payload: faces } = action;
+        // console.log(faces);
         return { ...state, faces };
       }
       case LOADED_VIDEO: {
