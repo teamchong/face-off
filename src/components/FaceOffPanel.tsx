@@ -238,6 +238,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   },
   hideMessage() {
     dispatch(hideMessage());
+    dispatch(openImageDetails(''));
   },
   removeImages(imageIndexes: number[]) {
     dispatch(removeImages(imageIndexes));
@@ -305,7 +306,7 @@ const FaceOffPanel = ({
                   <img
                     src={preview}
                     title={name}
-                    height={120}
+                    height={200}
                     className={classes!.card}
                   />
                 </CardActionArea>
@@ -441,11 +442,13 @@ const FaceOffPanel = ({
         aria-describedby="alert-dialog-slide-description"
       >
         <DialogTitle id="alert-dialog-slide-title">
-          {"Use Google's location service?"}
+          <Info size={12} className={classes!.alignCenter} />
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-slide-description">
-            {!!message ? message : <div>{JSON.stringify(imageDetails)}</div>}
+            {!!message
+              ? message
+              : !!imageDetails && <p>{JSON.stringify(imageDetails)}</p>}
           </DialogContentText>
         </DialogContent>
         <DialogActions>

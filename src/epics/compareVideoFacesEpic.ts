@@ -30,53 +30,55 @@ export default (
       Observable.create(async observer => {
         const state = state$.value.faceOffPanel;
         const { faces, videoCtx } = state;
-        const newFaces = { ...faces };
-        await Promise.all(
-          results.map(async result => {
-            let foundId = '';
 
-            for (const id in faces) {
-              const face = newFaces[id];
+        const canvas = document.createElement('canvas');
+        canvas.width = videoCtx.canvas.width;
+        canvas.height = videoCtx.canvas.height;
+        canvas.getContext('2d').drawImage(videoCtx.canvas, 0, 0);
 
-              if (compareFaces(face.descriptor, result.descriptor)) {
-                const newFace = {
-                  preview: face.preview,
-                  video: face.video,
-                  webcam: face.webcam,
-                  images: face.images,
-                  descriptor: face.descriptor,
-                };
+        for (const result of results) {
+          const newFaces = { ...faces };
+          let foundId = '';
 
-                if (!newFace.video[url]) {
-                  newFace.video[url] = [time];
-                } else {
-                  newFace.video[url].push(time);
-                }
-                newFace.video[url] = newFace.video[url]
-                  .sort()
-                  .filter((item, pos, ary) => !pos || item != ary[pos - 1]);
-                newFaces[id] = newFace;
-                foundId = id;
-                break;
-              }
-              if (foundId) break;
-            }
+          for (const id in faces) {
+            const face = newFaces[id];
 
-            if (!foundId) {
-              newFaces[uniqueId()] = {
-                preview: await generatePreview(
-                  videoCtx.canvas,
-                  result.detection
-                ),
-                video: { [url]: [time] },
-                webcam: [],
-                images: {},
-                descriptor: result.descriptor,
+            if (compareFaces(face.descriptor, result.descriptor)) {
+              const newFace = {
+                preview: face.preview,
+                video: face.video,
+                webcam: face.webcam,
+                images: face.images,
+                descriptor: face.descriptor,
               };
+
+              if (!newFace.video[url]) {
+                newFace.video[url] = [time];
+              } else {
+                newFace.video[url].push(time);
+              }
+              newFace.video[url] = newFace.video[url]
+                .sort()
+                .filter((item, pos, ary) => !pos || item != ary[pos - 1]);
+              newFaces[id] = newFace;
+              foundId = id;
+              break;
             }
-          })
-        );
-        observer.next(refreshFaces(newFaces));
+            if (foundId) break;
+          }
+
+          if (!foundId) {
+            newFaces[uniqueId()] = {
+              preview: await generatePreview(canvas, result.detection),
+              video: { [url]: [time] },
+              webcam: [],
+              images: {},
+              descriptor: result.descriptor,
+            };
+          }
+          observer.next(refreshFaces(newFaces));
+          await timer(0).toPromise();
+        }
         observer.complete();
       })
     )
