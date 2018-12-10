@@ -1,5 +1,5 @@
 import * as Dropzone from 'react-dropzone';
-import { action } from 'typesafe-actions';
+import { createAction } from 'typesafe-actions';
 import {
   SWITCH_TAB,
   SHOW_MESSAGE,
@@ -22,55 +22,88 @@ import {
   LOADED_WEBCAM,
 } from '../constants';
 
-export const switchTab = (tab: string) => action(SWITCH_TAB, tab);
-export const showMessage = (message: string) => action(SHOW_MESSAGE, message);
-export const hideMessage = () => action(HIDE_MESSAGE);
+export const switchTab = createAction(SWITCH_TAB, resolve => (tab: string) =>
+  resolve(tab)
+);
+export const showMessage = createAction(
+  SHOW_MESSAGE,
+  resolve => (message: string) => resolve(message)
+);
+export const hideMessage = createAction(HIDE_MESSAGE, resolve => () =>
+  resolve()
+);
 
-export const addImages = (images: HTMLImageElement[]) =>
-  action(ADD_IMAGES, images);
-export const removeImages = (imageIndexes: number[]) =>
-  action(REMOVE_IMAGES, imageIndexes);
+export const addImages = createAction(
+  ADD_IMAGES,
+  resolve => (images: HTMLImageElement[]) => resolve(images)
+);
+export const removeImages = createAction(
+  REMOVE_IMAGES,
+  resolve => (imageIndexes: number[]) => resolve(imageIndexes)
+);
 
-export const switchFacingMode = (facingMode: string) =>
-  action(SWITCH_FACINGMODE, facingMode);
+export const switchFacingMode = createAction(
+  SWITCH_FACINGMODE,
+  resolve => (facingMode: string) => resolve(facingMode)
+);
 
-export const changeVideoUrl = (videoUrl: string) =>
-  action(CHANGE_VIDEOURL, videoUrl);
+export const changeVideoUrl = createAction(
+  CHANGE_VIDEOURL,
+  resolve => (videoUrl: string) => resolve(videoUrl)
+);
 
-export const fetchMp4Url = (videoUrl: string) => action(FETCH_MP4URL, videoUrl);
+export const fetchMp4Url = createAction(
+  FETCH_MP4URL,
+  resolve => (videoUrl: string) => resolve(videoUrl)
+);
 
-export const fetchedMp4Url = (payload: {
-  videoUrlLoaded: string;
-  mp4Url: string;
-}) => action(FETCHED_MP4URL, payload);
+export const fetchedMp4Url = createAction(
+  FETCHED_MP4URL,
+  resolve => (payload: { videoUrlLoaded: string; mp4Url: string }) =>
+    resolve(payload)
+);
 
-export const startApp = () => action(START_APP);
-export const stopApp = () => action(STOP_APP);
+export const startApp = createAction(START_APP, resolve => () => resolve());
+export const stopApp = createAction(STOP_APP, resolve => () => resolve());
 
-export const screenshotVideo = () => action(SCREENSHOT_VIDEO);
+export const screenshotVideo = createAction(SCREENSHOT_VIDEO, resolve => () =>
+  resolve()
+);
 
-export const loadedModels = () => action(LOADED_MODELS);
+export const loadedModels = createAction(LOADED_MODELS, resolve => () =>
+  resolve()
+);
 
-export const detectFaces = () => action(DETECT_FACES);
+export const detectFaces = createAction(DETECT_FACES, resolve => () =>
+  resolve()
+);
 
-export const detectedVideoFaces = (payload: {
-  url: string;
-  time: number;
-  results: any[];
-}) => action(DETECTED_VIDEOFACES, payload);
+export const detectedVideoFaces = createAction(
+  DETECTED_VIDEOFACES,
+  resolve => (payload: { url: string; time: number; results: any[] }) =>
+    resolve(payload)
+);
 
-export const detectedWebcamFaces = (payload: {
-  time: number;
-  results: any[];
-}) => action(DETECTED_WEBCAMFACES, payload);
+export const detectedWebcamFaces = createAction(
+  DETECTED_WEBCAMFACES,
+  resolve => (payload: { time: number; results: any[] }) => resolve(payload)
+);
 
-export const detectedImageFaces = (payload: {
-  image: HTMLImageElement;
-  results: any[];
-}) => action(DETECTED_IMAGEFACES, payload);
+export const detectedImageFaces = createAction(
+  DETECTED_IMAGEFACES,
+  resolve => (payload: { image: HTMLImageElement; results: any[] }) =>
+    resolve(payload)
+);
 
-export const refreshFaces = (payload: any) => action(REFRESH_FACES, playload);
+export const refreshFaces = createAction(
+  REFRESH_FACES,
+  resolve => (payload: any) => resolve(playload)
+);
 
-export const loadedVideo = () => action(LOADED_VIDEO);
+export const loadedVideo = createAction(LOADED_VIDEO, resolve => () =>
+  resolve()
+);
 
-export const loadedWebcam = () => action(LOADED_WEBCAM);
+export const loadedWebcam = createAction(LOADED_WEBCAM, resolve => () =>
+  resolve()
+);
