@@ -34,16 +34,16 @@ import {
 } from 'face-api.js';
 const FaceDetectModel = loadTinyFaceDetectorModel;
 
-const initializeModels = async () => {
+const FaceDetectOptions = (opts?: any) =>
+  new (TinyFaceDetectorOptions as any)(opts);
+
+export const initializeModels = async () => {
   await FaceDetectModel(MODEL_URL);
   await loadFaceLandmarkModel(MODEL_URL);
   // await loadFaceLandmarkTinyModel(MODEL_URL);
   await loadFaceRecognitionModel(MODEL_URL);
   await startDetectFaces(new Image(100, 100), 32);
 };
-
-const FaceDetectOptions = (opts?: any) =>
-  new (TinyFaceDetectorOptions as any)(opts);
 
 export const compareFaces = (descriptor1: any, descriptor2: any): boolean => {
   if (!descriptor1 || !descriptor2) {
