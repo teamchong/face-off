@@ -32,7 +32,6 @@ export const compareFaces = (descriptor1: any, descriptor2: any): boolean => {
   }
   const faceMatcher = new FaceMatcher(descriptor1);
   const distance = faceMatcher.computeMeanDistance(descriptor1, [descriptor2]);
-  debugger;
   return distance >= 0.6;
 };
 
