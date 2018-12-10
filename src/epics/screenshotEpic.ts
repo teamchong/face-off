@@ -7,7 +7,6 @@ import { addImages, RootActions, screenshotVideo } from '../actions';
 import { SCREENSHOT_VIDEO } from '../constants';
 import { RootState } from '../models';
 
-console.log(screenshotVideo);
 export default (
   action$: Observable<RootActions>,
   state$: StateObservable<RootState>
