@@ -3,7 +3,7 @@ import { Observable, timer } from 'rxjs';
 import { concat, filter, switchMap, timeout } from 'rxjs/operators';
 import { isActionOf } from 'typesafe-actions';
 import {
-  detectFaces
+  detectFaces,
   detectedImageFaces,
   detectedVideoFaces,
   detectedWebcamFaces,
@@ -50,7 +50,9 @@ export default (
 
             if (isModelsLoaded) {
               const results = await startDetectFaces(videoCtx.canvas, 320);
-              observer.next(detectedVideoFaces({ url: videoUrlLoaded, time, results }));
+              observer.next(
+                detectedVideoFaces({ url: videoUrlLoaded, time, results })
+              );
 
               const { width, height } = videoCtx.canvas;
               drawDetections(
@@ -68,7 +70,9 @@ export default (
 
               if (isModelsLoaded) {
                 const results = await startDetectFaces(videoCtx.canvas, 320);
-                observer.next(detectedWebcamFaces({ time: new Date().getTime(), results }));
+                observer.next(
+                  detectedWebcamFaces({ time: new Date().getTime(), results })
+                );
 
                 const { width, height } = videoCtx.canvas;
                 drawDetections(

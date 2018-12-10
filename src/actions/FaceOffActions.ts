@@ -98,7 +98,7 @@ export const detectedImageFaces = createAction(
 
 export const refreshFaces = createAction(
   REFRESH_FACES,
-  resolve => (payload: any) => resolve(playload)
+  resolve => (payload: any) => resolve(payload)
 );
 
 export const loadedVideo = createAction(LOADED_VIDEO, resolve => () =>

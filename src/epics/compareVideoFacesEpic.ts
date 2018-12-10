@@ -11,9 +11,10 @@ import {
 } from '../actions';
 import {
   compareFaces,
-  startDetectFaces,
   drawDetections,
   drawVideo,
+  generatePreview,
+  startDetectFaces,
   uniqueId,
 } from '../classes/faceApi';
 import { RootState } from '../models';
@@ -28,10 +29,10 @@ export default (
     switchMap(({ playload: { url, time, results } }) =>
       Observable.create(async observer => {
         const state = state$.value.faceOffPanel;
-        const { faces } = state;
+        const { faces, videoCtx } = state;
         const newFaces = { ...faces };
-        for (const result of results) {
-          await new Promise(resolve => {
+        await Promise.all(
+          results.map(async result => {
             let foundId = '';
 
             for (const id in faces) {
@@ -39,6 +40,7 @@ export default (
 
               if (compareFaces(face.descriptor, result.descriptor)) {
                 const newFace = {
+                  preview: generatePreview(videoCtx.canvas, result.detection),
                   video: face.video ? { ...face.video } : {},
                   webcam: face.webcam,
                   images: face.images,
@@ -58,14 +60,17 @@ export default (
 
             if (!foundId) {
               newFaces[uniqueId()] = {
+                preview: await generatePreview(
+                  videoCtx.canvas,
+                  result.detection
+                ),
                 video: { [url]: [time] },
                 webcam: [],
                 images: {},
               };
             }
-          });
-          await timer(300).toPromise();
-        }
+          })
+        );
         observer.next(refreshFaces(newFaces));
       })
     )

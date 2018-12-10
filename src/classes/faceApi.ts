@@ -1,3 +1,4 @@
+import { canvasToBlob, createObjectURL } from 'blob-util';
 // import {
 //   drawDetection,
 // } from 'face-api.js';
@@ -46,7 +47,6 @@ export const compareFaces = (
   );
 };
 
-
 export const uniqueId = () =>
   `_${Math.random()
     .toString(36)
@@ -60,6 +60,14 @@ export const drawVideo = (
   videoCtx.canvas.width = videoWidth;
   videoCtx.canvas.height = videoHeight;
   videoCtx.drawImage(video, 0, 0, videoWidth, videoHeight);
+};
+
+export const generatePreview = async (
+  canvas: HTMLCanvasElement,
+  detection: any
+): Promise<string> => {
+  var thumb = extractFaces(canvas, [detection])[0];
+  return createObjectURL(await canvasToBlob(thumb));
 };
 
 export const startDetectFaces = async (

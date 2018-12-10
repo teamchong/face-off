@@ -35,13 +35,15 @@ import screenshotEpic from './epics/screenshotEpic';
 import startAppEpic from './epics/startAppEpic';
 import detectFaceEpic from './epics/detectFaceEpic';
 import fetchMp4Epic from './epics/fetchMp4Epic';
+import compareVideoFacesEpic from './epics/compareVideoFacesEpic';
 
 export const rootEpic = combineEpics(
   pasteHandlerEpic,
   screenshotEpic,
   startAppEpic,
   detectFaceEpic,
-  fetchMp4Epic
+  fetchMp4Epic,
+  compareVideoFacesEpic
 );
 
 const initState = {
@@ -110,6 +112,9 @@ export const rootReducer = combineReducers<RootState, RootActions>({
         const imageIds = state.images
           .filter((image, i) => imageIndexes.indexOf(i) < 0)
           .map(image => image.id);
+        for (const id in state.faces) {
+          revokeIfNeed(state.faces[id].preview);
+        }
         return {
           ...state,
           images: state.images.filter((img, i) => imageIndexes.indexOf(i) < 0),
@@ -179,6 +184,7 @@ export const rootReducer = combineReducers<RootState, RootActions>({
       }
       case REFRESH_FACES: {
         const { payload: faces } = action;
+        console.log(faces);
         return { ...state, faces };
       }
       case LOADED_VIDEO: {
