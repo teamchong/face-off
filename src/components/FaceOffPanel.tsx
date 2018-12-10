@@ -27,6 +27,8 @@ import {
   Photo,
   Videocam,
   VideoLibrary,
+  UnfoldMore,
+  UnfoldLess,
 } from '@material-ui/icons';
 import {
   createStyles,
@@ -230,22 +232,13 @@ const mapStateToProps = ({ faceOffPanel }: RootState) =>
   activeTabSelector(faceOffPanel);
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  switchTab(tab: string) {
-    dispatch(switchTab(tab));
-  },
-  showMessage(message: string) {
-    dispatch(showMessage(message));
-  },
-  hideMessage() {
-    dispatch(hideMessage());
-    dispatch(openImageDetails(''));
-  },
-  removeImages(imageIndexes: number[]) {
-    dispatch(removeImages(imageIndexes));
-  },
-  openImageDetails(openImageId: string) {
-    dispatch(openImageDetails(openImageId));
-  },
+  switchTab: (tab: string) => dispatch(switchTab(tab)),
+  showMessage: (message: string) => dispatch(showMessage(message)),
+  hideMessage: () => dispatch(hideMessage()),
+  removeImages: (imageIndexes: number[]) =>
+    dispatch(removeImages(imageIndexes)),
+  openImageDetails: (openImageId: string) =>
+    dispatch(openImageDetails(openImageId)),
 });
 
 const Transition = (props: Props<ReactNode>) => (
@@ -296,9 +289,14 @@ const FaceOffPanel = ({
       <div className={classes!.facesContainer}>
         {faceGroup.map(
           ({ id, name, preview, videoCount, webcamCount, imageCount }) => {
-            const popperClickHandler = () => openImageDetails(id);
+            const isOpen = imageDetails && imageDetails.id === id;
+            const clickHandler = () => openImageDetails(isOpen ? '' : id);
             return (
-              <Card className={classes!.card} key={id || null}>
+              <Card
+                className={classes!.card}
+                key={id || null}
+                onClick={clickHandler}
+              >
                 <CardActionArea>
                   {!!name && (
                     <CardContent className={classes!.title}>{name}</CardContent>
@@ -311,34 +309,28 @@ const FaceOffPanel = ({
                   />
                 </CardActionArea>
                 <CardActions className={classes!.cardActions}>
-                  <Button
-                    size="small"
-                    color="primary"
-                    onClick={popperClickHandler}
+                  <Badge
+                    color="secondary"
+                    badgeContent={videoCount}
+                    invisible={!videoCount}
                   >
-                    <Badge
-                      color="secondary"
-                      badgeContent={videoCount}
-                      invisible={!videoCount}
-                    >
-                      <VideoLibrary />
-                    </Badge>{' '}
-                    <Badge
-                      color="secondary"
-                      badgeContent={webcamCount}
-                      invisible={!webcamCount}
-                    >
-                      <Videocam />
-                    </Badge>{' '}
-                    <Badge
-                      color="secondary"
-                      badgeContent={imageCount}
-                      invisible={!imageCount}
-                    >
-                      <Photo />
-                    </Badge>{' '}
-                    (details)
-                  </Button>
+                    <VideoLibrary />
+                  </Badge>{' '}
+                  <Badge
+                    color="secondary"
+                    badgeContent={webcamCount}
+                    invisible={!webcamCount}
+                  >
+                    <Videocam />
+                  </Badge>{' '}
+                  <Badge
+                    color="secondary"
+                    badgeContent={imageCount}
+                    invisible={!imageCount}
+                  >
+                    <Photo />
+                  </Badge>{' '}
+                {isOpen ? <UnfoldLess> : <UnfoldMore/>}
                 </CardActions>
               </Card>
             );
@@ -356,29 +348,6 @@ const FaceOffPanel = ({
             <DeleteSweep /> Remove all
           </Button>
           <div className={classes!.br} />
-          <div className={classes!.facesContainer}>
-            {faceGroup.map(({ id, name, preview }) => (
-              <Card className={classes!.card} key={id || null}>
-                <CardActionArea>
-                  {!!name && (
-                    <CardContent className={classes!.title}>{name}</CardContent>
-                  )}
-                  <img
-                    src={preview}
-                    title={name}
-                    width={100}
-                    height={100}
-                    className={classes!.card}
-                  />
-                </CardActionArea>
-                <CardActions className={classes!.cardActions}>
-                  <Button size="small" color="primary">
-                    Detail
-                  </Button>
-                </CardActions>
-              </Card>
-            ))}
-          </div>
           <div className={classes!.imagesContainer}>
             {images.map(({ id, title, width, height, src }, i) => {
               const removeImageHandler = () => removeImages([i]);
@@ -434,7 +403,7 @@ const FaceOffPanel = ({
         </div>
       )}
       <Dialog
-        open={!!message || !!imageDetails}
+        open={!!message}
         TransitionComponent={Transition}
         keepMounted={true}
         onClose={hideMessage}
@@ -446,9 +415,7 @@ const FaceOffPanel = ({
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-slide-description">
-            {!!message
-              ? message
-              : !!imageDetails && <p>{JSON.stringify(imageDetails)}</p>}
+            {message}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
