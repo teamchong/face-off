@@ -66,8 +66,11 @@ export const generatePreview = async (
   canvas: HTMLCanvasElement,
   detection: any
 ): Promise<string> => {
-  var thumb = extractFaces(canvas, [detection])[0];
-  return createObjectURL(await canvasToBlob(thumb));
+  var thumb = await extractFaces(canvas, [detection]);
+  if (thumb[0]) {
+    return createObjectURL(await canvasToBlob(thumb[0]));
+  }
+  return '';
 };
 
 export const startDetectFaces = async (
