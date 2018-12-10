@@ -82,6 +82,8 @@ const styles = ({ palette, spacing }: Theme) =>
     },
     title: {
       position: 'absolute',
+      color: '#fff',
+      textShadow: '2px 2px #ff0000',
     },
     br: {
       width: '100%',
@@ -266,8 +268,6 @@ const FaceOffPanel = ({
   isWebcamLoaded,
   images,
   imagesOverlayRef,
-  videoRef,
-  webcamRef,
   imageDetails,
   switchTab,
   hideMessage,
@@ -336,7 +336,7 @@ const FaceOffPanel = ({
                     >
                       <Photo />
                     </Badge>{' '}
-                    {name}
+                    (details)
                   </Button>
                 </CardActions>
               </Card>
