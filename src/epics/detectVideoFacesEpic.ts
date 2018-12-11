@@ -44,8 +44,8 @@ export default (
               if (isModelsLoaded) {
                 const { detection, getDescriptor } = await scanImage(
                   canvas,
-                  224,
-                  1000
+                  160,
+                  500
                 );
                 const { width, height } = canvas;
                 drawDetections(detection, videoOverlay, width, height);
@@ -73,8 +73,8 @@ export default (
                 if (isModelsLoaded) {
                   const { detection, getDescriptor } = await scanImage(
                     canvas,
-                    224,
-                    1000
+                    160,
+                    500
                   );
                   const { width, height } = canvas;
                   drawDetections(detection, webcamOverlay, width, height);
