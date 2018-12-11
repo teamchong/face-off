@@ -5,7 +5,7 @@ import { concat, filter, mergeMap, timeout } from 'rxjs/operators';
 import { isActionOf } from 'typesafe-actions';
 import {
   addImages,
-  detectedImageFaces,
+  compareImageFaces,
   refreshFaces,
   RootActions,
 } from '../actions';
@@ -34,7 +34,7 @@ export default (
         for (let i = 0, iL = images.length; i < iL; i++) {
           const image = images[i];
 
-          const { detection, getDescriptor } = await scanImage(image, 608);
+          const { detection, getDescriptor } = await scanImage(image, 288);
 
           const canvas = document.createElement('canvas');
           canvas.width = image.width;
@@ -43,7 +43,7 @@ export default (
           const overlay = createObjectURL(await canvasToBlob(canvas));
 
           observer.next(
-            detectedImageFaces({
+            compareImageFaces({
               image,
               overlay,
               getDescriptor,

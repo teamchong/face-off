@@ -82,15 +82,52 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 
   const face = faces[id];
 
+  const toHHMMSS = (second: number) => {
+    const sec_num = parseInt(this, 10); // don't forget the second param
+    const hours = Math.floor(sec_num / 3600);
+    const minutes = Math.floor((sec_num - hours * 3600) / 60);
+    const seconds = sec_num - hours * 3600 - minutes * 60;
+
+    const h = hours < 10 ? '0' : '';
+    const m = minutes < 10 ? '0' : '';
+    const s = seconds < 10 ? '0' : '';
+    return h + hours + ':' + m + minutes + ':' + s + seconds;
+  };
+
+  const videoLog = [];
+  const webcamLog = [];
+  const imageLog = [];
   const isOpen = openImageId === id;
+
+  if (isOpen) {
+    for (const url in face.video) {
+      videoLog.push({
+        url,
+        log: Array.from(face.video[url])
+          .sort()
+          .map((s: number) => ({ s, l: toHHMMSS(s) })),
+      });
+    }
+    for (const t of face.webcam) {
+      webcamLog.push(new Date(t).toLocaleString('en-GB'));
+    }
+    for (const imageId of imageIds) {
+      const image = images[imageId];
+      if (image) {
+        imageLog.push(image);
+      }
+    }
+  }
+
   return {
     id,
     name: face.name || '',
     gender: face.gender,
     age: face.age,
     preview: face.preview,
-    video: face.video,
-    webcam: face.webcam,
+    videoLog,
+    webcamLog,
+    imageLog,
     videoCount: Object.keys(face.video).reduce(
       (total, url) => total + face.video[url].size,
       0
@@ -109,8 +146,9 @@ const FaceCard = ({
   gender,
   age,
   preview,
-  video,
-  webcam,
+  videoLog,
+  webcamLog,
+  imageLog,
   videoCount,
   webcamCount,
   imageCount,
@@ -159,11 +197,11 @@ const FaceCard = ({
           <Photo />
         </Badge>
       )}
-      {1===0 && <IconButton className={classes!.fold} onClick={clickHandler}>
+      <IconButton className={classes!.fold} onClick={clickHandler}>
         {isOpen ? <ExpandLess /> : <ExpandMore />}
-      </IconButton>}
+      </IconButton>
     </CardActions>
-    {isOpen && 1===0 ? (
+    {isOpen ? (
       <CardContent>
         <TextField
           label="Name"
@@ -187,8 +225,8 @@ const FaceCard = ({
           />
         ) : (
           <div>
-            <CircularProgress size={12} className={classes!.alignCenter} />{' '}
-            Gender
+            Gender:{' '}
+            <CircularProgress size={12} className={classes!.alignCenter} />
           </div>
         )}
         {age ? (
@@ -205,7 +243,40 @@ const FaceCard = ({
           />
         ) : (
           <div>
-            <CircularProgress size={12} className={classes!.alignCenter} /> Age
+            Age: <CircularProgress size={12} className={classes!.alignCenter} />
+          </div>
+        )}
+        {!!videoLog.length && (
+          <div>
+            Video log:
+            {videoLog.map(({ url, log }) => (
+              <div>
+                {url}{' '}
+                <select>
+                  {log.map(({ s, l }) => (
+                    <option value={s}>{l}</option>
+                  ))}
+                </select>
+              </div>
+            ))}
+          </div>
+        )}
+        {!!webcamLog.length && (
+          <div>
+            WebCam log:
+            {webcamLog.map(time => (
+              <div>{time}</div>
+            ))}
+          </div>
+        )}
+        {!!imageLog.length && (
+          <div>
+            Appear in images:
+            {imageLog.map(({ src, id }) => (
+              <a href={src}>
+                <img src={src} height="50" />
+              </a>
+            ))}
           </div>
         )}
       </CardContent>
