@@ -20,9 +20,9 @@ import {
   START_APP,
   STOP_APP,
   LOADED_MODELS,
-  DETECTED_VIDEOFACES,
-  DETECTED_WEBCAMFACES,
-  DETECTED_IMAGEFACES,
+  COMPARE_VIDEOFACES,
+  COMPARE_WEBCAMFACES,
+  COMPARE_IMAGEFACES,
   REFRESH_FACES,
   OPEN_IMAGEDETAILS,
   FACINGMODE_REAR,
@@ -188,7 +188,7 @@ export const rootReducer = combineReducers<RootState, RootActions>({
           isAppRunning: false,
         };
       }
-      case DETECTED_IMAGEFACES: {
+      case COMPARE_IMAGEFACES: {
         const {
           payload: {
             image: { id },
