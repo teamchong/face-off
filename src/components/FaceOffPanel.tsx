@@ -143,7 +143,11 @@ const componentSelector = createSelector(
       tab,
       message,
       imageIndexes,
-      isModelsLoaded,
+      isModelsLoadCompleted:
+        !isModelsLoaded &&
+        ((tab == 'one' && isVideoLoaded) ||
+          (tab === 'two' && isWebcamLoaded) ||
+          tab === 'three'),
       isVideoLoaded,
       isWebcamLoaded,
       faceIds,
@@ -216,10 +220,7 @@ const FaceOffPanel = ({
       <TabContainer>
         <ActiveTab />
       </TabContainer>
-      {!isModelsLoaded &&
-      ((tab == 'one' && isVideoLoaded) ||
-        (tab === 'two' && isWebcamLoaded) ||
-        tab === 'three') ? (
+      {!isModelsLoadCompleted ? (
         <div>
           <CircularProgress size={12} className={classes!.alignCenter} /> Please
           wait while loading face detection models.
