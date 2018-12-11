@@ -56,7 +56,7 @@ export default (
             };
           }
           observer.next(refreshFaces(newFaces));
-          await new Promise(r => setTimeout(r, 100));
+          await new Promise(r => setTimeout(r, 0));
         }
         observer.complete();
       })
