@@ -95,7 +95,7 @@ export default (
             }
           }
 
-          await new Promise(r => setTimeout(r, 0));
+          await new Promise(r => setTimeout(r, 10));
         }
         observer.complete();
       })
