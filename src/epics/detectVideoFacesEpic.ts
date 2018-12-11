@@ -44,7 +44,7 @@ export default (
               if (isModelsLoaded) {
                 const { detection, getDescriptor } = await scanImage(
                   canvas,
-                  320,
+                  224,
                   1000
                 );
                 const { width, height } = canvas;
@@ -73,7 +73,7 @@ export default (
                 if (isModelsLoaded) {
                   const { detection, getDescriptor } = await scanImage(
                     canvas,
-                    320,
+                    224,
                     1000
                   );
                   const { width, height } = canvas;
