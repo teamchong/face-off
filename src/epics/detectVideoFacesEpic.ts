@@ -1,5 +1,5 @@
 import { StateObservable } from 'redux-observable';
-import { Observable, timer } from 'rxjs';
+import { Observable } from 'rxjs';
 import { concat, filter, switchMap, timeout } from 'rxjs/operators';
 import { isActionOf } from 'typesafe-actions';
 import {
@@ -91,7 +91,7 @@ export default (
             }
           }
 
-          await timer(100).toPromise();
+          await new Promise(r => setTimeout(r, 100));
         }
       })
     )

@@ -1,5 +1,5 @@
 import { StateObservable } from 'redux-observable';
-import { Observable, timer } from 'rxjs';
+import { Observable } from 'rxjs';
 import { concat, filter, switchMap, timeout } from 'rxjs/operators';
 import { isActionOf } from 'typesafe-actions';
 import { detectedVideoFaces, refreshFaces, RootActions } from '../actions';
@@ -56,7 +56,7 @@ export default (
             };
           }
           observer.next(refreshFaces(newFaces));
-          await timer(0).toPromise();
+          await new Promise(r => setTimeout(r, 0));
         }
         observer.complete();
       })

@@ -2,7 +2,7 @@ import { forkJoin, from, Observable, of } from 'rxjs';
 import { filter, switchMap } from 'rxjs/operators';
 import { isActionOf } from 'typesafe-actions';
 import {
-  detectFaces,
+  detectVideoFaces,
   fetchMp4Url,
   loadedModels,
   RootActions,
@@ -19,7 +19,7 @@ export default (action$: Observable<RootActions>) =>
         observer.next(fetchMp4Url(DEFAULT_VIDEO_URL));
         await initializeModels();
         observer.next(loadedModels());
-        observer.next(detectFaces());
+        observer.next(detectVideoFaces());
         observer.complete();
       })
     )
