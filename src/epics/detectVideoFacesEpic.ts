@@ -46,7 +46,7 @@ export default (
               const time = ~~video.currentTime;
 
               if (isModelsLoaded) {
-                const results = await startDetectFaces(canvas, 320, 1000);
+                const results = await startDetectFaces(canvas, 320, 2000);
                 observer.next(
                   detectedVideoFaces({
                     url: videoUrlLoaded,
@@ -77,7 +77,7 @@ export default (
               const canvas = drawVideo(video);
               try {
                 if (isModelsLoaded) {
-                  const results = await startDetectFaces(canvas, 320, 1000);
+                  const results = await startDetectFaces(canvas, 320, 2000);
                   observer.next(
                     detectedWebcamFaces({
                       time: new Date().getTime(),
