@@ -4,9 +4,9 @@ import { concat, filter, exhaustMap, timeout } from 'rxjs/operators';
 import { isActionOf } from 'typesafe-actions';
 import {
   detectVideoFaces,
-  detectedImageFaces,
-  detectedVideoFaces,
-  detectedWebcamFaces,
+  compareImageFaces,
+  compareVideoFaces,
+  compareWebcamFaces,
   RootActions,
 } from '../actions';
 import { scanImage, drawDetections, drawVideo } from '../classes/faceApi';
@@ -36,7 +36,7 @@ export default (
             isWebcamLoaded,
           } = state$.value.faceOffPanel;
 
-          if (tab == 'one' && video && video.videoWidth && isVideoLoaded) {
+          if (tab === 'one' && video && video.videoWidth && isVideoLoaded) {
             const canvas = drawVideo(video);
             try {
               const time = ~~video.currentTime;
@@ -44,13 +44,13 @@ export default (
               if (isModelsLoaded) {
                 const { detection, getDescriptor } = await scanImage(
                   canvas,
-                  320,
+                  288,
                   500
                 );
                 const { width, height } = canvas;
                 drawDetections(detection, videoOverlay, width, height);
                 observer.next(
-                  detectedVideoFaces({
+                  compareVideoFaces({
                     url: videoUrlLoaded,
                     time,
                     canvas,
@@ -73,14 +73,14 @@ export default (
                 if (isModelsLoaded) {
                   const { detection, getDescriptor } = await scanImage(
                     canvas,
-                    320,
+                    288,
                     500
                   );
                   const { width, height } = canvas;
                   drawDetections(detection, webcamOverlay, width, height);
                   observer.next(
-                    detectedWebcamFaces({
-                      time: new Date().getTime(),
+                    compareWebcamFaces({
+                      time: ~~(new Date().getTime() / 1000) * 1000,
                       canvas,
                       getDescriptor,
                     })
@@ -94,8 +94,7 @@ export default (
               }
             }
           }
-
-          await new Promise(r => setTimeout(r, 0));
+          await new Promise(r => setTimeout(r, 100));
         }
         observer.complete();
       })
