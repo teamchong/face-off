@@ -47,6 +47,11 @@ import { FaceOffModel, RootState } from '../models';
 const styles = ({ palette, spacing }: Theme) =>
   createStyles({
     root: {
+      display: 'flex',
+      flexFlow: 'column wrap',
+      justifyContent: 'flex-start',
+      alignItems: 'flex-start',
+      alignContent: 'flex-start',
       backgroundColor: palette.background.paper,
     },
     container: {
@@ -144,7 +149,7 @@ const componentSelector = createSelector(
       message,
       imageIndexes,
       isModelsLoadCompleted:
-        !isModelsLoaded &&
+        isModelsLoaded &&
         ((tab == 'one' && isVideoLoaded) ||
           (tab === 'two' && isWebcamLoaded) ||
           tab === 'three'),
@@ -208,33 +213,35 @@ const FaceOffPanel = ({
   removeAllHandler,
   switchTabHandler,
 }: StyledComponentProps & ReturnType<typeof mergeProps>): ReactElement<any> => (
-  <div className={classes!.root}>
-    <div className={classes!.container}>
-      <AppBar position="static">
-        <Tabs value={tab} onChange={switchTabHandler} fullWidth={true}>
-          <Tab value="one" icon={<VideoLibrary />} />
-          <Tab value="two" icon={<Videocam />} />
-          <Tab value="three" icon={<AddPhotoAlternate />} />
-        </Tabs>
-      </AppBar>
-      <TabContainer>
-        <ActiveTab />
-      </TabContainer>
-      {!isModelsLoadCompleted ? (
-        <div>
-          <CircularProgress size={12} className={classes!.alignCenter} /> Please
-          wait while loading face detection models.
-        </div>
-      ) : (
-        <div>
-          <Info size={12} className={classes!.alignCenter} /> Face detection is
-          on.
-        </div>
-      )}
+  <div>
+    <div className={classes!.root}>
+      <div className={classes!.container}>
+        <AppBar position="static">
+          <Tabs value={tab} onChange={switchTabHandler} fullWidth={true}>
+            <Tab value="one" icon={<VideoLibrary />} />
+            <Tab value="two" icon={<Videocam />} />
+            <Tab value="three" icon={<AddPhotoAlternate />} />
+          </Tabs>
+        </AppBar>
+        <TabContainer>
+          <ActiveTab />
+        </TabContainer>
+        {!isModelsLoadCompleted ? (
+          <div>
+            <CircularProgress size={12} className={classes!.alignCenter} />{' '}
+            Please wait while loading face detection models.
+          </div>
+        ) : (
+          <div>
+            <Info size={12} className={classes!.alignCenter} /> Face detection
+            is on.
+          </div>
+        )}
+      </div>
+      {faceIds.map(faceId => (
+        <FaceCard id={faceId} key={faceId} />
+      ))}
     </div>
-    {faceIds.map(faceId => (
-      <FaceCard id={faceId} key={faceId} />
-    ))}
     <Divider variant="middle" />
     {!!imageIndexes.length && (
       <div>
