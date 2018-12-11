@@ -1,10 +1,13 @@
 import {
   Badge,
+  Button,
   Card,
   CardActions,
   CardContent,
   CardHeader,
   CircularProgress,
+  Collapse,
+  IconButton,
   TextField,
 } from '@material-ui/core';
 import {
@@ -43,7 +46,6 @@ const styles = ({ palette, spacing }: Theme) =>
       marginLeft: 'auto',
     },
     faceThumb: {
-      height: '120px',
       display: 'block',
     },
     card: {
@@ -119,7 +121,7 @@ const FaceCard = ({
   <Card className={classes!.card} key={id} onClick={clickHandler}>
     <div>
       {!!name && <div className={classes!.title}>{name}</div>}
-      <img src={preview} title={name} className={classes!.faceThumb} />
+      <img src={preview} title={name} className={classes!.faceThumb} style={{height: isOpen ? 'auto' : '120px'}}/>
     </div>
     <CardActions className={classes!.cardActions}>
       {!!videoCount && (
@@ -149,13 +151,15 @@ const FaceCard = ({
           <Photo />
         </Badge>
       )}
+      <IconButton className={classes!.fold}>
       {isOpen ? (
-        <ExpandLess className={classes!.fold} />
+        <ExpandLess />
       ) : (
-        <ExpandMore className={classes!.fold} />
+        <ExpandMore />
       )}
+      </IconButton>
     </CardActions>
-    {isOpen && (
+    <Collapse in={isOpen} timeout="auto" unmountOnExit>
       <CardContent>
         <TextField
           label="Name"
@@ -201,7 +205,7 @@ const FaceCard = ({
           </div>
         )}
       </CardContent>
-    )}
+      </Collapse>
   </Card>
 );
 
