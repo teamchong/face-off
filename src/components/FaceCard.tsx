@@ -108,6 +108,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
           .map((s: number) => ({ s, l: toHHMMSS(s) })),
       });
     }
+
     face.webcam.forEach(t =>
       webcamLog.push(new Date(t).toLocaleString('en-GB'))
     );
