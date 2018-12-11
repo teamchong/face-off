@@ -163,7 +163,7 @@ const FaceCard = ({
         {isOpen ? <ExpandLess /> : <ExpandMore />}
       </IconButton>
     </CardActions>
-    <CardContent style={{ visiblity: isOpen ? 'visible' : 'hidden' }}>
+    <CardContent style={{ visibility: isOpen ? 'visible' : 'hidden' }}>
       <TextField
         label="Name"
         value={name}
