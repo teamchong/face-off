@@ -116,14 +116,10 @@ const FaceCard = ({
   nameChangeHandler,
 }: StyledComponentProps & ReturnType<typeof mergeProps>): ReactElement<any> => (
   <Card className={classes!.card} key={id} onClick={clickHandler}>
-    <CardContent>
+    <div>
       {!!name && <div className={classes!.title}>{name}</div>}
-      <img
-        src={preview}
-        title={name}
-        className={classes!.faceThumb}
-      />
-    </CardContent>
+      <img src={preview} title={name} className={classes!.faceThumb} />
+    </div>
     <CardActions className={classes!.cardActions}>
       {!!!videoCount && (
         <Badge
