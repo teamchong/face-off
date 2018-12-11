@@ -22,17 +22,17 @@ export const LOADED_VIDEO = 'LOADED_VIDEO';
 export const LOADED_WEBCAM = 'LOADED_WEBCAM';
 
 export const DETECT_VIDEOFACES = 'DETECT_VIDEOFACES';
-export const DETECTED_VIDEOFACES = 'DETECTED_VIDEOFACES';
-export const DETECTED_WEBCAMFACES = 'DETECTED_WEBCAMFACES';
-export const DETECTED_IMAGEFACES = 'DETECTED_IMAGEFACES';
+export const COMPARE_VIDEOFACES = 'COMPARE_VIDEOFACES';
+export const COMPARE_WEBCAMFACES = 'COMPARE_WEBCAMFACES';
+export const COMPARE_IMAGEFACES = 'COMPARE_IMAGEFACES';
 
 export const REFRESH_FACES = 'REFRESH_FACES';
 
 export const OPEN_IMAGEDETAILS = 'OPEN_IMAGEDETAILS';
 
 /* constants */
-export const FACINGMODE_REAR = 'environment';
-export const FACINGMODE_FRONT = 'user';
+export const FACINGMODE_REAR = 'user';
+export const FACINGMODE_FRONT = 'environment';
 
 export const MAX_WIDTH = 640;
 export const MAX_HEIGHT = 480;

@@ -82,15 +82,57 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 
   const face = faces[id];
 
+  const toHHMMSS = (second: number) => {
+    const sec_num = ~~second;
+    const hours = Math.floor(sec_num / 3600);
+    const minutes = Math.floor((sec_num - hours * 3600) / 60);
+    const seconds = sec_num - hours * 3600 - minutes * 60;
+
+    const h = hours < 10 ? '0' : '';
+    const m = minutes < 10 ? '0' : '';
+    const s = seconds < 10 ? '0' : '';
+    return h + hours + ':' + m + minutes + ':' + s + seconds;
+  };
+
+  const videoLog = [];
+  const webcamLog = [];
+  const imageLog = [];
   const isOpen = openImageId === id;
+
+  if (isOpen) {
+    for (const url in face.video) {
+      videoLog.push({
+        url,
+        log: Array.from(face.video[url])
+          .sort()
+          .map((s: number) => ({ s, l: toHHMMSS(s) })),
+      });
+    }
+
+    face.webcam.forEach(t =>
+      webcamLog.push(new Date(t).toLocaleString('en-GB'))
+    );
+    const imageLookup = {};
+    for (const image of images) {
+      imageLookup[image.id] = image;
+    }
+    face.imageIds.forEach(imageId => {
+      const image = imageLookup[imageId];
+      if (image) {
+        imageLog.push(image);
+      }
+    });
+  }
+
   return {
     id,
-    name: face.name || '',
-    gender: face.gender,
-    age: face.age,
+    //name: face.name || '',
+    //gender: face.gender,
+    //age: face.age,
     preview: face.preview,
-    video: face.video,
-    webcam: face.webcam,
+    videoLog,
+    webcamLog,
+    imageLog,
     videoCount: Object.keys(face.video).reduce(
       (total, url) => total + face.video[url].size,
       0
@@ -105,28 +147,28 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 const FaceCard = ({
   classes,
   id,
-  name,
-  gender,
-  age,
+  // name,
+  // gender,
+  // age,
   preview,
-  video,
-  webcam,
+  videoLog,
+  webcamLog,
+  imageLog,
   videoCount,
   webcamCount,
   imageCount,
   isOpen,
   clickHandler,
-  nameChangeHandler,
-}: StyledComponentProps & ReturnType<typeof mergeProps>): ReactElement<any> => (
+}: // nameChangeHandler,
+StyledComponentProps & ReturnType<typeof mergeProps>): ReactElement<any> => (
   <Card className={classes!.card} key={id}>
     <div>
-      {!!name && <div className={classes!.title}>{name}</div>}
+      {/*name && <div className={classes!.title}>{name}</div>*/}
       <img
         src={preview}
-        title={name}
         className={classes!.faceThumb}
         style={{
-          width: isOpen ? '300px' : 'auto',
+          width: isOpen ? '100%' : 'auto',
           height: isOpen ? 'auto' : '120px',
         }}
       />
@@ -159,13 +201,13 @@ const FaceCard = ({
           <Photo />
         </Badge>
       )}
-      {1===0 && <IconButton className={classes!.fold} onClick={clickHandler}>
+      <IconButton className={classes!.fold} onClick={clickHandler}>
         {isOpen ? <ExpandLess /> : <ExpandMore />}
-      </IconButton>}
+      </IconButton>
     </CardActions>
-    {isOpen && 1===0 ? (
+    {isOpen ? (
       <CardContent>
-        <TextField
+        {/*<TextField
           label="Name"
           value={name}
           onChange={nameChangeHandler}
@@ -187,8 +229,8 @@ const FaceCard = ({
           />
         ) : (
           <div>
-            <CircularProgress size={12} className={classes!.alignCenter} />{' '}
-            Gender
+            Gender:{' '}
+            <CircularProgress size={12} className={classes!.alignCenter} />
           </div>
         )}
         {age ? (
@@ -205,7 +247,46 @@ const FaceCard = ({
           />
         ) : (
           <div>
-            <CircularProgress size={12} className={classes!.alignCenter} /> Age
+            Age: <CircularProgress size={12} className={classes!.alignCenter} />
+          </div>
+        )}*/}
+        {!!videoLog.length && (
+          <div>
+            Video log:
+            {videoLog.map(({ url, log }, i) => (
+              <div key={i}>
+                <a href={url} target="_blank">
+                  {url}
+                </a>
+                <div>
+                  <select style={{ width: '100%' }}>
+                    {log.map(({ s, l }, i) => (
+                      <option value={s} key={i}>
+                        {l}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        {!!webcamLog.length && (
+          <div>
+            WebCam log:
+            {webcamLog.map((time, i) => (
+              <div key={i}>{time}</div>
+            ))}
+          </div>
+        )}
+        {!!imageLog.length && (
+          <div>
+            <div>Appear in images:</div>
+            {imageLog.map(({ src, id }, i) => (
+              <a href={src} target="_blank" key={i}>
+                <img src={src} height="50" />
+              </a>
+            ))}
           </div>
         )}
       </CardContent>
