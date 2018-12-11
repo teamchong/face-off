@@ -19,6 +19,7 @@ export default (
         const { faces } = state;
 
         for (const result of results) {
+          debugger;
           const newFaces: FaceDetectResults = { ...faces };
           let foundId = '';
 
@@ -42,7 +43,12 @@ export default (
           }
 
           if (!foundId) {
+            // const canvas = document.createElement('canvas');
+            // canvas.width = image.width;
+            // canvas.height = image.height;
+            // canvas.getContext('2d').drawImage(image, 0, 0);
             newFaces[uniqueId()] = {
+              // preview: await generatePreview(canvas, result.detection),
               preview: await generatePreview(image, result.detection),
               video: {},
               webcam: new Set<number>(),

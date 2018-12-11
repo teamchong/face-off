@@ -4,6 +4,7 @@ import {
   CardActionArea,
   CardActions,
   CardContent,
+  CircularProgress,
 } from '@material-ui/core';
 import { Delete } from '@material-ui/icons';
 import {
@@ -95,12 +96,13 @@ const ImageCard = ({
   <Card className={classes!.card} style={{ order: images.length - index }}>
     <CardActionArea>
       {!!title && <CardContent className={classes!.title}>{title}</CardContent>}
-      <img
-        src={imagesOverlay}
-        width={width}
-        height={height}
-        className={classes!.overlay}
-      />
+      <div className={classes!.overlay}>
+        {imagesOverlay ? (
+          <img src={imagesOverlay} width={width} height={height} />
+        ) : (
+          <CircularProgress size={12} className={classes!.alignCenter} />
+        )}
+      </div>
       <img
         src={src}
         title={title}
