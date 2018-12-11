@@ -163,50 +163,53 @@ const FaceCard = ({
         {isOpen ? <ExpandLess /> : <ExpandMore />}
       </IconButton>
     </CardActions>
-    <CardContent style={{ visibility: isOpen ? 'visible' : 'hidden' }}>
-      <TextField
-        label="Name"
-        value={name}
-        onChange={nameChangeHandler}
-        fullWidth
-        margin="normal"
-        variant="outlined"
-      />
-      {gender ? (
+    {isOpen ? (
+      <CardContent>
         <TextField
-          label="Gender"
-          value={gender}
+          label="Name"
+          value={name}
           onChange={nameChangeHandler}
           fullWidth
           margin="normal"
           variant="outlined"
-          InputProps={{
-            readOnly: true,
-          }}
         />
-      ) : (
-        <div>
-          <CircularProgress size={12} className={classes!.alignCenter} /> Gender
-        </div>
-      )}
-      {age ? (
-        <TextField
-          label="Age"
-          value={age}
-          onChange={nameChangeHandler}
-          fullWidth
-          margin="normal"
-          variant="outlined"
-          InputProps={{
-            readOnly: true,
-          }}
-        />
-      ) : (
-        <div>
-          <CircularProgress size={12} className={classes!.alignCenter} /> Age
-        </div>
-      )}
-    </CardContent>
+        {gender ? (
+          <TextField
+            label="Gender"
+            value={gender}
+            onChange={nameChangeHandler}
+            fullWidth
+            margin="normal"
+            variant="outlined"
+            InputProps={{
+              readOnly: true,
+            }}
+          />
+        ) : (
+          <div>
+            <CircularProgress size={12} className={classes!.alignCenter} />{' '}
+            Gender
+          </div>
+        )}
+        {age ? (
+          <TextField
+            label="Age"
+            value={age}
+            onChange={nameChangeHandler}
+            fullWidth
+            margin="normal"
+            variant="outlined"
+            InputProps={{
+              readOnly: true,
+            }}
+          />
+        ) : (
+          <div>
+            <CircularProgress size={12} className={classes!.alignCenter} /> Age
+          </div>
+        )}
+      </CardContent>
+    ) : null}
   </Card>
 );
 

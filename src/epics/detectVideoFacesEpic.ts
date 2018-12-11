@@ -26,23 +26,23 @@ export default (
     exhaustMap(() =>
       Observable.create(async observer => {
         while (state$.value.faceOffPanel.isAppRunning) {
-          try {
-            let {
-              videoRef: { current: video },
-            } = state$.value.faceOffPanel;
-            const {
-              tab,
-              videoOverlayRef: { current: videoOverlay },
-              webcamRef: { current: webcam },
-              webcamOverlayRef: { current: webcamOverlay },
-              videoUrlLoaded,
-              isModelsLoaded,
-              isVideoLoaded,
-              isWebcamLoaded,
-            } = state$.value.faceOffPanel;
+          let {
+            videoRef: { current: video },
+          } = state$.value.faceOffPanel;
+          const {
+            tab,
+            videoOverlayRef: { current: videoOverlay },
+            webcamRef: { current: webcam },
+            webcamOverlayRef: { current: webcamOverlay },
+            videoUrlLoaded,
+            isModelsLoaded,
+            isVideoLoaded,
+            isWebcamLoaded,
+          } = state$.value.faceOffPanel;
 
-            if (tab == 'one' && video && video.videoWidth && isVideoLoaded) {
-              const canvas = drawVideo(video);
+          if (tab == 'one' && video && video.videoWidth && isVideoLoaded) {
+            const canvas = drawVideo(video);
+            try {
               const time = ~~video.currentTime;
 
               if (isModelsLoaded) {
@@ -64,12 +64,18 @@ export default (
                   height
                 );
               }
-            } else if (tab === 'two' && webcam && isWebcamLoaded) {
-              video = (webcam as any).video;
+            } catch (ex) {
+              console.warn(ex);
 
-              if (video && video.videoWidth) {
-                const canvas = drawVideo(video);
+              const { width, height } = canvas;
+              drawDetections([], videoOverlay, width, height);
+            }
+          } else if (tab === 'two' && webcam && isWebcamLoaded) {
+            video = (webcam as any).video;
 
+            if (video && video.videoWidth) {
+              const canvas = drawVideo(video);
+              try {
                 if (isModelsLoaded) {
                   const results = await startDetectFaces(canvas, 320, 1000);
                   observer.next(
@@ -88,10 +94,13 @@ export default (
                     height
                   );
                 }
+              } catch (ex) {
+                console.warn(ex);
+
+                const { width, height } = canvas;
+                drawDetections([], webcamOverlay, width, height);
               }
             }
-          } catch (ex) {
-            console.warn(ex);
           }
 
           await new Promise(r => setTimeout(r, 100));
