@@ -11,8 +11,8 @@ import {
   Photo,
   Videocam,
   VideoLibrary,
-  UnfoldMore,
-  UnfoldLess,
+  ExpandMore,
+  ExpandLess,
 } from '@material-ui/icons';
 import {
   createStyles,
@@ -122,7 +122,7 @@ const FaceCard = ({
       <img src={preview} title={name} className={classes!.faceThumb} />
     </div>
     <CardActions className={classes!.cardActions}>
-      {!!!videoCount && (
+      {!!videoCount && (
         <Badge
           className={classes!.badge}
           color="secondary"
@@ -150,9 +150,9 @@ const FaceCard = ({
         </Badge>
       )}
       {isOpen ? (
-        <UnfoldLess className={classes!.fold} />
+        <ExpandLess className={classes!.fold} />
       ) : (
-        <UnfoldMore className={classes!.fold} />
+        <ExpandMore className={classes!.fold} />
       )}
     </CardActions>
     {isOpen && (

@@ -29,6 +29,8 @@ export default (
           await new Promise(r => setTimeout(r, 100));
         }
 
+        await new Promise(r => setTimeout(r, 100));
+
         for (let i = 0, iL = images.length; i < iL; i++) {
           const image = images[i];
 
