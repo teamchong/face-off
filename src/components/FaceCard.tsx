@@ -121,7 +121,9 @@ const FaceCard = ({
   <Card className={classes!.card} key={id} onClick={clickHandler}>
     <div>
       {!!name && <div className={classes!.title}>{name}</div>}
-      <img src={preview} title={name} className={classes!.faceThumb} style={{height: isOpen ? 'auto' : '120px'}}/>
+      <img src={preview} title={name} className={classes!.faceThumb} style={{
+        width: isOpen ? '300px' : 'auto',
+        height: isOpen ? 'auto' : '120px'}}/>
     </div>
     <CardActions className={classes!.cardActions}>
       {!!videoCount && (
