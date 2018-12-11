@@ -119,7 +119,7 @@ const FaceCard = ({
   <Card className={classes!.card} key={id} onClick={clickHandler}>
     <CardHeader title={name} className={classes!.faceName} />
     <CardMedia
-      component={'image' as any}
+      component="img"
       image={preview}
       title={name}
       className={classes!.faceThumb}
