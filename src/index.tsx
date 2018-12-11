@@ -22,9 +22,7 @@ class App extends Component {
     return (
       <Grid container={true}>
         <Card raised={true}>
-          <CardContent>
-            <FaceOffPanel />
-          </CardContent>
+          <FaceOffPanel />
         </Card>
       </Grid>
     );
