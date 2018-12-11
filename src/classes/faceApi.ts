@@ -90,12 +90,7 @@ export const startDetectFaces = async (
   if (!timeoutMs) {
     return (await query.toPromise()) as any;
   }
-  return (await query
-    .pipe(
-      timeout(timeoutMs),
-      catchError(() => of([]))
-    )
-    .toPromise()) as any;
+  return (await query.pipe(timeout(timeoutMs)).toPromise()) as any;
 };
 
 export const drawDetections = (
