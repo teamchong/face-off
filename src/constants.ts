@@ -31,8 +31,8 @@ export const REFRESH_FACES = 'REFRESH_FACES';
 export const OPEN_IMAGEDETAILS = 'OPEN_IMAGEDETAILS';
 
 /* constants */
-export const FACINGMODE_REAR = 'environment';
-export const FACINGMODE_FRONT = 'user';
+export const FACINGMODE_REAR = 'user';
+export const FACINGMODE_FRONT = 'environment';
 
 export const MAX_WIDTH = 640;
 export const MAX_HEIGHT = 480;
