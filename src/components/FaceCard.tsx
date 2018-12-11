@@ -83,7 +83,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
   const face = faces[id];
 
   const toHHMMSS = (second: number) => {
-    const sec_num = parseInt(this, 10); // don't forget the second param
+    const sec_num = ~~second;
     const hours = Math.floor(sec_num / 3600);
     const minutes = Math.floor((sec_num - hours * 3600) / 60);
     const seconds = sec_num - hours * 3600 - minutes * 60;
@@ -108,22 +108,26 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
           .map((s: number) => ({ s, l: toHHMMSS(s) })),
       });
     }
-    for (const t of face.webcam) {
-      webcamLog.push(new Date(t).toLocaleString('en-GB'));
+    face.webcam.forEach(t =>
+      webcamLog.push(new Date(t).toLocaleString('en-GB'))
+    );
+    const imageLookup = {};
+    for (const image of images) {
+      imageLookup[image.id] = image;
     }
-    for (const imageId of face.imageIds) {
-      const image = images[imageId];
+    face.imageIds.forEach(imageId => {
+      const image = imageLookup[imageId];
       if (image) {
         imageLog.push(image);
       }
-    }
+    });
   }
 
   return {
     id,
-    name: face.name || '',
-    gender: face.gender,
-    age: face.age,
+    //name: face.name || '',
+    //gender: face.gender,
+    //age: face.age,
     preview: face.preview,
     videoLog,
     webcamLog,
@@ -142,9 +146,9 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 const FaceCard = ({
   classes,
   id,
-  name,
-  gender,
-  age,
+  // name,
+  // gender,
+  // age,
   preview,
   videoLog,
   webcamLog,
@@ -154,17 +158,16 @@ const FaceCard = ({
   imageCount,
   isOpen,
   clickHandler,
-  nameChangeHandler,
-}: StyledComponentProps & ReturnType<typeof mergeProps>): ReactElement<any> => (
+}: // nameChangeHandler,
+StyledComponentProps & ReturnType<typeof mergeProps>): ReactElement<any> => (
   <Card className={classes!.card} key={id}>
     <div>
-      {!!name && <div className={classes!.title}>{name}</div>}
+      {/*name && <div className={classes!.title}>{name}</div>*/}
       <img
         src={preview}
-        title={name}
         className={classes!.faceThumb}
         style={{
-          width: isOpen ? '300px' : 'auto',
+          width: isOpen ? '100%' : 'auto',
           height: isOpen ? 'auto' : '120px',
         }}
       />
@@ -203,7 +206,7 @@ const FaceCard = ({
     </CardActions>
     {isOpen ? (
       <CardContent>
-        <TextField
+        {/*<TextField
           label="Name"
           value={name}
           onChange={nameChangeHandler}
@@ -245,19 +248,21 @@ const FaceCard = ({
           <div>
             Age: <CircularProgress size={12} className={classes!.alignCenter} />
           </div>
-        )}
+        )}*/}
         {!!videoLog.length && (
           <div>
             Video log:
-            {videoLog.map(({ url, log }) => (
-              <div>
+            {videoLog.map(({ url, log }, i) => (
+              <div key={i}>
                 <a href={url} target="_blank">
                   {url}
                 </a>
                 <div>
-                  <select>
-                    {log.map(({ s, l }) => (
-                      <option value={s}>{l}</option>
+                  <select style={{ width: '100%' }}>
+                    {log.map(({ s, l }, i) => (
+                      <option value={s} key={i}>
+                        {l}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -268,16 +273,16 @@ const FaceCard = ({
         {!!webcamLog.length && (
           <div>
             WebCam log:
-            {webcamLog.map(time => (
-              <div>{time}</div>
+            {webcamLog.map((time, i) => (
+              <div key={i}>{time}</div>
             ))}
           </div>
         )}
         {!!imageLog.length && (
           <div>
-            Appear in images:
-            {imageLog.map(({ src, id }) => (
-              <a href={src} target="_blank">
+            <div>Appear in images:</div>
+            {imageLog.map(({ src, id }, i) => (
+              <a href={src} target="_blank" key={i}>
                 <img src={src} height="50" />
               </a>
             ))}

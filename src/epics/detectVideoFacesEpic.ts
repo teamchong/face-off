@@ -36,7 +36,7 @@ export default (
             isWebcamLoaded,
           } = state$.value.faceOffPanel;
 
-          if (tab == 'one' && video && video.videoWidth && isVideoLoaded) {
+          if (tab === 'one' && video && video.videoWidth && isVideoLoaded) {
             const canvas = drawVideo(video);
             try {
               const time = ~~video.currentTime;
@@ -94,7 +94,7 @@ export default (
               }
             }
           }
-          await new Promise(r => setTimeout(r, 0));
+          await new Promise(r => setTimeout(r, 100));
         }
         observer.complete();
       })
