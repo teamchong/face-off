@@ -40,20 +40,15 @@ export default (
               height
             );
           const src = createObjectURL(await canvasToBlob(canvas, 'image/png'));
-          observer.next(
-            addImages([
-              await new Promise<HTMLImageElement>((resolve, reject) => {
-                const imgEl = new Image();
-                imgEl.title = `faceoff-${new Date()
-                  .toLocaleString('en-GB')
-                  .replace('/', '-')
-                  .replace(/[,]/g, '')}.png`;
-                imgEl.onload = () => resolve(imgEl);
-                imgEl.onerror = error => reject(error);
-                imgEl.src = src;
-              }),
-            ])
-          );
+          const imgEl = new Image();
+          imgEl.title = `faceoff-${new Date()
+            .toLocaleString('en-GB')
+            .replace('/', '-')
+            .replace(/[,]/g, '')}.png`;
+          imgEl.src = src;
+          imgEl.width = canvas.width;
+          imgEl.height = canvas.height;
+          observer.next(addImages([imgEl]));
         }
         observer.complete();
       })
