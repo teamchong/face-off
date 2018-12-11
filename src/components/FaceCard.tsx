@@ -251,12 +251,16 @@ const FaceCard = ({
             Video log:
             {videoLog.map(({ url, log }) => (
               <div>
-                {url}{' '}
-                <select>
-                  {log.map(({ s, l }) => (
-                    <option value={s}>{l}</option>
-                  ))}
-                </select>
+                <a href={url} target="_blank">
+                  {url}
+                </a>
+                <div>
+                  <select>
+                    {log.map(({ s, l }) => (
+                      <option value={s}>{l}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
             ))}
           </div>
@@ -273,7 +277,7 @@ const FaceCard = ({
           <div>
             Appear in images:
             {imageLog.map(({ src, id }) => (
-              <a href={src}>
+              <a href={src} target="_blank">
                 <img src={src} height="50" />
               </a>
             ))}
