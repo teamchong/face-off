@@ -100,7 +100,6 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
   const isOpen = openImageId === id;
 
   if (isOpen) {
-    debugger;
     for (const url in face.video) {
       videoLog.push({
         url,
@@ -109,9 +108,8 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
           .map((s: number) => ({ s, l: toHHMMSS(s) })),
       });
     }
-
     face.webcam.forEach(t =>
-      webcamLog.push(new Date(face.webcam[t]).toLocaleString('en-GB'))
+      webcamLog.push(new Date(t).toLocaleString('en-GB'))
     );
     const imageLookup = {};
     for (const image of images) {

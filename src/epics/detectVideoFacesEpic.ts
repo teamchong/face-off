@@ -80,7 +80,7 @@ export default (
                   drawDetections(detection, webcamOverlay, width, height);
                   observer.next(
                     compareWebcamFaces({
-                      time: new Date().getTime(),
+                      time: ~~(new Date().getTime() / 1000) * 1000,
                       canvas,
                       getDescriptor,
                     })
