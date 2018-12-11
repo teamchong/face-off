@@ -90,7 +90,7 @@ export const scanImage = async (
         .toPromise()
     : task) as Promise<any[]>;
   const getDescriptor = (): Promise<any[]> =>
-    task.detectVideoFaces.withFaceLandmarks().withFaceDescriptors() as Promise<
+    task.withFaceLandmarks().withFaceDescriptors() as Promise<
       any[]
     >;
   return { detection: await detection, getDescriptor };
