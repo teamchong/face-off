@@ -44,7 +44,7 @@ export default (
               if (isModelsLoaded) {
                 const { detection, getDescriptor } = await scanImage(
                   canvas,
-                  320,
+                  288,
                   500
                 );
                 const { width, height } = canvas;
@@ -73,7 +73,7 @@ export default (
                 if (isModelsLoaded) {
                   const { detection, getDescriptor } = await scanImage(
                     canvas,
-                    320,
+                    288,
                     500
                   );
                   const { width, height } = canvas;
@@ -94,7 +94,6 @@ export default (
               }
             }
           }
-
           await new Promise(r => setTimeout(r, 0));
         }
         observer.complete();
