@@ -25,8 +25,7 @@ export default (
     filter(() => state$.value.faceOffPanel.isAppRunning),
     exhaustMap(() =>
       Observable.create(async observer => {
-        const state = state$.value.faceOffPanel;
-        while (state.isAppRunning) {
+        while (state$.value.faceOffPanel.isAppRunning) {
           try {
             let {
               videoRef: { current: video },
@@ -92,7 +91,7 @@ export default (
               }
             }
           } catch (ex) {
-            console.error(ex);
+            console.warn(ex);
           }
 
           await new Promise(r => setTimeout(r, 100));

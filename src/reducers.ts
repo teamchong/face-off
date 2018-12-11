@@ -38,6 +38,7 @@ import addImagesEpic from './epics/addImagesEpic';
 import fetchMp4Epic from './epics/fetchMp4Epic';
 import compareVideoFacesEpic from './epics/compareVideoFacesEpic';
 import compareWebcamFacesEpic from './epics/compareWebcamFacesEpic';
+import compareImageFacesEpic from './epics/compareImageFacesEpic';
 
 export const rootEpic = combineEpics(
   pasteHandlerEpic,
@@ -47,7 +48,8 @@ export const rootEpic = combineEpics(
   addImagesEpic,
   fetchMp4Epic,
   compareVideoFacesEpic,
-  compareWebcamFacesEpic
+  compareWebcamFacesEpic,
+  compareImageFacesEpic
 );
 
 const initState = {

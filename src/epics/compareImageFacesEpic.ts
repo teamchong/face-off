@@ -12,11 +12,9 @@ export default (
 ) =>
   action$.pipe(
     filter(isActionOf(detectedImageFaces)),
-    filter(() => state$.value.faceOffPanel.isAppRunning),
     concatMap(({ payload: { image, results } }) =>
       Observable.create(async observer => {
-        const state = state$.value.faceOffPanel;
-        const { faces } = state;
+        const { faces } = state$.value.faceOffPanel;
 
         for (const result of results) {
           const newFaces: FaceDetectResults = { ...faces };
@@ -42,7 +40,6 @@ export default (
           }
 
           if (!foundId) {
-            debugger;
             // const canvas = document.createElement('canvas');
             // canvas.width = image.width;
             // canvas.height = image.height;

@@ -15,8 +15,7 @@ export default (
     filter(() => state$.value.faceOffPanel.isAppRunning),
     concatMap(({ payload: { url, time, canvas, results } }) =>
       Observable.create(async observer => {
-        const state = state$.value.faceOffPanel;
-        const { faces } = state;
+        const { faces } = state$.value.faceOffPanel;
 
         for (const result of results) {
           const newFaces: FaceDetectResults = { ...faces };
