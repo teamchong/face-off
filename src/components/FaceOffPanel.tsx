@@ -47,15 +47,10 @@ import { FaceOffModel, RootState } from '../models';
 const styles = ({ palette, spacing }: Theme) =>
   createStyles({
     root: {
-      display: 'flex',
-      flexFlow: 'column wrap',
-      justifyContent: 'flex-start',
-      alignItems: 'flex-start',
-      alignContent: 'flex-start',
       backgroundColor: palette.background.paper,
     },
     container: {
-      display: 'inline-block',
+      float: 'left',
       width: '700px',
     },
     faceName: {
