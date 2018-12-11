@@ -200,7 +200,7 @@ const FaceOffPanel = ({
   faceIds,
   tab,
   message,
-  isModelsLoaded,
+  isModelsLoadCompleted,
   isVideoLoaded,
   isWebcamLoaded,
   imageIndexes,
