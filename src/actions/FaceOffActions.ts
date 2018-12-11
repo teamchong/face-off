@@ -15,9 +15,9 @@ import {
   STOP_APP,
   LOADED_MODELS,
   DETECT_VIDEOFACES,
-  DETECTED_VIDEOFACES,
-  DETECTED_WEBCAMFACES,
-  DETECTED_IMAGEFACES,
+  COMPARE_VIDEOFACES,
+  COMPARE_WEBCAMFACES,
+  COMPARE_IMAGEFACES,
   LOADED_VIDEO,
   LOADED_WEBCAM,
   REFRESH_FACES,
@@ -81,8 +81,8 @@ export const detectVideoFaces = createAction(DETECT_VIDEOFACES, resolve => () =>
   resolve()
 );
 
-export const detectedVideoFaces = createAction(
-  DETECTED_VIDEOFACES,
+export const compareVideoFaces = createAction(
+  COMPARE_VIDEOFACES,
   resolve => (payload: {
     url: string;
     time: number;
@@ -91,8 +91,8 @@ export const detectedVideoFaces = createAction(
   }) => resolve(payload)
 );
 
-export const detectedWebcamFaces = createAction(
-  DETECTED_WEBCAMFACES,
+export const compareWebcamFaces = createAction(
+  COMPARE_WEBCAMFACES,
   resolve => (payload: {
     time: number;
     canvas: HTMLCanvasElement;
@@ -100,8 +100,8 @@ export const detectedWebcamFaces = createAction(
   }) => resolve(payload)
 );
 
-export const detectedImageFaces = createAction(
-  DETECTED_IMAGEFACES,
+export const compareImageFaces = createAction(
+  COMPARE_IMAGEFACES,
   resolve => (payload: {
     image: HTMLImageElement;
     overlay: string;
