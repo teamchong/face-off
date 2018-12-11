@@ -137,26 +137,6 @@ export const rootReducer = combineReducers<RootState, RootActions>({
           ...state,
           faces,
           images: state.images.filter((img, i) => imageIndexes.indexOf(i) < 0),
-          imagesDetectResults: Object.keys(state.imagesDetectResults).reduce(
-            (result, imageId) => {
-              if (!removeIds.has(imageId)) {
-                result[imageId] = state.imagesDetectResults[imageId];
-              }
-              return result;
-            },
-            {}
-          ),
-          imagesOverlaies: Object.keys(state.imagesOverlaies).reduce(
-            (result, imageId) => {
-              if (!removeIds.has(imageId)) {
-                result[imageId] = state.imagesOverlaies[imageId];
-              } else {
-                revokeIfNeed(state.imagesOverlaies[imageId]);
-              }
-              return result;
-            },
-            {}
-          ),
         };
       }
       case SWITCH_FACINGMODE: {
@@ -210,11 +190,15 @@ export const rootReducer = combineReducers<RootState, RootActions>({
         const {
           payload: {
             image: { id },
+            overlay,
             results,
           },
         } = action;
         return {
           ...state,
+          imagesOverlaies: Object.assign({}, state.imagesOverlaies, {
+            [id]: overlay,
+          }),
           imagesDetectResults: Object.assign({}, state.imagesDetectResults, {
             [id]: results,
           }),

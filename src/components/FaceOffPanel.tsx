@@ -7,6 +7,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Divider,
   Slide,
   Tabs,
   Tab,
@@ -46,12 +47,6 @@ import { FaceOffModel, RootState } from '../models';
 const styles = ({ palette, spacing }: Theme) =>
   createStyles({
     root: {
-      flexGrow: 1,
-      display: 'flex',
-      flexFlow: 'row wrap',
-      justifyContent: 'flex-start',
-      alignItems: 'flex-start',
-      alignContent: 'flex-start',
       backgroundColor: palette.background.paper,
     },
     container: {
@@ -221,11 +216,25 @@ const FaceOffPanel = ({
       <TabContainer>
         <ActiveTab />
       </TabContainer>
+      {!isModelsLoaded &&
+      ((tab == 'one' && isVideoLoaded) ||
+        (tab === 'two' && isWebcamLoaded) ||
+        tab === 'three') ? (
+        <div>
+          <CircularProgress size={12} className={classes!.alignCenter} /> Please
+          wait while loading face detection models.
+        </div>
+      ) : (
+        <div>
+          <Info size={12} className={classes!.alignCenter} /> Face detection is
+          on.
+        </div>
+      )}
     </div>
     {faceIds.map(faceId => (
       <FaceCard id={faceId} key={faceId} />
     ))}
-    <div className={classes!.br} />
+    <Divider variant="middle" />
     {!!imageIndexes.length && (
       <div>
         <Button
@@ -242,20 +251,6 @@ const FaceOffPanel = ({
             <ImageCard index={index} key={index} />
           ))}
         </div>
-      </div>
-    )}
-    {!isModelsLoaded &&
-    ((tab == 'one' && isVideoLoaded) ||
-      (tab === 'two' && isWebcamLoaded) ||
-      tab === 'three') ? (
-      <div>
-        <CircularProgress size={12} className={classes!.alignCenter} /> Please
-        wait while loading face detection models.
-      </div>
-    ) : (
-      <div>
-        <Info size={12} className={classes!.alignCenter} /> Face detection is
-        on.
       </div>
     )}
     <Dialog

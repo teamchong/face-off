@@ -83,7 +83,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
   const isOpen = openImageId === id;
   return {
     id,
-    name: face.name || `Unknown${id || ''}`,
+    name: face.name || '',
     gender: face.gender,
     age: face.age,
     preview: face.preview,
@@ -125,27 +125,33 @@ const FaceCard = ({
       className={classes!.faceThumb}
     />
     <CardActions className={classes!.cardActions}>
-      {!!!videoCount && <Badge
-        className={classes!.badge}
-        color="secondary"
-        badgeContent={videoCount}
-      >
-        <VideoLibrary />
-      </Badge>}
-      {!!webcamCount && <Badge
-        className={classes!.badge}
-        color="secondary"
-        badgeContent={webcamCount}
-      >
-        <Videocam />
-      </Badge>}
-      {!!imageCount && <Badge
-        className={classes!.badge}
-        color="secondary"
-        badgeContent={imageCount}
-      >
-        <Photo />
-      </Badge>}
+      {!!!videoCount && (
+        <Badge
+          className={classes!.badge}
+          color="secondary"
+          badgeContent={videoCount}
+        >
+          <VideoLibrary />
+        </Badge>
+      )}
+      {!!webcamCount && (
+        <Badge
+          className={classes!.badge}
+          color="secondary"
+          badgeContent={webcamCount}
+        >
+          <Videocam />
+        </Badge>
+      )}
+      {!!imageCount && (
+        <Badge
+          className={classes!.badge}
+          color="secondary"
+          badgeContent={imageCount}
+        >
+          <Photo />
+        </Badge>
+      )}
       {isOpen ? (
         <UnfoldLess className={classes!.fold} />
       ) : (

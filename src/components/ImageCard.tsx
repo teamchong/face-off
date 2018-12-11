@@ -93,12 +93,14 @@ const ImageCard = ({
   <Card className={classes!.card} style={{ order: images.length - index }}>
     <CardActionArea>
       <CardContent className={classes!.title}>{name}</CardContent>
-      <img
-        src={imagesOverlay}
-        width={width}
-        height={height}
-        className={classes!.overlay}
-      />
+      {!!imagesOverlay && (
+        <img
+          src={imagesOverlay}
+          width={width}
+          height={height}
+          className={classes!.overlay}
+        />
+      )}
       <img
         src={src}
         title={title}
