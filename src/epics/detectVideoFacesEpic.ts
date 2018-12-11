@@ -4,9 +4,9 @@ import { concat, filter, exhaustMap, timeout } from 'rxjs/operators';
 import { isActionOf } from 'typesafe-actions';
 import {
   detectVideoFaces,
-  detectedImageFaces,
-  detectedVideoFaces,
-  detectedWebcamFaces,
+  compareImageFaces,
+  compareVideoFaces,
+  compareWebcamFaces,
   RootActions,
 } from '../actions';
 import { scanImage, drawDetections, drawVideo } from '../classes/faceApi';
@@ -50,7 +50,7 @@ export default (
                 const { width, height } = canvas;
                 drawDetections(detection, videoOverlay, width, height);
                 observer.next(
-                  detectedVideoFaces({
+                  compareVideoFaces({
                     url: videoUrlLoaded,
                     time,
                     canvas,
@@ -79,7 +79,7 @@ export default (
                   const { width, height } = canvas;
                   drawDetections(detection, webcamOverlay, width, height);
                   observer.next(
-                    detectedWebcamFaces({
+                    compareWebcamFaces({
                       time: new Date().getTime(),
                       canvas,
                       getDescriptor,
