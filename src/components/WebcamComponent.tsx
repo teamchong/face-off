@@ -63,20 +63,20 @@ const styles = ({ spacing }: Theme) =>
     rearFacing: {
       margin: spacing.unit,
       position: 'absolute',
-      left: '0px',
-      zIndex: 1,
+      top: '0px',
+      zIndex: 2,
     },
     frontFacing: {
       margin: spacing.unit,
       position: 'absolute',
-      left: '60px',
-      zIndex: 1,
+      top: '60px',
+      zIndex: 2,
     },
     screenshot: {
       margin: spacing.unit,
       position: 'absolute',
-      left: '120px',
-      zIndex: 1,
+      top: '120px',
+      zIndex: 2,
     },
   });
 
