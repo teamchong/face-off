@@ -94,8 +94,8 @@ const ImageCard = ({
   removeImageHandler,
 }: StyledComponentProps & ReturnType<typeof mergeProps>): ReactElement<any> => (
   <Card className={classes!.card} style={{ order: images.length - index }}>
-    <CardActionArea>
-      {!!title && <CardContent className={classes!.title}>{title}</CardContent>}
+    <CardContent>
+      {!!title && <div className={classes!.title}>{title}</div>}
       <div className={classes!.overlay}>
         {imagesOverlay ? (
           <img src={imagesOverlay} width={width} height={height} />
@@ -110,7 +110,7 @@ const ImageCard = ({
         height={height}
         className={classes!.card}
       />
-    </CardActionArea>
+    </CardContent>
     <CardActions className={classes!.cardActions}>
       <Button size="small" color="primary" onClick={removeImageHandler}>
         <Delete /> Remove

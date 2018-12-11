@@ -4,7 +4,6 @@ import {
   CardActions,
   CardContent,
   CardHeader,
-  CardMedia,
   CircularProgress,
   TextField,
 } from '@material-ui/core';
@@ -117,13 +116,14 @@ const FaceCard = ({
   nameChangeHandler,
 }: StyledComponentProps & ReturnType<typeof mergeProps>): ReactElement<any> => (
   <Card className={classes!.card} key={id} onClick={clickHandler}>
-    <CardHeader title={name} className={classes!.faceName} />
-    <CardMedia
-      component="img"
-      image={preview}
-      title={name}
-      className={classes!.faceThumb}
-    />
+    <CardContent>
+      {!!name && <div className={classes!.title}>{name}</div>}
+      <img
+        src={preview}
+        title={name}
+        className={classes!.faceThumb}
+      />
+    </CardContent>
     <CardActions className={classes!.cardActions}>
       {!!!videoCount && (
         <Badge

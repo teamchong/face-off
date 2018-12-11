@@ -43,6 +43,7 @@ export default (
           }
 
           if (!foundId) {
+            debugger;
             // const canvas = document.createElement('canvas');
             // canvas.width = image.width;
             // canvas.height = image.height;
