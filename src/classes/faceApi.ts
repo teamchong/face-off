@@ -81,16 +81,21 @@ export const generatePreview = async (
 
 export const startDetectFaces = async (
   canvas: HTMLCanvasElement | HTMLImageElement,
-  inputSize: number
-): any[] => {
-  return await from(detectAllFaces(canvas, FaceDetectOptions({ inputSize }))
+  inputSize: number,
+  timeoutMs?: number
+): Promise<any[]> => {
+  const query = from(detectAllFaces(canvas, FaceDetectOptions({ inputSize }))
     .withFaceLandmarks()
-    .withFaceDescriptors() as any)
+    .withFaceDescriptors() as any);
+  if (!timeoutMs) {
+    return (await query.toPromise()) as any;
+  }
+  return (await query
     .pipe(
-      timeout(1000),
+      timeout(timeoutMs),
       catchError(() => of([]))
     )
-    .toPromise();
+    .toPromise()) as any;
 };
 
 export const drawDetections = (

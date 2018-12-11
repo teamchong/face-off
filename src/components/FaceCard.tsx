@@ -44,6 +44,7 @@ const styles = ({ palette, spacing }: Theme) =>
     },
     faceThumb: {
       height: '120px',
+      display: 'block',
     },
     card: {
       margin: '5px',

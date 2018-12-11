@@ -31,6 +31,9 @@ const styles = ({ palette, spacing }: Theme) =>
       pointerEvents: 'none',
       zIndex: 1,
     },
+    overlayImage: {
+      display: 'block',
+    },
     title: {
       position: 'absolute',
       color: '#fff',
@@ -98,7 +101,12 @@ const ImageCard = ({
       {!!title && <div className={classes!.title}>{title}</div>}
       <div className={classes!.overlay}>
         {imagesOverlay ? (
-          <img src={imagesOverlay} width={width} height={height} />
+          <img
+            src={imagesOverlay}
+            width={width}
+            height={height}
+            className={classes!.overlayImage}
+          />
         ) : (
           <CircularProgress size={12} className={classes!.alignCenter} />
         )}

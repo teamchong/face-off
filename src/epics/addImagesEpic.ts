@@ -1,7 +1,7 @@
 import { canvasToBlob, createObjectURL } from 'blob-util';
 import { StateObservable } from 'redux-observable';
 import { Observable, timer } from 'rxjs';
-import { concat, filter, switchMap, timeout } from 'rxjs/operators';
+import { concat, filter, mergeMap, timeout } from 'rxjs/operators';
 import { isActionOf } from 'typesafe-actions';
 import {
   addImages,
@@ -23,10 +23,8 @@ export default (
 ) =>
   action$.pipe(
     filter(isActionOf(addImages)),
-    switchMap(({ payload: images }) =>
+    mergeMap(({ payload: images }) =>
       Observable.create(async observer => {
-        const { images } = state$.value.faceOffPanel;
-
         while (!state$.value.faceOffPanel.isModelsLoaded) {
           await new Promise(r => setTimeout(r, 100));
         }

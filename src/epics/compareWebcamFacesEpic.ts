@@ -1,6 +1,6 @@
 import { StateObservable } from 'redux-observable';
 import { Observable } from 'rxjs';
-import { concat, filter, switchMap, timeout } from 'rxjs/operators';
+import { concat, filter, concatMap, timeout } from 'rxjs/operators';
 import { isActionOf } from 'typesafe-actions';
 import { detectedWebcamFaces, refreshFaces, RootActions } from '../actions';
 import { compareFaces, generatePreview, uniqueId } from '../classes/faceApi';
@@ -13,7 +13,7 @@ export default (
   action$.pipe(
     filter(isActionOf(detectedWebcamFaces)),
     filter(() => state$.value.faceOffPanel.isAppRunning),
-    switchMap(({ payload: { time, canvas, results } }) =>
+    concatMap(({ payload: { time, canvas, results } }) =>
       Observable.create(async observer => {
         const state = state$.value.faceOffPanel;
         const { faces } = state;

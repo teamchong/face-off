@@ -1,6 +1,6 @@
 import { StateObservable } from 'redux-observable';
 import { Observable } from 'rxjs';
-import { concat, filter, switchMap, timeout } from 'rxjs/operators';
+import { concat, filter, exhaustMap, timeout } from 'rxjs/operators';
 import { isActionOf } from 'typesafe-actions';
 import {
   detectVideoFaces,
@@ -23,7 +23,7 @@ export default (
   action$.pipe(
     filter(isActionOf(detectVideoFaces)),
     filter(() => state$.value.faceOffPanel.isAppRunning),
-    switchMap(() =>
+    exhaustMap(() =>
       Observable.create(async observer => {
         const state = state$.value.faceOffPanel;
         while (state.isAppRunning) {
@@ -46,7 +46,7 @@ export default (
             const time = ~~video.currentTime;
 
             if (isModelsLoaded) {
-              const results = await startDetectFaces(canvas, 320);
+              const results = await startDetectFaces(canvas, 320, 500);
               observer.next(
                 detectedVideoFaces({
                   url: videoUrlLoaded,
@@ -71,7 +71,7 @@ export default (
               const canvas = drawVideo(video);
 
               if (isModelsLoaded) {
-                const results = await startDetectFaces(canvas, 320);
+                const results = await startDetectFaces(canvas, 320, 500);
                 observer.next(
                   detectedWebcamFaces({
                     time: new Date().getTime(),
@@ -93,6 +93,7 @@ export default (
 
           await new Promise(r => setTimeout(r, 100));
         }
+        observer.complete();
       })
     )
   );

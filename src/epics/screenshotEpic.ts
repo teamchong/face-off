@@ -7,10 +7,7 @@ import { addImages, RootActions, screenshotVideo } from '../actions';
 import { MAX_HEIGHT, MAX_WIDTH, SCREENSHOT_VIDEO } from '../constants';
 import { RootState } from '../models';
 
-export default (
-  action$: Observable<RootActions>,
-  state$: StateObservable<RootState>
-) =>
+export default (action$: Observable<RootActions>) =>
   action$.pipe(
     filter(isActionOf(screenshotVideo)),
     switchMap(({ payload: video }) =>
@@ -41,7 +38,7 @@ export default (
             );
           const src = createObjectURL(await canvasToBlob(canvas, 'image/png'));
           const imgEl = new Image();
-          imgEl.title = `faceoff-${new Date()
+          imgEl.title = `screenshot-${new Date()
             .toLocaleString('en-GB')
             .replace('/', '-')
             .replace(/[,]/g, '')}.png`;
