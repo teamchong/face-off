@@ -10,7 +10,7 @@ import {
   RootActions,
 } from '../actions';
 import {
-  startDetectFaces,
+  detectImage,
   drawDetections,
   generatePreview,
   uniqueId,
@@ -34,7 +34,7 @@ export default (
         for (let i = 0, iL = images.length; i < iL; i++) {
           const image = images[i];
 
-          const results = await startDetectFaces(image, 608);
+          const results = await detectImage(image, 608);
 
           const canvas = document.createElement('canvas');
           canvas.width = image.width;

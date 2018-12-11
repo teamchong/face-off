@@ -13,9 +13,10 @@ export default (
   action$.pipe(
     filter(isActionOf(detectedWebcamFaces)),
     filter(() => state$.value.faceOffPanel.isAppRunning),
-    concatMap(({ payload: { time, canvas, results } }) =>
+    concatMap(({ payload: { time, canvas, getDescriptor } }) =>
       Observable.create(async observer => {
         const { faces } = state$.value.faceOffPanel;
+        const results = await getDescriptor();
 
         for (const result of results) {
           const newFaces: FaceDetectResults = { ...faces };

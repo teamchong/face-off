@@ -13,9 +13,10 @@ export default (
   action$.pipe(
     filter(isActionOf(detectedVideoFaces)),
     filter(() => state$.value.faceOffPanel.isAppRunning),
-    concatMap(({ payload: { url, time, canvas, results } }) =>
+    concatMap(({ payload: { url, time, canvas, getDescriptor } }) =>
       Observable.create(async observer => {
         const { faces } = state$.value.faceOffPanel;
+        const results = await getDescriptor();
 
         for (const result of results) {
           const newFaces: FaceDetectResults = { ...faces };

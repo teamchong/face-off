@@ -87,7 +87,7 @@ export const detectedVideoFaces = createAction(
     url: string;
     time: number;
     canvas: HTMLCanvasElement;
-    results: any[];
+    getDescriptor: () => Promise<any[]>;
   }) => resolve(payload)
 );
 
@@ -96,7 +96,7 @@ export const detectedWebcamFaces = createAction(
   resolve => (payload: {
     time: number;
     canvas: HTMLCanvasElement;
-    results: any[];
+    getDescriptor: () => Promise<any[]>;
   }) => resolve(payload)
 );
 

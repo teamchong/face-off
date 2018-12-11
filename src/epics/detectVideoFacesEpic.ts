@@ -9,11 +9,7 @@ import {
   detectedWebcamFaces,
   RootActions,
 } from '../actions';
-import {
-  startDetectFaces,
-  drawDetections,
-  drawVideo,
-} from '../classes/faceApi';
+import { detectVideo, drawDetections, drawVideo } from '../classes/faceApi';
 import { RootState } from '../models';
 
 export default (
@@ -46,22 +42,20 @@ export default (
               const time = ~~video.currentTime;
 
               if (isModelsLoaded) {
-                const results = await startDetectFaces(canvas, 320, 2000);
+                const { detection, getDescriptor } = await detectVideo(
+                  canvas,
+                  320,
+                  1000
+                );
+                const { width, height } = canvas;
+                drawDetections(detection, videoOverlay, width, height);
                 observer.next(
                   detectedVideoFaces({
                     url: videoUrlLoaded,
                     time,
                     canvas,
-                    results,
+                    getDescriptor,
                   })
-                );
-
-                const { width, height } = canvas;
-                drawDetections(
-                  results.map(r => r.detection),
-                  videoOverlay,
-                  width,
-                  height
                 );
               }
             } catch (ex) {
@@ -77,21 +71,19 @@ export default (
               const canvas = drawVideo(video);
               try {
                 if (isModelsLoaded) {
-                  const results = await startDetectFaces(canvas, 320, 2000);
+                  const { detection, getDescriptor } = await detectVideo(
+                    canvas,
+                    320,
+                    1000
+                  );
+                  const { width, height } = canvas;
+                  drawDetections(detection, webcamOverlay, width, height);
                   observer.next(
                     detectedWebcamFaces({
                       time: new Date().getTime(),
                       canvas,
-                      results,
+                      getDescriptor,
                     })
-                  );
-
-                  const { width, height } = canvas;
-                  drawDetections(
-                    results.map(r => r.detection),
-                    webcamOverlay,
-                    width,
-                    height
                   );
                 }
               } catch (ex) {
@@ -103,7 +95,7 @@ export default (
             }
           }
 
-          await new Promise(r => setTimeout(r, 100));
+          await new Promise(r => setTimeout(r, 0));
         }
         observer.complete();
       })
