@@ -51,10 +51,11 @@ export default (
             detectedImageFaces({
               image,
               overlay,
-              results: await results,
+              results,
             })
           );
         }
+        observer.complete();
       })
     )
   );
