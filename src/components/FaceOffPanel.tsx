@@ -223,7 +223,7 @@ const FaceOffPanel = ({
       </TabContainer>
     </div>
     {faceIds.map(faceId => (
-      <FaceCard id={faceId} />
+      <FaceCard id={faceId} key={faceId} />
     ))}
     <div className={classes!.br} />
     {!!imageIndexes.length && (
@@ -239,7 +239,7 @@ const FaceOffPanel = ({
         <div className={classes!.br} />
         <div className={classes!.imagesContainer}>
           {imageIndexes.map(index => (
-            <ImageCard index={index} />
+            <ImageCard index={index} key={index} />
           ))}
         </div>
       </div>

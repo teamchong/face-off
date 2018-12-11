@@ -38,6 +38,7 @@ const styles = ({ palette, spacing }: Theme) =>
     },
     badge: {
       marginRight: '10px',
+      fontSize: '9px',
     },
     fold: {
       marginLeft: 'auto',
@@ -89,7 +90,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
     video: face.video,
     webcam: face.webcam,
     videoCount: Object.keys(face.video).reduce(
-      (total, url) => total + face.video[url].length,
+      (total, url) => total + face.video[url].size,
       0
     ),
     webcamCount: face.webcam.size,
@@ -124,30 +125,27 @@ const FaceCard = ({
       className={classes!.faceThumb}
     />
     <CardActions className={classes!.cardActions}>
-      <Badge
+      {!!!videoCount && <Badge
         className={classes!.badge}
         color="secondary"
         badgeContent={videoCount}
-        invisible={!videoCount}
       >
         <VideoLibrary />
-      </Badge>
-      <Badge
+      </Badge>}
+      {!!webcamCount && <Badge
         className={classes!.badge}
         color="secondary"
         badgeContent={webcamCount}
-        invisible={!webcamCount}
       >
         <Videocam />
-      </Badge>
-      <Badge
+      </Badge>}
+      {!!imageCount && <Badge
         className={classes!.badge}
         color="secondary"
         badgeContent={imageCount}
-        invisible={!imageCount}
       >
         <Photo />
-      </Badge>
+      </Badge>}
       {isOpen ? (
         <UnfoldLess className={classes!.fold} />
       ) : (
