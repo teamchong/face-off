@@ -13,34 +13,49 @@ export default (
 ) =>
   action$.pipe(
     filter(isActionOf(screenshotVideo)),
-    switchMap(async ({ payload: video }) => {
-      if (video && video.videoWidth) {
-        const { videoWidth, videoHeight } = video;
-        let width = videoWidth;
-        let height = videoHeight;
-        if (width > MAX_WIDTH) {
-          height = ~~((MAX_WIDTH * height) / width);
-          width = MAX_WIDTH;
+    switchMap(({ payload: video }) =>
+      Observable.create(async observer => {
+        if (video && video.videoWidth) {
+          const { videoWidth, videoHeight } = video;
+          let width = videoWidth;
+          let height = videoHeight;
+          if (width > MAX_WIDTH) {
+            height = ~~((MAX_WIDTH * height) / width);
+            width = MAX_WIDTH;
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          canvas
+            .getContext('2d')
+            .drawImage(
+              video,
+              0,
+              0,
+              videoWidth,
+              videoHeight,
+              0,
+              0,
+              width,
+              height
+            );
+          const src = createObjectURL(await canvasToBlob(canvas, 'image/png'));
+          observer.next(
+            addImages([
+              await new Promise<HTMLImageElement>((resolve, reject) => {
+                const imgEl = new Image();
+                imgEl.title = `faceoff-${new Date()
+                  .toLocaleString('en-GB')
+                  .replace('/', '-')
+                  .replace(/[,]/g, '')}.png`;
+                imgEl.onload = () => resolve(imgEl);
+                imgEl.onerror = error => reject(error);
+                imgEl.src = src;
+              }),
+            ])
+          );
         }
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        canvas
-          .getContext('2d')
-          .drawImage(video, 0, 0, videoWidth, videoHeight, 0, 0, width, height);
-        const src = createObjectURL(await canvasToBlob(canvas, 'image/png'));
-        return addImages([
-          await new Promise<HTMLImageElement>((resolve, reject) => {
-            const imgEl = new Image();
-            imgEl.title = `faceoff-${new Date()
-              .toLocaleString('en-GB')
-              .replace('/', '-')
-              .replace(/[,]/g, '')}.png`;
-            imgEl.onload = () => resolve(imgEl);
-            imgEl.onerror = error => reject(error);
-            imgEl.src = src;
-          }),
-        ]);
-      }
-    })
+        observer.complete();
+      })
+    )
   );

@@ -70,7 +70,7 @@ export const stopApp = createAction(STOP_APP, resolve => () => resolve());
 
 export const screenshotVideo = createAction(
   SCREENSHOT_VIDEO,
-  resolve => (payload: HTMLVideoElement) => resolve()
+  resolve => (payload: HTMLVideoElement) => resolve(payload)
 );
 
 export const loadedModels = createAction(LOADED_MODELS, resolve => () =>
