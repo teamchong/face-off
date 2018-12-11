@@ -63,7 +63,9 @@ const mergeProps = (stateProps, dispatchProps, ownProps: ImageCardProps) => {
   const { removeImages } = dispatchProps;
   const image = images[index] || ({} as any);
   const { id, title, width, height, src } = image;
-  const imagesOverlay = imagesOverlaies[id];
+  const imagesOverlay = /^blob:/i.test(imagesOverlaies[id])
+    ? imagesOverlaies[id]
+    : '';
   const removeImageHandler = () => removeImages([index]);
   return {
     index,
@@ -92,15 +94,13 @@ const ImageCard = ({
 }: StyledComponentProps & ReturnType<typeof mergeProps>): ReactElement<any> => (
   <Card className={classes!.card} style={{ order: images.length - index }}>
     <CardActionArea>
-      <CardContent className={classes!.title}>{name}</CardContent>
-      {!!imagesOverlay && (
-        <img
-          src={imagesOverlay}
-          width={width}
-          height={height}
-          className={classes!.overlay}
-        />
-      )}
+      {!!title && <CardContent className={classes!.title}>{title}</CardContent>}
+      <img
+        src={imagesOverlay}
+        width={width}
+        height={height}
+        className={classes!.overlay}
+      />
       <img
         src={src}
         title={title}
