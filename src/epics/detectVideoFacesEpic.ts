@@ -9,7 +9,7 @@ import {
   detectedWebcamFaces,
   RootActions,
 } from '../actions';
-import { detectVideo, drawDetections, drawVideo } from '../classes/faceApi';
+import { scanImage, drawDetections, drawVideo } from '../classes/faceApi';
 import { RootState } from '../models';
 
 export default (
@@ -42,7 +42,7 @@ export default (
               const time = ~~video.currentTime;
 
               if (isModelsLoaded) {
-                const { detection, getDescriptor } = await detectVideo(
+                const { detection, getDescriptor } = await scanImage(
                   canvas,
                   320,
                   1000
@@ -71,7 +71,7 @@ export default (
               const canvas = drawVideo(video);
               try {
                 if (isModelsLoaded) {
-                  const { detection, getDescriptor } = await detectVideo(
+                  const { detection, getDescriptor } = await scanImage(
                     canvas,
                     320,
                     1000

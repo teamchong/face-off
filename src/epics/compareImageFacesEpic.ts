@@ -12,9 +12,10 @@ export default (
 ) =>
   action$.pipe(
     filter(isActionOf(detectedImageFaces)),
-    concatMap(({ payload: { image, results } }) =>
+    concatMap(({ payload: { image, getDescriptor } }) =>
       Observable.create(async observer => {
         const { faces } = state$.value.faceOffPanel;
+        const results = await getDescriptor();
 
         for (const result of results) {
           const newFaces: FaceDetectResults = { ...faces };

@@ -78,29 +78,22 @@ export const generatePreview = async (
   return '';
 };
 
-export const detectVideo = async (
+export const scanImage = async (
   canvas: HTMLCanvasElement | HTMLImageElement,
   inputSize: number,
   timeoutMs?: number
 ): Promise<{ detection: any[]; getDescriptor: () => Promise<any[]> }> => {
   const task = detectAllFaces(canvas, FaceDetectOptions({ inputSize })) as any;
-  const detection = from(task)
-    .pipe(timeout(timeoutMs))
-    .toPromise() as Promise<any[]>;
+  const detection = (timeoutMs
+    ? from(task)
+        .pipe(timeout(timeoutMs))
+        .toPromise()
+    : task) as Promise<any[]>;
   const getDescriptor = (): Promise<any[]> =>
     task.detectVideoFaces.withFaceLandmarks().withFaceDescriptors() as Promise<
       any[]
     >;
   return { detection: await detection, getDescriptor };
-};
-
-export const detectImage = (
-  canvas: HTMLCanvasElement | HTMLImageElement,
-  inputSize: number
-): Promise<any[]> => {
-  return (detectAllFaces(canvas, FaceDetectOptions({ inputSize }))
-    .withFaceLandmarks()
-    .withFaceDescriptors() as any) as Promise<any[]>;
 };
 
 export const drawDetections = (

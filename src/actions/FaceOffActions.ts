@@ -105,7 +105,7 @@ export const detectedImageFaces = createAction(
   resolve => (payload: {
     image: HTMLImageElement;
     overlay: string;
-    results: any[];
+    getDescriptor: () => Promise<any[]>;
   }) => resolve(payload)
 );
 

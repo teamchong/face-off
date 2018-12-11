@@ -10,7 +10,7 @@ import {
   RootActions,
 } from '../actions';
 import {
-  detectImage,
+  scanImage,
   drawDetections,
   generatePreview,
   uniqueId,
@@ -34,24 +34,19 @@ export default (
         for (let i = 0, iL = images.length; i < iL; i++) {
           const image = images[i];
 
-          const results = await detectImage(image, 608);
+          const { detection, getDescriptor } = await scanImage(image, 608);
 
           const canvas = document.createElement('canvas');
           canvas.width = image.width;
           canvas.height = image.height;
-          drawDetections(
-            results.map(r => r.detection),
-            canvas,
-            canvas.width,
-            canvas.height
-          );
+          drawDetections(detection, canvas, canvas.width, canvas.height);
           const overlay = createObjectURL(await canvasToBlob(canvas));
 
           observer.next(
             detectedImageFaces({
               image,
               overlay,
-              results,
+              getDescriptor,
             })
           );
         }
