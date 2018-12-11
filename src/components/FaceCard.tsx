@@ -159,11 +159,11 @@ const FaceCard = ({
           <Photo />
         </Badge>
       )}
-      <IconButton className={classes!.fold} onClick={clickHandler}>
+      {1===0 && <IconButton className={classes!.fold} onClick={clickHandler}>
         {isOpen ? <ExpandLess /> : <ExpandMore />}
-      </IconButton>
+      </IconButton>}
     </CardActions>
-    {isOpen ? (
+    {isOpen && 1===0 ? (
       <CardContent>
         <TextField
           label="Name"
