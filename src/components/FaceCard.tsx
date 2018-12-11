@@ -111,7 +111,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
     for (const t of face.webcam) {
       webcamLog.push(new Date(t).toLocaleString('en-GB'));
     }
-    for (const imageId of imageIds) {
+    for (const imageId of face.imageIds) {
       const image = images[imageId];
       if (image) {
         imageLog.push(image);
