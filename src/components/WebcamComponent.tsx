@@ -64,19 +64,19 @@ const styles = ({ spacing }: Theme) =>
       margin: spacing.unit,
       position: 'absolute',
       left: '0px',
-      zIndex: 1,
+      zIndex: 2,
     },
     frontFacing: {
       margin: spacing.unit,
       position: 'absolute',
       left: '60px',
-      zIndex: 1,
+      zIndex: 2,
     },
     screenshot: {
       margin: spacing.unit,
       position: 'absolute',
       left: '120px',
-      zIndex: 1,
+      zIndex: 2,
     },
   });
 
