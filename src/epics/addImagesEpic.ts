@@ -27,9 +27,9 @@ export default (
       Observable.create(async observer => {
         const { images } = state$.value.faceOffPanel;
 
-        await timer(0, 100)
-          .pipe(filter(() => !state$.value.faceOffPanel.isModelsLoaded))
-          .toPromise();
+        while (!state$.value.faceOffPanel.isModelsLoaded) {
+          await new Promise(r => setTimeout(r, 100));
+        }
 
         for (let i = 0, iL = images.length; i < iL; i++) {
           const image = images[i];
