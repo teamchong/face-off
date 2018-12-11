@@ -118,12 +118,18 @@ const FaceCard = ({
   clickHandler,
   nameChangeHandler,
 }: StyledComponentProps & ReturnType<typeof mergeProps>): ReactElement<any> => (
-  <Card className={classes!.card} key={id} onClick={clickHandler}>
+  <Card className={classes!.card} key={id}>
     <div>
       {!!name && <div className={classes!.title}>{name}</div>}
-      <img src={preview} title={name} className={classes!.faceThumb} style={{
-        width: isOpen ? '300px' : 'auto',
-        height: isOpen ? 'auto' : '120px'}}/>
+      <img
+        src={preview}
+        title={name}
+        className={classes!.faceThumb}
+        style={{
+          width: isOpen ? '300px' : 'auto',
+          height: isOpen ? 'auto' : '120px',
+        }}
+      />
     </div>
     <CardActions className={classes!.cardActions}>
       {!!videoCount && (
@@ -153,61 +159,54 @@ const FaceCard = ({
           <Photo />
         </Badge>
       )}
-      <IconButton className={classes!.fold}>
-      {isOpen ? (
-        <ExpandLess />
-      ) : (
-        <ExpandMore />
-      )}
+      <IconButton className={classes!.fold} onClick={clickHandler}>
+        {isOpen ? <ExpandLess /> : <ExpandMore />}
       </IconButton>
     </CardActions>
-    <Collapse in={isOpen} timeout="auto" unmountOnExit>
-      <CardContent>
+    <CardContent style={{ visiblity: isOpen ? 'visible' : 'hidden' }}>
+      <TextField
+        label="Name"
+        value={name}
+        onChange={nameChangeHandler}
+        fullWidth
+        margin="normal"
+        variant="outlined"
+      />
+      {gender ? (
         <TextField
-          label="Name"
-          value={name}
+          label="Gender"
+          value={gender}
           onChange={nameChangeHandler}
           fullWidth
           margin="normal"
           variant="outlined"
+          InputProps={{
+            readOnly: true,
+          }}
         />
-        {gender ? (
-          <TextField
-            label="Gender"
-            value={gender}
-            onChange={nameChangeHandler}
-            fullWidth
-            margin="normal"
-            variant="outlined"
-            InputProps={{
-              readOnly: true,
-            }}
-          />
-        ) : (
-          <div>
-            <CircularProgress size={12} className={classes!.alignCenter} />{' '}
-            Gender
-          </div>
-        )}
-        {age ? (
-          <TextField
-            label="Age"
-            value={age}
-            onChange={nameChangeHandler}
-            fullWidth
-            margin="normal"
-            variant="outlined"
-            InputProps={{
-              readOnly: true,
-            }}
-          />
-        ) : (
-          <div>
-            <CircularProgress size={12} className={classes!.alignCenter} /> Age
-          </div>
-        )}
-      </CardContent>
-      </Collapse>
+      ) : (
+        <div>
+          <CircularProgress size={12} className={classes!.alignCenter} /> Gender
+        </div>
+      )}
+      {age ? (
+        <TextField
+          label="Age"
+          value={age}
+          onChange={nameChangeHandler}
+          fullWidth
+          margin="normal"
+          variant="outlined"
+          InputProps={{
+            readOnly: true,
+          }}
+        />
+      ) : (
+        <div>
+          <CircularProgress size={12} className={classes!.alignCenter} /> Age
+        </div>
+      )}
+    </CardContent>
   </Card>
 );
 
