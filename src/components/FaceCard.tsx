@@ -94,6 +94,18 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 
   const face = faces[id];
 
+  const toHHMMSS = (second: number) => {
+    const sec_num = ~~second;
+    const hours = Math.floor(sec_num / 3600);
+    const minutes = Math.floor((sec_num - hours * 3600) / 60);
+    const seconds = sec_num - hours * 3600 - minutes * 60;
+
+    const h = hours < 10 ? '0' : '';
+    const m = minutes < 10 ? '0' : '';
+    const s = seconds < 10 ? '0' : '';
+    return h + hours + ':' + m + minutes + ':' + s + seconds;
+  };
+  
   const videoLog = [];
   const webcamLog = [];
   const imageLog = [];
