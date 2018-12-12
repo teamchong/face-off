@@ -67,6 +67,18 @@ const faceOffPanelSelector = ({
   openImageId,
 });
 
+const toHHMMSS = (second: number) => {
+  const sec_num = ~~second;
+  const hours = Math.floor(sec_num / 3600);
+  const minutes = Math.floor((sec_num - hours * 3600) / 60);
+  const seconds = sec_num - hours * 3600 - minutes * 60;
+
+  const h = hours < 10 ? '0' : '';
+  const m = minutes < 10 ? '0' : '';
+  const s = seconds < 10 ? '0' : '';
+  return h + hours + ':' + m + minutes + ':' + s + seconds;
+};
+
 const mapStateToProps = ({ faceOffPanel }: RootState) =>
   faceOffPanelSelector(faceOffPanel);
 
@@ -93,7 +105,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
     const s = seconds < 10 ? '0' : '';
     return h + hours + ':' + m + minutes + ':' + s + seconds;
   };
-
+  
   const videoLog = [];
   const webcamLog = [];
   const imageLog = [];
@@ -104,14 +116,15 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
       videoLog.push({
         url,
         log: Array.from(face.video[url])
-          .sort()
-          .map((s: number) => ({ s, l: toHHMMSS(s) })),
+          .map((s: number) => ({ s, l: toHHMMSS(s) }))
+          .sort(),
       });
     }
 
     face.webcam.forEach(t =>
       webcamLog.push(new Date(t).toLocaleString('en-GB'))
     );
+    
     const imageLookup = {};
     for (const image of images) {
       imageLookup[image.id] = image;
