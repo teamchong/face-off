@@ -40,6 +40,12 @@ const styles = () =>
       pointerEvents: 'none',
       zIndex: 1,
     },
+    colorBg: {
+      color: '#fff',
+      background: 'linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab)',
+      backgroundSize: '400% 400%',
+      animation: 'Gradient 15s ease infinite',
+    },
   });
 
 const faceOffPanelSelector = ({ message }: FaceOffModel) => ({
@@ -207,7 +213,7 @@ const DropzoneComponent = ({
   <Dropzone
     accept="image/*, video/mp4, video/webm"
     onDrop={dropHandler}
-    className="color-bg"
+    className={classes!.colorBg}
     style={{
       borderWidth: 5,
       borderStyle: 'dashed',
