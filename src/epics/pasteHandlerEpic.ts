@@ -1,10 +1,12 @@
 import { createObjectURL } from 'blob-util';
+import { StateObservable } from 'redux-observable';
 import { fromEvent, Observable } from 'rxjs';
 import { map, mergeMap } from 'rxjs/operators';
-import { addImages, fetchMp4Url, switchTab } from '../actions';
+import { addImages, fetchMp4Url, RootActions, switchTab } from '../actions';
 import { readAsImage } from '../classes/fileApi';
+import { IRootState } from '../models';
 
-export default () =>
+export default (action$: Observable<RootActions>, state$: StateObservable<IRootState>): Observable<RootActions> =>
   fromEvent(window, 'paste').pipe(
     map((evt: Event) => (evt as ClipboardEvent).clipboardData.items),
     mergeMap(items =>
@@ -32,5 +34,5 @@ export default () =>
         }
         observer.complete();
       })
-    )
+    ),
   );

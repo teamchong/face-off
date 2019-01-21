@@ -20,7 +20,7 @@ import {
 } from '../actions/FaceOffActions';
 import { readAsImage } from '../classes/fileApi';
 import { MAX_HEIGHT, MAX_WIDTH } from '../constants';
-import { FaceOffModel, IRootState } from '../models';
+import { IFaceOffModel, IRootState } from '../models';
 
 const Dropzone: any = DropzoneType as any;
 
@@ -48,7 +48,7 @@ const styles = () =>
     },
   });
 
-const faceOffPanelSelector = ({ message }: FaceOffModel) => ({
+const faceOffPanelSelector = ({ message }: IFaceOffModel) => ({
   message,
 });
 

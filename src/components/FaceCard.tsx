@@ -28,7 +28,7 @@ import { ReactElement, ReactNode, ReactType } from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { openImageDetails } from '../actions/FaceOffActions';
-import { FaceOffModel, IRootState } from '../models';
+import { IFaceOffModel, IRootState } from '../models';
 
 const styles = ({ palette, spacing }: Theme) =>
   createStyles({
@@ -61,7 +61,7 @@ const faceOffPanelSelector = ({
   images,
   faces,
   openImageId,
-}: FaceOffModel) => ({
+}: IFaceOffModel) => ({
   faces,
   images,
   openImageId,

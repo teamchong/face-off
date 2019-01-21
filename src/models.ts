@@ -1,6 +1,6 @@
 export * from './models/FaceOffModel';
-import { FaceOffModel } from './models/FaceOffModel';
+import { IFaceOffModel } from './models/FaceOffModel';
 
 export interface IRootState {
-  readonly faceOffPanel: FaceOffModel;
+  readonly faceOffPanel: IFaceOffModel;
 }

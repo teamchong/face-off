@@ -30,6 +30,8 @@ export const REFRESH_FACES = 'REFRESH_FACES';
 
 export const OPEN_IMAGEDETAILS = 'OPEN_IMAGEDETAILS';
 
+export const PASTE_ACTION = 'PASTE_ACTION';
+
 /* constants */
 export const FACINGMODE_REAR = 'user';
 export const FACINGMODE_FRONT = 'environment';

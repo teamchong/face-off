@@ -4,12 +4,9 @@ import { concat, concatMap, filter, timeout } from 'rxjs/operators';
 import { isActionOf } from 'typesafe-actions';
 import { compareWebcamFaces, refreshFaces, RootActions } from '../actions';
 import { compareFaces, generatePreview, uniqueId } from '../classes/faceApi';
-import { FaceDetectResults, IRootState } from '../models';
+import { IFaceDetectResults, IRootState } from '../models';
 
-export default (
-  action$: Observable<RootActions>,
-  state$: StateObservable<IRootState>
-) =>
+export default (action$: Observable<RootActions>, state$: StateObservable<IRootState>): Observable<RootActions> =>
   action$.pipe(
     filter(isActionOf(compareWebcamFaces)),
     filter(() => state$.value.faceOffPanel.isAppRunning),
@@ -20,7 +17,7 @@ export default (
           const results = await getDescriptor();
 
           for (const result of results) {
-            const newFaces: FaceDetectResults = { ...faces };
+            const newFaces: IFaceDetectResults = { ...faces };
             let foundId = '';
 
             // tslint:disable-next-line:forin

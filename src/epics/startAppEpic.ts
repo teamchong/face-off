@@ -1,3 +1,4 @@
+import { StateObservable } from 'redux-observable';
 import { forkJoin, from, Observable, of } from 'rxjs';
 import { filter, switchMap } from 'rxjs/operators';
 import { isActionOf } from 'typesafe-actions';
@@ -10,8 +11,9 @@ import {
 } from '../actions';
 import { initializeModels } from '../classes/faceApi';
 import { DEFAULT_VIDEO_URL } from '../constants';
+import { IRootState } from '../models';
 
-export default (action$: Observable<RootActions>) =>
+export default (action$: Observable<RootActions>, state$: StateObservable<IRootState>): Observable<RootActions> =>
   action$.pipe(
     filter(isActionOf(startApp)),
     switchMap(() =>

@@ -6,49 +6,49 @@ import {
   CardContent,
   CircularProgress,
 } from '@material-ui/core';
-import { Delete } from '@material-ui/icons';
 import {
   createStyles,
   StyledComponentProps,
   withStyles,
 } from '@material-ui/core/styles';
 import { Theme } from '@material-ui/core/styles/createMuiTheme';
+import { Delete } from '@material-ui/icons';
 import * as React from 'react';
 import { ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { removeImages } from '../actions/FaceOffActions';
-import { FaceOffModel, IRootState } from '../models';
+import { IFaceOffModel, IRootState } from '../models';
 
-type ImageCardProps = {
+interface IImageCardProps {
   index: number;
-};
+}
 
 const styles = ({ palette, spacing }: Theme) =>
   createStyles({
+    card: {
+      display: 'inline-block',
+      margin: '5px',
+    },
+    cardActions: {
+      backgroundColor: 'rgba(0,0,0,0.1)',
+    },
     overlay: {
-      position: 'absolute',
       pointerEvents: 'none',
+      position: 'absolute',
       zIndex: 1,
     },
     overlayImage: {
       display: 'block',
     },
     title: {
-      position: 'absolute',
       color: '#fff',
+      position: 'absolute',
       textShadow: '1px 1px #000',
-    },
-    card: {
-      margin: '5px',
-      display: 'inline-block',
-    },
-    cardActions: {
-      backgroundColor: 'rgba(0,0,0,0.1)',
     },
   });
 
-const faceOffPanelSelector = ({ images, imagesOverlaies }: FaceOffModel) => ({
+const faceOffPanelSelector = ({ images, imagesOverlaies }: IFaceOffModel) => ({
   images,
   imagesOverlaies,
 });
@@ -57,30 +57,30 @@ const mapStateToProps = ({ faceOffPanel }: IRootState) =>
   faceOffPanelSelector(faceOffPanel);
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  removeImages: (imageIndexes: number[]) =>
+  removingImages: (imageIndexes: number[]) =>
     dispatch(removeImages(imageIndexes)),
 });
 
-const mergeProps = (stateProps, dispatchProps, ownProps: ImageCardProps) => {
+const mergeProps = (stateProps, dispatchProps, ownProps: IImageCardProps) => {
   const { index } = ownProps;
   const { images, imagesOverlaies } = stateProps;
-  const { removeImages } = dispatchProps;
+  const { removingImages } = dispatchProps;
   const image = images[index] || ({} as any);
   const { id, title, width, height, src } = image;
   const imagesOverlay = /^blob:/i.test(imagesOverlaies[id])
     ? imagesOverlaies[id]
     : '';
-  const removeImageHandler = () => removeImages([index]);
+  const removeImageHandler = () => removingImages([index]);
   return {
-    index,
-    id,
-    title,
-    width,
     height,
-    src,
+    id,
     images,
     imagesOverlay,
+    index,
     removeImageHandler,
+    src,
+    title,
+    width,
   };
 };
 

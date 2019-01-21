@@ -1,6 +1,6 @@
 import { createRef } from 'react';
 import * as Webcam from 'react-webcam';
-import { combineReducers } from 'redux';
+import { Action, combineReducers } from 'redux';
 import { combineEpics } from 'redux-observable';
 import { RootActions } from './actions';
 import { drawDetections, uniqueId } from './classes/faceApi';
@@ -8,9 +8,7 @@ import { revokeIfNeed } from './classes/fileApi';
 import {
   ADD_IMAGES,
   CHANGE_VIDEOURL,
-  COMPARE_IMAGEFACES,
-  COMPARE_VIDEOFACES,
-  COMPARE_WEBCAMFACES,
+  // COMPARE_IMAGEFACES,
   DEFAULT_VIDEO_URL,
   FACINGMODE_REAR,
   FETCH_MP4URL,
@@ -22,7 +20,6 @@ import {
   OPEN_IMAGEDETAILS,
   REFRESH_FACES,
   REMOVE_IMAGES,
-  SCREENSHOT_VIDEO,
   SHOW_MESSAGE,
   START_APP,
   STOP_APP,
@@ -38,7 +35,7 @@ import fetchMp4Epic from './epics/fetchMp4Epic';
 import pasteHandlerEpic from './epics/pasteHandlerEpic';
 import screenshotEpic from './epics/screenshotEpic';
 import startAppEpic from './epics/startAppEpic';
-import { IRootState } from './models';
+import { IFaceOffModel, IRootState } from './models';
 
 export const rootEpic = combineEpics(
   pasteHandlerEpic,
@@ -52,7 +49,7 @@ export const rootEpic = combineEpics(
   compareImageFacesEpic
 );
 
-const initState = {
+const initState: IFaceOffModel = {
   faces: {},
   facingMode: FACINGMODE_REAR,
   images: [],
@@ -191,24 +188,24 @@ export const rootReducer = combineReducers<IRootState, RootActions>({
           mp4Url: '',
         };
       }
-      case COMPARE_IMAGEFACES: {
-        const {
-          payload: {
-            image: { id },
-            overlay,
-            results,
-          },
-        } = action;
-        return {
-          ...state,
-          imagesDetectResults: Object.assign({}, state.imagesDetectResults, {
-            [id]: results,
-          }),
-          imagesOverlaies: Object.assign({}, state.imagesOverlaies, {
-            [id]: overlay,
-          }),
-        };
-      }
+      // case COMPARE_IMAGEFACES: {
+      //   const {
+      //     payload: {
+      //       getDescriptor,
+      //       image: { id },
+      //       overlay,
+      //     },
+      //   } = action;
+      //   return {
+      //     ...state,
+      //     imagesDetectResults: Object.assign({}, state.imagesDetectResults, {
+      //       [id]: results,
+      //     }),
+      //     imagesOverlaies: Object.assign({}, state.imagesOverlaies, {
+      //       [id]: overlay,
+      //     }),
+      //   };
+      // }
       case REFRESH_FACES: {
         const { payload: faces } = action;
         // console.log(faces);

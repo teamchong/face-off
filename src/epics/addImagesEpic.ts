@@ -6,7 +6,6 @@ import { isActionOf } from 'typesafe-actions';
 import {
   addImages,
   compareImageFaces,
-  refreshFaces,
   RootActions,
 } from '../actions';
 import {
@@ -15,10 +14,7 @@ import {
 } from '../classes/faceApi';
 import { IRootState } from '../models';
 
-export default (
-  action$: Observable<RootActions>,
-  state$: StateObservable<IRootState>
-) =>
+export default (action$: Observable<RootActions>, state$: StateObservable<IRootState>): Observable<RootActions> =>
   action$.pipe(
     filter(isActionOf(addImages)),
     mergeMap(({ payload: images }) =>

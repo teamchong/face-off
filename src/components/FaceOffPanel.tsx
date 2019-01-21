@@ -37,7 +37,7 @@ import {
   removeImages,
   switchTab,
 } from '../actions/FaceOffActions';
-import { FaceOffModel, IRootState } from '../models';
+import { IFaceOffModel, IRootState } from '../models';
 import DropzoneComponent from './DropzoneComponent';
 import FaceCard from './FaceCard';
 import ImageCard from './ImageCard';
@@ -114,7 +114,7 @@ const faceOffPanelSelector = ({
   isWebcamLoaded,
   faces,
   openImageId,
-}: FaceOffModel) => ({
+}: IFaceOffModel) => ({
   faces,
   images,
   isModelsLoaded,

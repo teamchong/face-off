@@ -3,7 +3,6 @@ import { Observable } from 'rxjs';
 import { concat, exhaustMap, filter, timeout } from 'rxjs/operators';
 import { isActionOf } from 'typesafe-actions';
 import {
-  compareImageFaces,
   compareVideoFaces,
   compareWebcamFaces,
   detectVideoFaces,
@@ -12,10 +11,7 @@ import {
 import { drawDetections, drawVideo, scanImage } from '../classes/faceApi';
 import { IRootState } from '../models';
 
-export default (
-  action$: Observable<RootActions>,
-  state$: StateObservable<IRootState>
-) =>
+export default (action$: Observable<RootActions>, state$: StateObservable<IRootState>): Observable<RootActions> =>
   action$.pipe(
     filter(isActionOf(detectVideoFaces)),
     filter(() => state$.value.faceOffPanel.isAppRunning),

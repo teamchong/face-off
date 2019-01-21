@@ -1,4 +1,5 @@
 import { canvasToBlob, createObjectURL } from 'blob-util';
+import { StateObservable } from 'redux-observable';
 import { Observable } from 'rxjs';
 import { filter, switchMap } from 'rxjs/operators';
 import { isActionOf } from 'typesafe-actions';
@@ -6,7 +7,7 @@ import { addImages, RootActions, screenshotVideo } from '../actions';
 import { MAX_HEIGHT, MAX_WIDTH, SCREENSHOT_VIDEO } from '../constants';
 import { IRootState } from '../models';
 
-export default (action$: Observable<RootActions>) =>
+export default (action$: Observable<RootActions>, state$: StateObservable<IRootState>): Observable<RootActions> =>
   action$.pipe(
     filter(isActionOf(screenshotVideo)),
     switchMap(({ payload: video }) =>

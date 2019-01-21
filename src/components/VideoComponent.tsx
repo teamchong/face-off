@@ -33,7 +33,7 @@ import {
   FACINGMODE_REAR,
 } from '../constants';
 import { MAX_HEIGHT, MAX_WIDTH } from '../constants';
-import { FaceOffModel, IRootState } from '../models';
+import { IFaceOffModel, IRootState } from '../models';
 
 const styles = ({ spacing }: Theme) =>
   createStyles({
@@ -80,7 +80,7 @@ const faceOffPanelSelector = ({
   videoUrlLoaded,
   mp4Url,
   tab,
-}: FaceOffModel) => ({
+}: IFaceOffModel) => ({
   mp4Url,
   tab,
   videoOverlayRef,

@@ -20,7 +20,7 @@ import {
   switchFacingMode,
 } from '../actions/FaceOffActions';
 import { FACINGMODE_FRONT, FACINGMODE_REAR, MAX_HEIGHT, MAX_WIDTH } from '../constants';
-import { FaceOffModel, IRootState } from '../models';
+import { IFaceOffModel, IRootState } from '../models';
 
 // declare namespace Webcam {
 //   interface WebcamProps {
@@ -85,7 +85,7 @@ const faceOffPanelSelector = ({
   webcamRef,
   webcamOverlayRef,
   tab,
-}: FaceOffModel) => ({
+}: IFaceOffModel) => ({
   facingMode,
   isWebcamLoaded,
   tab,

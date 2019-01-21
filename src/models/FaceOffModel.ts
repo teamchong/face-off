@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 import * as Webcam from 'react-webcam';
 
-export type FaceDetectResults = {
+export interface IFaceDetectResults {
   [id: string]: {
     name?: string;
     gender?: string;
@@ -12,15 +12,15 @@ export type FaceDetectResults = {
     imageIds: Set<string>;
     descriptor: Float32Array;
   };
-};
+}
 
-export interface FaceOffModel {
+export interface IFaceOffModel {
   readonly isAppRunning: boolean;
   readonly isModelsLoaded: boolean;
   readonly isVideoLoaded: boolean;
   readonly isWebcamLoaded: boolean;
   readonly tab: string;
-  readonly message: string;
+  readonly message: string | null;
   readonly facingMode: string;
   readonly videoUrl: string;
   readonly videoUrlLoaded: string;
@@ -32,6 +32,6 @@ export interface FaceOffModel {
   readonly webcamOverlayRef: RefObject<HTMLCanvasElement>;
   readonly imagesOverlaies: { [id: string]: string };
   readonly imagesDetectResults: { [id: string]: any[] };
-  readonly faces: FaceDetectResults;
+  readonly faces: IFaceDetectResults;
   readonly openImageId: string;
 }

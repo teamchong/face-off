@@ -14,6 +14,7 @@ import {
   LOADED_VIDEO,
   LOADED_WEBCAM,
   OPEN_IMAGEDETAILS,
+  PASTE_ACTION,
   REFRESH_FACES,
   REMOVE_IMAGES,
   SCREENSHOT_VIDEO,
@@ -23,6 +24,7 @@ import {
   SWITCH_FACINGMODE,
   SWITCH_TAB,
 } from '../constants';
+import { IFaceDetectResults } from '../models';
 
 export const switchTab = createAction(SWITCH_TAB, resolve => (tab: string) =>
   resolve(tab)
@@ -111,7 +113,7 @@ export const compareImageFaces = createAction(
 
 export const refreshFaces = createAction(
   REFRESH_FACES,
-  resolve => (payload: any) => resolve(payload)
+  resolve => (payload: IFaceDetectResults) => resolve(payload)
 );
 
 export const loadedVideo = createAction(LOADED_VIDEO, resolve => () =>
