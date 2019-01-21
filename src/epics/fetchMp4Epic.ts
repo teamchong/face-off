@@ -4,7 +4,7 @@ import { concat, filter, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { isActionOf } from 'typesafe-actions';
 import { fetchMp4Url, fetchedMp4Url, RootActions } from '../actions';
 import { VIDEO_API } from '../constants';
-import { RootState } from '../models';
+import { IRootState } from '../models';
 
 export default (action$: Observable<RootActions>) =>
   action$.pipe(

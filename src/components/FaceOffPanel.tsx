@@ -9,10 +9,16 @@ import {
   DialogTitle,
   Divider,
   Slide,
-  Tabs,
   Tab,
+  Tabs,
   Typography,
 } from '@material-ui/core';
+import {
+  createStyles,
+  StyledComponentProps,
+  withStyles,
+} from '@material-ui/core/styles';
+import { Theme } from '@material-ui/core/styles/createMuiTheme';
 import {
   AddPhotoAlternate,
   DeleteSweep,
@@ -21,33 +27,43 @@ import {
   Videocam,
   VideoLibrary,
 } from '@material-ui/icons';
-import {
-  createStyles,
-  StyledComponentProps,
-  withStyles,
-} from '@material-ui/core/styles';
-import { Theme } from '@material-ui/core/styles/createMuiTheme';
 import * as React from 'react';
-import { createSelector } from 'reselect';
 import { Props, ReactElement, ReactNode, ReactType } from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
-import VideoComponent from './VideoComponent';
-import DropzoneComponent from './DropzoneComponent';
-import WebcamComponent from './WebcamComponent';
-import FaceCard from './FaceCard';
-import ImageCard from './ImageCard';
+import { createSelector } from 'reselect';
 import {
-  switchTab,
   hideMessage,
   removeImages,
+  switchTab,
 } from '../actions/FaceOffActions';
-import { FaceOffModel, RootState } from '../models';
+import { FaceOffModel, IRootState } from '../models';
+import DropzoneComponent from './DropzoneComponent';
+import FaceCard from './FaceCard';
+import ImageCard from './ImageCard';
+import VideoComponent from './VideoComponent';
+import WebcamComponent from './WebcamComponent';
 
 const styles = ({ palette, spacing }: Theme) =>
   createStyles({
-    root: {
-      backgroundColor: palette.background.paper,
+    alignCenter: {
+      verticalAlign: 'middle',
+    },
+    badge: {
+      marginRight: '10px',
+    },
+    br: {
+      width: '100%',
+    },
+    button: {
+      margin: spacing.unit,
+    },
+    card: {
+      display: 'inline-block',
+      margin: '5px',
+    },
+    cardActions: {
+      backgroundColor: 'rgba(0,0,0,0.1)',
     },
     container: {
       float: 'left',
@@ -56,52 +72,36 @@ const styles = ({ palette, spacing }: Theme) =>
     faceName: {
       fontSize: '10px',
     },
-    imagesContainer: {
-      display: 'flex',
-      flexFlow: 'row wrap',
-      justifyContent: 'flex-start',
-      alignItems: 'flex-start',
-      alignContent: 'flex-start',
-    },
-    alignCenter: {
-      verticalAlign: 'middle',
-    },
-    title: {
-      position: 'absolute',
-      color: '#fff',
-      textShadow: '1px 1px #000',
-    },
-    badge: {
-      marginRight: '10px',
+    faceThumb: {
+      height: '120px',
     },
     fold: {
       marginLeft: 'auto',
     },
-    br: {
-      width: '100%',
-    },
-    faceThumb: {
-      height: '120px',
-    },
-    removeAll: {
-      width: '100%',
-      marginBottom: '5px',
-    },
-    button: {
-      margin: spacing.unit,
+    imagesContainer: {
+      alignContent: 'flex-start',
+      alignItems: 'flex-start',
+      display: 'flex',
+      flexFlow: 'row wrap',
+      justifyContent: 'flex-start',
     },
     leftIcon: {
       marginRight: spacing.unit,
     },
+    removeAll: {
+      marginBottom: '5px',
+      width: '100%',
+    },
     rightIcon: {
       marginLeft: spacing.unit,
     },
-    card: {
-      margin: '5px',
-      display: 'inline-block',
+    root: {
+      backgroundColor: palette.background.paper,
     },
-    cardActions: {
-      backgroundColor: 'rgba(0,0,0,0.1)',
+    title: {
+      color: '#fff',
+      position: 'absolute',
+      textShadow: '1px 1px #000',
     },
   });
 
@@ -115,14 +115,14 @@ const faceOffPanelSelector = ({
   faces,
   openImageId,
 }: FaceOffModel) => ({
-  tab,
-  message,
+  faces,
   images,
   isModelsLoaded,
   isVideoLoaded,
   isWebcamLoaded,
-  faces,
+  message,
   openImageId,
+  tab,
 });
 
 const componentSelector = createSelector(
@@ -140,17 +140,17 @@ const componentSelector = createSelector(
     const faceIds = Object.keys(faces);
     const imageIndexes = images.map((_, index) => index);
     const props = {
-      tab,
-      message,
+      faceIds,
       imageIndexes,
       isModelsLoadCompleted:
         isModelsLoaded &&
-        ((tab == 'one' && isVideoLoaded) ||
+        ((tab === 'one' && isVideoLoaded) ||
           (tab === 'two' && isWebcamLoaded) ||
           tab === 'three'),
       isVideoLoaded,
       isWebcamLoaded,
-      faceIds,
+      message,
+      tab,
     };
     switch (tab) {
       case 'three':
@@ -163,24 +163,24 @@ const componentSelector = createSelector(
   }
 );
 
-const mapStateToProps = ({ faceOffPanel }: RootState) =>
+const mapStateToProps = ({ faceOffPanel }: IRootState) =>
   componentSelector(faceOffPanel);
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  switchTabHandler: (_: any, value: string) => dispatch(switchTab(value)),
-  hideMessage: () => dispatch(hideMessage()),
-  removeImages: (imageIndexes: number[]) =>
+  hidingMessage: () => dispatch(hideMessage()),
+  removingImages: (imageIndexes: number[]) =>
     dispatch(removeImages(imageIndexes)),
+  switchTabHandler: (_: any, value: string) => dispatch(switchTab(value)),
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
   const { imageIndexes } = stateProps;
-  const { removeImages } = dispatchProps;
+  const { removingImages } = dispatchProps;
   return {
     ...ownProps,
     ...stateProps,
     ...dispatchProps,
-    removeAllHandler: () => removeImages(imageIndexes),
+    removeAllHandler: () => removingImages(imageIndexes),
   };
 };
 
@@ -195,16 +195,16 @@ const TabContainer = ({ children }: Props<ReactNode>): ReactElement<any> => (
 );
 
 const FaceOffPanel = ({
-  classes,
   ActiveTab,
+  classes,
   faceIds,
-  tab,
-  message,
+  hidingMessage,
   isModelsLoadCompleted,
   isVideoLoaded,
   isWebcamLoaded,
   imageIndexes,
-  hideMessage,
+  tab,
+  message,
   removeAllHandler,
   switchTabHandler,
 }: StyledComponentProps & ReturnType<typeof mergeProps>): ReactElement<any> => (
@@ -228,7 +228,7 @@ const FaceOffPanel = ({
           </div>
         ) : (
           <div>
-            <Info size={12} className={classes!.alignCenter} /> Face detection
+            <Info className={classes!.alignCenter} {...{ size: 12}} /> Face detection
             is on.
           </div>
         )}
@@ -260,12 +260,12 @@ const FaceOffPanel = ({
       open={!!message}
       TransitionComponent={Transition}
       keepMounted={true}
-      onClose={hideMessage}
+      onClose={hidingMessage}
       aria-labelledby="alert-dialog-slide-title"
       aria-describedby="alert-dialog-slide-description"
     >
       <DialogTitle id="alert-dialog-slide-title">
-        <Info size={12} className={classes!.alignCenter} />
+        <Info className={classes!.alignCenter} {...{ size: 12 }} />
       </DialogTitle>
       <DialogContent>
         <DialogContentText id="alert-dialog-slide-description">
@@ -273,7 +273,7 @@ const FaceOffPanel = ({
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={hideMessage} color="primary">
+        <Button onClick={hidingMessage} color="primary">
           <Done />
         </Button>
       </DialogActions>

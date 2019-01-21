@@ -1,5 +1,5 @@
 import { canvasToBlob, createObjectURL, revokeObjectURL } from 'blob-util';
-import { MAX_WIDTH, MAX_HEIGHT } from '../constants';
+import { MAX_WIDTH } from '../constants';
 
 export const revokeIfNeed = (url: string) => {
   if (/^blob:/i.test(url)) {
@@ -17,6 +17,7 @@ export const readAsImage = async (file: File): Promise<HTMLImageElement> => {
     imgEl.src = dataUrl;
   });
   if (img.width > MAX_WIDTH) {
+    // tslint:disable-next-line:no-bitwise
     const newHeight = ~~((MAX_WIDTH * img.height) / img.width);
     const canvas = document.createElement('canvas');
     canvas.width = MAX_WIDTH;

@@ -4,8 +4,8 @@ import {
   StyledComponentProps,
   withStyles,
 } from '@material-ui/core/styles';
-import { createObjectURL } from 'blob-util';
 import { Collections } from '@material-ui/icons';
+import { createObjectURL } from 'blob-util';
 import * as React from 'react';
 import { Fragment, ReactElement, ReactType } from 'react';
 import * as DropzoneType from 'react-dropzone';
@@ -14,37 +14,37 @@ import { Dispatch } from 'redux';
 import { createSelector } from 'reselect';
 import {
   addImages,
-  showMessage,
   fetchMp4Url,
+  showMessage,
   switchTab,
 } from '../actions/FaceOffActions';
 import { readAsImage } from '../classes/fileApi';
-import { MAX_WIDTH, MAX_HEIGHT } from '../constants';
-import { FaceOffModel, RootState } from '../models';
+import { MAX_HEIGHT, MAX_WIDTH } from '../constants';
+import { FaceOffModel, IRootState } from '../models';
 
-const Dropzone: ReactType = DropzoneType as any;
+const Dropzone: any = DropzoneType as any;
 
 const styles = () =>
   createStyles({
-    typography: {
-      color: 'rgba(255,255,255,0.9)',
-    },
     br: {
       width: '100%',
+    },
+    colorBg: {
+      animation: 'Gradient 15s ease infinite',
+      background: 'linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab)',
+      backgroundSize: '400% 400%',
+      color: '#fff',
     },
     iconSmall: {
       fontSize: 20,
     },
     overlay: {
-      position: 'absolute',
       pointerEvents: 'none',
+      position: 'absolute',
       zIndex: 1,
     },
-    colorBg: {
-      color: '#fff',
-      background: 'linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab)',
-      backgroundSize: '400% 400%',
-      animation: 'Gradient 15s ease infinite',
+    typography: {
+      color: 'rgba(255,255,255,0.9)',
     },
   });
 
@@ -52,7 +52,7 @@ const faceOffPanelSelector = ({ message }: FaceOffModel) => ({
   message,
 });
 
-const mapStateToProps = ({ faceOffPanel }: RootState) =>
+const mapStateToProps = ({ faceOffPanel }: IRootState) =>
   faceOffPanelSelector(faceOffPanel);
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
@@ -67,8 +67,8 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
     __proto__: File
     */
     if (!!(acceptedFiles || []).length) {
-      const imageFiles = [];
-      const videoFiles = [];
+      const imageFiles: HTMLImageElement[] = [];
+      const videoFiles: string[] = [];
       for (let i = 0, iL = acceptedFiles.length; i < iL; i++) {
         const file = acceptedFiles[i];
 
@@ -215,16 +215,16 @@ const DropzoneComponent = ({
     onDrop={dropHandler}
     className={classes!.colorBg}
     style={{
-      borderWidth: 5,
-      borderStyle: 'dashed',
+      alignContent: 'center',
       borderColor: 'rgba(0,0,0,0.2)',
       borderRadius: 5,
-      width: MAX_WIDTH,
-      height: MAX_HEIGHT,
-      alignContent: 'center',
-      justifyContent: 'center',
-      flexFlow: 'row wrap',
+      borderStyle: 'dashed',
+      borderWidth: 5,
       display: 'flex',
+      flexFlow: 'row wrap',
+      height: MAX_HEIGHT,
+      justifyContent: 'center',
+      width: MAX_WIDTH,
     }}
   >
     <Typography

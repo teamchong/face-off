@@ -1,6 +1,6 @@
 export * from './models/FaceOffModel';
 import { FaceOffModel } from './models/FaceOffModel';
 
-export type RootState = {
+export interface IRootState {
   readonly faceOffPanel: FaceOffModel;
-};
+}

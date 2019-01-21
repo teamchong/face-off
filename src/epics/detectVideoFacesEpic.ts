@@ -1,20 +1,20 @@
 import { StateObservable } from 'redux-observable';
 import { Observable } from 'rxjs';
-import { concat, filter, exhaustMap, timeout } from 'rxjs/operators';
+import { concat, exhaustMap, filter, timeout } from 'rxjs/operators';
 import { isActionOf } from 'typesafe-actions';
 import {
-  detectVideoFaces,
   compareImageFaces,
   compareVideoFaces,
   compareWebcamFaces,
+  detectVideoFaces,
   RootActions,
 } from '../actions';
-import { scanImage, drawDetections, drawVideo } from '../classes/faceApi';
-import { RootState } from '../models';
+import { drawDetections, drawVideo, scanImage } from '../classes/faceApi';
+import { IRootState } from '../models';
 
 export default (
   action$: Observable<RootActions>,
-  state$: StateObservable<RootState>
+  state$: StateObservable<IRootState>
 ) =>
   action$.pipe(
     filter(isActionOf(detectVideoFaces)),
@@ -39,6 +39,7 @@ export default (
           if (tab === 'one' && video && video.videoWidth && isVideoLoaded) {
             const canvas = drawVideo(video);
             try {
+              // tslint:disable-next-line:no-bitwise
               const time = ~~video.currentTime;
 
               if (isModelsLoaded) {
@@ -51,14 +52,15 @@ export default (
                 drawDetections(detection, videoOverlay, width, height);
                 observer.next(
                   compareVideoFaces({
-                    url: videoUrlLoaded,
-                    time,
                     canvas,
                     getDescriptor,
+                    time,
+                    url: videoUrlLoaded,
                   })
                 );
               }
             } catch (ex) {
+              // tslint:disable-next-line:no-console
               console.warn(ex);
 
               const { width, height } = canvas;
@@ -80,13 +82,15 @@ export default (
                   drawDetections(detection, webcamOverlay, width, height);
                   observer.next(
                     compareWebcamFaces({
-                      time: ~~(new Date().getTime() / 1000) * 1000,
                       canvas,
                       getDescriptor,
+                      // tslint:disable-next-line:no-bitwise
+                      time: ~~(new Date().getTime() / 1000) * 1000,
                     })
                   );
                 }
               } catch (ex) {
+                // tslint:disable-next-line:no-console
                 console.warn(ex);
 
                 const { width, height } = canvas;

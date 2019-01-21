@@ -16,61 +16,60 @@ import {
   PhotoCamera,
   PlayCircleFilled,
 } from '@material-ui/icons';
-import { createObjectURL } from 'blob-util';
 import * as React from 'react';
-import { createRef, ChangeEvent, Fragment, KeyboardEvent } from 'react';
+import { ChangeEvent, Fragment, KeyboardEvent } from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { createSelector } from 'reselect';
-import {
-  CORS_PROXY_URL,
-  FACINGMODE_REAR,
-  FACINGMODE_FRONT,
-} from '../constants';
 import {
   changeVideoUrl,
   fetchMp4Url,
   loadedVideo,
   screenshotVideo,
 } from '../actions/FaceOffActions';
-import { MAX_WIDTH, MAX_HEIGHT } from '../constants';
-import { FaceOffModel, RootState } from '../models';
+import {
+  CORS_PROXY_URL,
+  FACINGMODE_FRONT,
+  FACINGMODE_REAR,
+} from '../constants';
+import { MAX_HEIGHT, MAX_WIDTH } from '../constants';
+import { FaceOffModel, IRootState } from '../models';
 
 const styles = ({ spacing }: Theme) =>
   createStyles({
     container: {
       position: 'relative',
     },
-    overlay: {
+    frontFacing: {
+      left: '120px',
+      margin: spacing.unit,
       position: 'absolute',
+      zIndex: 1,
+    },
+    overlay: {
       pointerEvents: 'none',
+      position: 'absolute',
       zIndex: 1,
     },
     progress: {
       margin: spacing.unit * 2,
     },
-    screenshot: {
-      margin: spacing.unit,
-      position: 'absolute',
-      left: '0px',
-      zIndex: 1,
-    },
     rearFacing: {
+      left: '60px',
       margin: spacing.unit,
       position: 'absolute',
-      left: '60px',
       zIndex: 1,
     },
-    frontFacing: {
+    screenshot: {
+      left: '0px',
       margin: spacing.unit,
       position: 'absolute',
-      left: '120px',
       zIndex: 1,
     },
     textField: {
-      width: MAX_WIDTH + 'px',
       marginLeft: spacing.unit,
       marginRight: spacing.unit,
+      width: MAX_WIDTH + 'px',
     },
   });
 
@@ -82,12 +81,12 @@ const faceOffPanelSelector = ({
   mp4Url,
   tab,
 }: FaceOffModel) => ({
-  videoRef,
-  videoOverlayRef,
-  videoUrl,
-  videoUrlLoaded,
   mp4Url,
   tab,
+  videoOverlayRef,
+  videoRef,
+  videoUrl,
+  videoUrlLoaded,
 });
 
 const componentSelector = createSelector(faceOffPanelSelector, props => ({
@@ -95,51 +94,51 @@ const componentSelector = createSelector(faceOffPanelSelector, props => ({
   videoUrlTrimmed: (props.videoUrl || '').replace(/^\s+|\s+$/g, ''),
 }));
 
-const mapStateToProps = ({ faceOffPanel }: RootState) =>
+const mapStateToProps = ({ faceOffPanel }: IRootState) =>
   componentSelector(faceOffPanel);
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
+  fetchingMp4Url: (videoUrl: string) => dispatch(fetchMp4Url(videoUrl)),
+  loadedTheVideo  : () => dispatch(loadedVideo()),
+  screenshotingVideo: (video: HTMLVideoElement) =>
+    dispatch(screenshotVideo(video)),
   textFieldHandler: ({ target }: ChangeEvent<HTMLInputElement>) =>
     dispatch(changeVideoUrl(target!.value)),
-  fetchMp4Url: (videoUrl: string) => dispatch(fetchMp4Url(videoUrl)),
-  loadedVideo: () => dispatch(loadedVideo()),
-  screenshotVideo: (video: HTMLVideoElement) =>
-    dispatch(screenshotVideo(video)),
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
-  const { fetchMp4Url, screenshotVideo } = dispatchProps;
+  const { fetchingMp4Url, screenshotingVideo } = dispatchProps;
   const { videoRef, videoUrl } = stateProps;
   return {
     ...ownProps,
     ...stateProps,
     ...dispatchProps,
-    loadMp4Handler: () => fetchMp4Url(videoUrl),
-    screenshotHandler: () => screenshotVideo(videoRef.current),
     keyDownHandler: (ev: KeyboardEvent<HTMLElement>) => {
       switch (ev.charCode) {
         case 13:
-          fetchMp4Url(videoUrl);
+          fetchingMp4Url(videoUrl);
           break;
       }
     },
+    loadMp4Handler: () => fetchingMp4Url(videoUrl),
+    screenshotHandler: () => screenshotingVideo(videoRef.current),
   };
 };
 
 const VideoComponent = ({
   classes,
+  keyDownHandler,
+  loadedTheVideo,
+  loadMp4Handler,
+  mp4Url,
+  screenshotHandler,
+  tab,
+  textFieldHandler,
   videoRef,
   videoOverlayRef,
   videoUrl,
   videoUrlTrimmed,
   videoUrlLoaded,
-  mp4Url,
-  tab,
-  textFieldHandler,
-  loadedVideo,
-  loadMp4Handler,
-  screenshotHandler,
-  keyDownHandler,
 }: StyledComponentProps & ReturnType<typeof mergeProps>) => (
   <div className={classes!.container}>
     <div>
@@ -152,7 +151,6 @@ const VideoComponent = ({
         variant="outlined"
         InputLabelProps={{ shrink: true }}
         InputProps={{
-          onKeyPress: keyDownHandler,
           endAdornment: (
             <InputAdornment position="end">
               {!!mp4Url && (
@@ -173,6 +171,7 @@ const VideoComponent = ({
               )}
             </InputAdornment>
           ),
+          onKeyPress: keyDownHandler,
         }}
       />
     </div>
@@ -194,12 +193,12 @@ const VideoComponent = ({
           muted={true}
           playsInline={true}
           style={{
-            borderWidth: 5,
-            borderStyle: 'solid',
             borderColor: '#ccc',
+            borderStyle: 'solid',
+            borderWidth: 5,
           }}
           crossOrigin="anonymous"
-          onCanPlay={loadedVideo}
+          onCanPlay={loadedTheVideo}
         >
           <source
             src={`${/^http/i.test(mp4Url) ? CORS_PROXY_URL : ''}${mp4Url}`}

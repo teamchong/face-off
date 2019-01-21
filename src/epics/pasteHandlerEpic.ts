@@ -1,16 +1,16 @@
 import { createObjectURL } from 'blob-util';
 import { fromEvent, Observable } from 'rxjs';
 import { map, mergeMap } from 'rxjs/operators';
-import { readAsImage } from '../classes/fileApi';
 import { addImages, fetchMp4Url, switchTab } from '../actions';
+import { readAsImage } from '../classes/fileApi';
 
 export default () =>
   fromEvent(window, 'paste').pipe(
-    map((evt: ClipboardEvent) => evt.clipboardData.items),
+    map((evt: Event) => (evt as ClipboardEvent).clipboardData.items),
     mergeMap(items =>
       Observable.create(async observer => {
-        const imageFiles = [];
-        const videoFiles = [];
+        const imageFiles: HTMLImageElement[] = [];
+        const videoFiles: string[] = [];
         for (let i = 0, iL = items.length; i < iL; i++) {
           const file = items[i].getAsFile();
 

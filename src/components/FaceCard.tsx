@@ -11,49 +11,49 @@ import {
   TextField,
 } from '@material-ui/core';
 import {
-  Photo,
-  Videocam,
-  VideoLibrary,
-  ExpandMore,
-  ExpandLess,
-} from '@material-ui/icons';
-import {
   createStyles,
   StyledComponentProps,
   withStyles,
 } from '@material-ui/core/styles';
 import { Theme } from '@material-ui/core/styles/createMuiTheme';
+import {
+  ExpandLess,
+  ExpandMore,
+  Photo,
+  Videocam,
+  VideoLibrary,
+} from '@material-ui/icons';
 import * as React from 'react';
 import { ReactElement, ReactNode, ReactType } from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { openImageDetails } from '../actions/FaceOffActions';
-import { FaceOffModel, RootState } from '../models';
+import { FaceOffModel, IRootState } from '../models';
 
 const styles = ({ palette, spacing }: Theme) =>
   createStyles({
-    faceName: {
-      fontSize: '10px',
-    },
     alignCenter: {
       verticalAlign: 'middle',
     },
     badge: {
-      marginRight: '10px',
       fontSize: '9px',
+      marginRight: '10px',
     },
-    fold: {
-      marginLeft: 'auto',
+    card: {
+      display: 'inline-block',
+      margin: '5px',
+    },
+    cardActions: {
+      backgroundColor: 'rgba(0,0,0,0.1)',
+    },
+    faceName: {
+      fontSize: '10px',
     },
     faceThumb: {
       display: 'block',
     },
-    card: {
-      margin: '5px',
-      display: 'inline-block',
-    },
-    cardActions: {
-      backgroundColor: 'rgba(0,0,0,0.1)',
+    fold: {
+      marginLeft: 'auto',
     },
   });
 
@@ -62,16 +62,17 @@ const faceOffPanelSelector = ({
   faces,
   openImageId,
 }: FaceOffModel) => ({
-  images,
   faces,
+  images,
   openImageId,
 });
 
 const toHHMMSS = (second: number) => {
-  const sec_num = ~~second;
-  const hours = Math.floor(sec_num / 3600);
-  const minutes = Math.floor((sec_num - hours * 3600) / 60);
-  const seconds = sec_num - hours * 3600 - minutes * 60;
+  // tslint:disable-next-line:no-bitwise
+  const secNum = ~~second;
+  const hours = Math.floor(secNum / 3600);
+  const minutes = Math.floor((secNum - hours * 3600) / 60);
+  const seconds = secNum - hours * 3600 - minutes * 60;
 
   const h = hours < 10 ? '0' : '';
   const m = minutes < 10 ? '0' : '';
@@ -79,45 +80,33 @@ const toHHMMSS = (second: number) => {
   return h + hours + ':' + m + minutes + ':' + s + seconds;
 };
 
-const mapStateToProps = ({ faceOffPanel }: RootState) =>
+const mapStateToProps = ({ faceOffPanel }: IRootState) =>
   faceOffPanelSelector(faceOffPanel);
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  openImageDetails: (openImageId: string) =>
+  openingImageDetails: (openImageId: string) =>
     dispatch(openImageDetails(openImageId)),
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
   const { id } = ownProps;
   const { images, faces, openImageId } = stateProps;
-  const { openImageDetails } = dispatchProps;
+  const { openingImageDetails } = dispatchProps;
 
   const face = faces[id];
-
-  const toHHMMSS = (second: number) => {
-    const sec_num = ~~second;
-    const hours = Math.floor(sec_num / 3600);
-    const minutes = Math.floor((sec_num - hours * 3600) / 60);
-    const seconds = sec_num - hours * 3600 - minutes * 60;
-
-    const h = hours < 10 ? '0' : '';
-    const m = minutes < 10 ? '0' : '';
-    const s = seconds < 10 ? '0' : '';
-    return h + hours + ':' + m + minutes + ':' + s + seconds;
-  };
-  
-  const videoLog = [];
-  const webcamLog = [];
-  const imageLog = [];
+  const videoLog: Array<{ log: Array<{ s: number, l: string }>, url: string }> = [];
+  const webcamLog: string[] = [];
+  const imageLog: HTMLImageElement[] = [];
   const isOpen = openImageId === id;
 
   if (isOpen) {
+    // tslint:disable-next-line:forin
     for (const url in face.video) {
       videoLog.push({
-        url,
-        log: Array.from(face.video[url])
+        log: Array.from(face.video[url] as number[])
           .map((s: number) => ({ s, l: toHHMMSS(s) }))
           .sort(),
+        url,
       });
     }
 
@@ -138,23 +127,23 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
   }
 
   return {
+    clickHandler: () => openingImageDetails(isOpen ? '' : id),
     id,
-    //name: face.name || '',
-    //gender: face.gender,
-    //age: face.age,
-    preview: face.preview,
-    videoLog,
-    webcamLog,
+    // name: face.name || '',
+    // gender: face.gender,
+    // age: face.age,
+    imageCount: face.imageIds.size,
     imageLog,
+    isOpen,
+    nameChangeHandler: () => ({}),
+    preview: face.preview,
     videoCount: Object.keys(face.video).reduce(
       (total, url) => total + face.video[url].size,
       0
     ),
+    videoLog,
     webcamCount: face.webcam.size,
-    imageCount: face.imageIds.size,
-    isOpen,
-    clickHandler: () => openImageDetails(isOpen ? '' : id),
-    nameChangeHandler: () => {},
+    webcamLog,
   };
 };
 const FaceCard = ({
@@ -181,8 +170,8 @@ StyledComponentProps & ReturnType<typeof mergeProps>): ReactElement<any> => (
         src={preview}
         className={classes!.faceThumb}
         style={{
-          width: isOpen ? '100%' : 'auto',
           height: isOpen ? 'auto' : '120px',
+          width: isOpen ? '100%' : 'auto',
         }}
       />
     </div>
@@ -273,8 +262,8 @@ StyledComponentProps & ReturnType<typeof mergeProps>): ReactElement<any> => (
                 </a>
                 <div>
                   <select style={{ width: '100%' }}>
-                    {log.map(({ s, l }, i) => (
-                      <option value={s} key={i}>
+                    {log.map(({ s, l }, logI) => (
+                      <option value={s} key={logI}>
                         {l}
                       </option>
                     ))}
@@ -295,7 +284,7 @@ StyledComponentProps & ReturnType<typeof mergeProps>): ReactElement<any> => (
         {!!imageLog.length && (
           <div>
             <div>Appear in images:</div>
-            {imageLog.map(({ src, id }, i) => (
+            {imageLog.map(({ src }, i) => (
               <a href={src} target="_blank" key={i}>
                 <img src={src} height="50" />
               </a>

@@ -2,43 +2,43 @@ import { createRef } from 'react';
 import * as Webcam from 'react-webcam';
 import { combineReducers } from 'redux';
 import { combineEpics } from 'redux-observable';
-import { RootState } from './models';
 import { RootActions } from './actions';
-import {
-  SWITCH_TAB,
-  SHOW_MESSAGE,
-  HIDE_MESSAGE,
-  ADD_IMAGES,
-  REMOVE_IMAGES,
-  SWITCH_FACINGMODE,
-  CHANGE_VIDEOURL,
-  LOADED_VIDEO,
-  LOADED_WEBCAM,
-  FETCH_MP4URL,
-  FETCHED_MP4URL,
-  SCREENSHOT_VIDEO,
-  START_APP,
-  STOP_APP,
-  LOADED_MODELS,
-  COMPARE_VIDEOFACES,
-  COMPARE_WEBCAMFACES,
-  COMPARE_IMAGEFACES,
-  REFRESH_FACES,
-  OPEN_IMAGEDETAILS,
-  FACINGMODE_REAR,
-  DEFAULT_VIDEO_URL,
-} from './constants';
 import { drawDetections, uniqueId } from './classes/faceApi';
 import { revokeIfNeed } from './classes/fileApi';
+import {
+  ADD_IMAGES,
+  CHANGE_VIDEOURL,
+  COMPARE_IMAGEFACES,
+  COMPARE_VIDEOFACES,
+  COMPARE_WEBCAMFACES,
+  DEFAULT_VIDEO_URL,
+  FACINGMODE_REAR,
+  FETCH_MP4URL,
+  FETCHED_MP4URL,
+  HIDE_MESSAGE,
+  LOADED_MODELS,
+  LOADED_VIDEO,
+  LOADED_WEBCAM,
+  OPEN_IMAGEDETAILS,
+  REFRESH_FACES,
+  REMOVE_IMAGES,
+  SCREENSHOT_VIDEO,
+  SHOW_MESSAGE,
+  START_APP,
+  STOP_APP,
+  SWITCH_FACINGMODE,
+  SWITCH_TAB,
+} from './constants';
+import addImagesEpic from './epics/addImagesEpic';
+import compareImageFacesEpic from './epics/compareImageFacesEpic';
+import compareVideoFacesEpic from './epics/compareVideoFacesEpic';
+import compareWebcamFacesEpic from './epics/compareWebcamFacesEpic';
+import detectVideoFacesEpic from './epics/detectVideoFacesEpic';
+import fetchMp4Epic from './epics/fetchMp4Epic';
 import pasteHandlerEpic from './epics/pasteHandlerEpic';
 import screenshotEpic from './epics/screenshotEpic';
 import startAppEpic from './epics/startAppEpic';
-import detectVideoFacesEpic from './epics/detectVideoFacesEpic';
-import addImagesEpic from './epics/addImagesEpic';
-import fetchMp4Epic from './epics/fetchMp4Epic';
-import compareVideoFacesEpic from './epics/compareVideoFacesEpic';
-import compareWebcamFacesEpic from './epics/compareWebcamFacesEpic';
-import compareImageFacesEpic from './epics/compareImageFacesEpic';
+import { IRootState } from './models';
 
 export const rootEpic = combineEpics(
   pasteHandlerEpic,
@@ -53,28 +53,28 @@ export const rootEpic = combineEpics(
 );
 
 const initState = {
+  faces: {},
+  facingMode: FACINGMODE_REAR,
+  images: [],
+  imagesDetectResults: {},
+  imagesOverlaies: {},
   isAppRunning: false,
   isModelsLoaded: false,
   isVideoLoaded: false,
   isWebcamLoaded: false,
-  tab: 'one',
   message: '',
-  facingMode: FACINGMODE_REAR,
+  mp4Url: '',
+  openImageId: '',
+  tab: 'one',
+  videoOverlayRef: createRef<HTMLCanvasElement>(),
+  videoRef: createRef<HTMLVideoElement>(),
   videoUrl: DEFAULT_VIDEO_URL,
   videoUrlLoaded: '',
-  mp4Url: '',
-  videoRef: createRef<HTMLVideoElement>(),
-  webcamRef: createRef<Webcam>(),
-  images: [],
-  videoOverlayRef: createRef<HTMLCanvasElement>(),
   webcamOverlayRef: createRef<HTMLCanvasElement>(),
-  imagesOverlaies: {},
-  imagesDetectResults: {},
-  faces: {},
-  openImageId: '',
+  webcamRef: createRef<Webcam>(),
 };
 
-export const rootReducer = combineReducers<RootState, RootActions>({
+export const rootReducer = combineReducers<IRootState, RootActions>({
   faceOffPanel(state = initState, action: RootActions) {
     switch (action.type) {
       case SWITCH_TAB: {
@@ -93,7 +93,6 @@ export const rootReducer = combineReducers<RootState, RootActions>({
         images.forEach(image => (image.id = uniqueId()));
         return {
           ...state,
-          images: [...state.images, ...images],
           imageFaceDetctResults: {
             ...state.imagesDetectResults,
             ...images.reduce((result, image) => {
@@ -101,6 +100,7 @@ export const rootReducer = combineReducers<RootState, RootActions>({
               return result;
             }, {}),
           },
+          images: [...state.images, ...images],
           imagesOverlaies: {
             ...state.imagesOverlaies,
             ...images.reduce((result, image) => {
@@ -123,6 +123,7 @@ export const rootReducer = combineReducers<RootState, RootActions>({
         }
 
         const faces = {};
+        // tslint:disable-next-line:forin
         for (const id in state.faces) {
           const imageIds = Array.from(state.faces[id].imageIds).filter(
             imageId => !removeIds.has(imageId)
@@ -173,19 +174,21 @@ export const rootReducer = combineReducers<RootState, RootActions>({
       case STOP_APP: {
         state.images.forEach(image => revokeIfNeed(image.src));
         revokeIfNeed(state.mp4Url);
+        // tslint:disable-next-line:forin
         for (const id in state.faces) {
           revokeIfNeed(state.faces[id].preview);
         }
+        // tslint:disable-next-line:forin
         for (const id in state.imagesOverlaies) {
           revokeIfNeed(state.imagesOverlaies[id]);
         }
         return {
           ...state,
-          mp4Url: '',
           images: [],
           imagesDetectResults: {},
           imagesOverlaies: {},
           isAppRunning: false,
+          mp4Url: '',
         };
       }
       case COMPARE_IMAGEFACES: {
@@ -198,11 +201,11 @@ export const rootReducer = combineReducers<RootState, RootActions>({
         } = action;
         return {
           ...state,
-          imagesOverlaies: Object.assign({}, state.imagesOverlaies, {
-            [id]: overlay,
-          }),
           imagesDetectResults: Object.assign({}, state.imagesDetectResults, {
             [id]: results,
+          }),
+          imagesOverlaies: Object.assign({}, state.imagesOverlaies, {
+            [id]: overlay,
           }),
         };
       }

@@ -2,7 +2,7 @@ import { canvasToBlob, createObjectURL } from 'blob-util';
 // import {
 //   drawDetection,
 // } from 'face-api.js';
-//const FaceDetectModel = loadSsdMobilenetv1Model;
+// const FaceDetectModel = loadSsdMobilenetv1Model;
 // const FaceDetectOptions = (opts?: any) =>
 //   new (SsdMobilenetv1Options as any)(opts);
 import { drawDetection } from 'face-api.js';
@@ -27,10 +27,10 @@ import { MODEL_URL } from '../constants';
 // import { loadSsdMobilenetv1Model } from 'face-api.js';
 // const FaceDetectModel = loadSsdMobilenetv1Model;
 import {
-  loadTinyFaceDetectorModel,
   loadFaceLandmarkModel,
-  // loadFaceLandmarkTinyModel,
   loadFaceRecognitionModel,
+  // loadFaceLandmarkTinyModel,
+  loadTinyFaceDetectorModel,
 } from 'face-api.js';
 const FaceDetectModel = loadTinyFaceDetectorModel;
 
@@ -63,15 +63,15 @@ export const drawVideo = (video: HTMLVideoElement) => {
   const canvas = document.createElement('canvas');
   canvas.width = videoWidth;
   canvas.height = videoHeight;
-  canvas.getContext('2d').drawImage(video, 0, 0, videoWidth, videoHeight);
+  canvas.getContext('2d')!.drawImage(video, 0, 0, videoWidth, videoHeight);
   return canvas;
 };
 
 export const generatePreview = async (
-  canvas: HTMLCanvasElement,
+  canvas: HTMLCanvasElement | HTMLImageElement,
   detection: any
 ): Promise<string> => {
-  var thumb = await extractFaces(canvas, [detection]);
+  const thumb = await extractFaces(canvas, [detection]);
   if (thumb[0]) {
     return createObjectURL(await canvasToBlob(thumb[0]));
   }
@@ -98,20 +98,21 @@ export const scanImage = async (
 
 export const drawDetections = (
   detection: any[],
-  canvas: HTMLCanvasElement,
+  canvas: HTMLCanvasElement | null,
   srcWidth: number,
   srcHeight: number
 ) => {
   if (canvas && canvas.width) {
     const { width, height } = canvas;
-    const ctx = canvas.getContext('2d');
-    //console.log({ width, height, videoWidth, videoHeight });
+    const ctx = canvas.getContext('2d')!;
+    // console.log({ width, height, videoWidth, videoHeight });
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, width, height);
+    // tslint:disable-next-line:no-bitwise
     ctx.translate(~~((width - srcWidth) / 2.0), ~~((height - srcHeight) / 2.0));
     if (detection.length) {
       drawDetection(canvas, detection, { withScore: false });
-      //console.log({ video: payload });
+      // console.log({ video: payload });
     }
   }
 };

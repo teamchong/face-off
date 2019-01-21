@@ -18,7 +18,7 @@ import { ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { removeImages } from '../actions/FaceOffActions';
-import { FaceOffModel, RootState } from '../models';
+import { FaceOffModel, IRootState } from '../models';
 
 type ImageCardProps = {
   index: number;
@@ -53,7 +53,7 @@ const faceOffPanelSelector = ({ images, imagesOverlaies }: FaceOffModel) => ({
   imagesOverlaies,
 });
 
-const mapStateToProps = ({ faceOffPanel }: RootState) =>
+const mapStateToProps = ({ faceOffPanel }: IRootState) =>
   faceOffPanelSelector(faceOffPanel);
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({

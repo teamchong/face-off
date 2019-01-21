@@ -4,11 +4,11 @@ import { concat, filter, concatMap, timeout } from 'rxjs/operators';
 import { isActionOf } from 'typesafe-actions';
 import { compareVideoFaces, refreshFaces, RootActions } from '../actions';
 import { compareFaces, generatePreview, uniqueId } from '../classes/faceApi';
-import { FaceDetectResults, RootState } from '../models';
+import { FaceDetectResults, IRootState } from '../models';
 
 export default (
   action$: Observable<RootActions>,
-  state$: StateObservable<RootState>
+  state$: StateObservable<IRootState>
 ) =>
   action$.pipe(
     filter(isActionOf(compareVideoFaces)),

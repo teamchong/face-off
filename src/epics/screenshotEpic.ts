@@ -1,11 +1,10 @@
 import { canvasToBlob, createObjectURL } from 'blob-util';
-import { isActionOf } from 'typesafe-actions';
-import { StateObservable } from 'redux-observable';
 import { Observable } from 'rxjs';
 import { filter, switchMap } from 'rxjs/operators';
+import { isActionOf } from 'typesafe-actions';
 import { addImages, RootActions, screenshotVideo } from '../actions';
 import { MAX_HEIGHT, MAX_WIDTH, SCREENSHOT_VIDEO } from '../constants';
-import { RootState } from '../models';
+import { IRootState } from '../models';
 
 export default (action$: Observable<RootActions>) =>
   action$.pipe(
@@ -17,6 +16,7 @@ export default (action$: Observable<RootActions>) =>
           let width = videoWidth;
           let height = videoHeight;
           if (width > MAX_WIDTH) {
+            // tslint:disable-next-line:no-bitwise
             height = ~~((MAX_WIDTH * height) / width);
             width = MAX_WIDTH;
           }
@@ -24,7 +24,7 @@ export default (action$: Observable<RootActions>) =>
           canvas.width = width;
           canvas.height = height;
           canvas
-            .getContext('2d')
+            .getContext('2d')!
             .drawImage(
               video,
               0,

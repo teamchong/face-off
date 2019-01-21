@@ -10,16 +10,14 @@ import {
   RootActions,
 } from '../actions';
 import {
-  scanImage,
   drawDetections,
-  generatePreview,
-  uniqueId,
+  scanImage,
 } from '../classes/faceApi';
-import { RootState } from '../models';
+import { IRootState } from '../models';
 
 export default (
   action$: Observable<RootActions>,
-  state$: StateObservable<RootState>
+  state$: StateObservable<IRootState>
 ) =>
   action$.pipe(
     filter(isActionOf(addImages)),
@@ -44,9 +42,9 @@ export default (
 
           observer.next(
             compareImageFaces({
+              getDescriptor,
               image,
               overlay,
-              getDescriptor,
             })
           );
         }

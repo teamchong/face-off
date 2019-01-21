@@ -6,22 +6,21 @@ import {
 } from '@material-ui/core/styles';
 import { Theme } from '@material-ui/core/styles/createMuiTheme';
 import { CameraFront, CameraRear, PhotoCamera } from '@material-ui/icons';
-import { canvasToBlob, createObjectURL } from 'blob-util';
+import { canvasToBlob } from 'blob-util';
 import * as React from 'react';
 import { createRef, Fragment } from 'react';
 import { connect } from 'react-redux';
 import * as Webcam from 'react-webcam';
 import { Dispatch } from 'redux';
-import { FACINGMODE_REAR, FACINGMODE_FRONT } from '../constants';
 import {
-  showMessage,
-  switchFacingMode,
   addImages,
   loadedWebcam,
   screenshotVideo,
+  showMessage,
+  switchFacingMode,
 } from '../actions/FaceOffActions';
-import { MAX_WIDTH, MAX_HEIGHT } from '../constants';
-import { FaceOffModel, RootState } from '../models';
+import { FACINGMODE_FRONT, FACINGMODE_REAR, MAX_HEIGHT, MAX_WIDTH } from '../constants';
+import { FaceOffModel, IRootState } from '../models';
 
 // declare namespace Webcam {
 //   interface WebcamProps {
@@ -50,26 +49,26 @@ const styles = ({ spacing }: Theme) =>
     container: {
       position: 'relative',
     },
-    overlay: {
+    frontFacing: {
+      margin: spacing.unit,
       position: 'absolute',
-      pointerEvents: 'none',
-      zIndex: 1,
+      top: '60px',
+      zIndex: 2,
     },
     loading: {
-      position: 'absolute',
-      marginTop: '-6px',
       marginLeft: '-6px',
+      marginTop: '-6px',
+      position: 'absolute',
+    },
+    overlay: {
+      pointerEvents: 'none',
+      position: 'absolute',
+      zIndex: 1,
     },
     rearFacing: {
       margin: spacing.unit,
       position: 'absolute',
       top: '0px',
-      zIndex: 2,
-    },
-    frontFacing: {
-      margin: spacing.unit,
-      position: 'absolute',
-      top: '60px',
       zIndex: 2,
     },
     screenshot: {
@@ -89,33 +88,33 @@ const faceOffPanelSelector = ({
 }: FaceOffModel) => ({
   facingMode,
   isWebcamLoaded,
-  webcamRef,
-  webcamOverlayRef,
   tab,
+  webcamOverlayRef,
+  webcamRef,
 });
 
-const mapStateToProps = ({ faceOffPanel }: RootState) =>
+const mapStateToProps = ({ faceOffPanel }: IRootState) =>
   faceOffPanelSelector(faceOffPanel);
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  showMessage: (message: string) => dispatch(showMessage(message)),
   addImages: (images: HTMLImageElement[]) => dispatch(addImages(images)),
-  switchRear: () => dispatch(switchFacingMode(FACINGMODE_REAR)),
-  switchFront: () => dispatch(switchFacingMode(FACINGMODE_FRONT)),
-  loadedWebcam: () => dispatch(loadedWebcam()),
-  screenshotVideo: (video: HTMLVideoElement) =>
+  loadedTheWebcam: () => dispatch(loadedWebcam()),
+  screenshotingVideo: (video: HTMLVideoElement) =>
     dispatch(screenshotVideo(video)),
+  showMessage: (message: string) => dispatch(showMessage(message)),
+  switchFront: () => dispatch(switchFacingMode(FACINGMODE_FRONT)),
+  switchRear: () => dispatch(switchFacingMode(FACINGMODE_REAR)),
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
-  const { screenshotVideo } = dispatchProps;
+  const { screenshotingVideo } = dispatchProps;
   const { webcamRef } = stateProps;
   return {
     ...ownProps,
     ...stateProps,
     ...dispatchProps,
     screenshotHandler: () =>
-      screenshotVideo(
+      screenshotingVideo(
         webcamRef.current ? (webcamRef.current as any).video : null
       ),
   };
@@ -123,17 +122,14 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 
 const WebcamComponent = ({
   classes,
-  isWebcamLoaded,
-  webcamRef,
-  webcamOverlayRef,
   facingMode,
-  showMessage,
+  isWebcamLoaded,
+  loadedTheWebcam,
+  screenshotHandler,
   switchRear,
   switchFront,
-  screenshotVideo,
-  addImages,
-  loadedWebcam,
-  screenshotHandler,
+  webcamRef,
+  webcamOverlayRef,
 }: StyledComponentProps & ReturnType<typeof mergeProps>) => (
   <div className={classes!.container}>
     <div className={classes!.rearFacing}>
@@ -175,11 +171,11 @@ const WebcamComponent = ({
       width={MAX_WIDTH}
       height={MAX_HEIGHT}
       screenshotFormat="image/png"
-      onUserMedia={loadedWebcam}
+      onUserMedia={loadedTheWebcam}
       style={{
-        borderWidth: 5,
-        borderStyle: 'solid',
         borderColor: '#ccc',
+        borderStyle: 'solid',
+        borderWidth: 5,
       }}
       {...{ videoConstraints: { facingMode } }}
     />
