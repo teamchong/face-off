@@ -42,5 +42,6 @@
     "eject": "react-scripts-ts eject"
   },
   "keywords": [],
-  "description": ""
+  "description": "",
+  "homepage": "https://ste80.github.io/face-off/build/"
 }
