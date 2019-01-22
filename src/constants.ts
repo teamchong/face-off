@@ -40,7 +40,7 @@ export const MAX_WIDTH = 640;
 export const MAX_HEIGHT = 480;
 
 export const VIDEO_API = 'https://you-link.herokuapp.com/?url=';
-export const DEFAULT_VIDEO_URL = 'https://www.youtube.com/watch?v=JfitWyYtPng';
+export const DEFAULT_VIDEO_URL = 'https://www.youtube.com/watch?v=0N_RO-jL-90';
 export const CORS_PROXY_URL = 'https://corsforce.herokuapp.com/';
 export const MODEL_URL =
   'https://justadudewhohacks.github.io/face-api.js/models/';
