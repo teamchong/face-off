@@ -8,7 +8,7 @@ import { Collections } from '@material-ui/icons';
 import { createObjectURL } from 'blob-util';
 import * as React from 'react';
 import { Fragment, ReactElement, ReactType } from 'react';
-import * as DropzoneType from 'react-dropzone';
+import Dropzone from 'react-dropzone';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { createSelector } from 'reselect';
@@ -21,8 +21,6 @@ import {
 import { readAsImage } from '../classes/fileApi';
 import { MAX_HEIGHT, MAX_WIDTH } from '../constants';
 import { IFaceOffModel, IRootState } from '../models';
-
-const Dropzone: any = DropzoneType as any;
 
 const styles = () =>
   createStyles({

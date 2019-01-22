@@ -51,7 +51,7 @@ export default (action$: Observable<RootActions>, state$: StateObservable<IRootS
               };
             }
             observer.next(refreshFaces(newFaces));
-            await new Promise(r => setTimeout(r, 0));
+            await new Promise(r => setTimeout(r, 100));
           }
         } catch (ex) {
           // tslint:disable-next-line:no-console
