@@ -2,7 +2,7 @@ Testing face recognition on client side (web browser)
 
 this project uses Redux-observable & TypeScript
 
-Demo: https://ste80.github.io/face-off/build/
+Demo: https://teamchong.github.io/face-off/build/
 
 Tested on my iphone only.
 
